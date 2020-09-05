@@ -20,7 +20,6 @@ pipeline {
       }
       steps {
         dir("./frontend") {
-          sh "whoami"
           sh "cp -r build /usr/share/nginx/leanCoffree/"
         }
       }
