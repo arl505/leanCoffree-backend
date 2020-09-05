@@ -15,7 +15,7 @@ pipeline {
     stage("Deploy: Frontend") {
       when {
         expression {
-           env.BRANCH_NAME == "addJenkinsCICD"
+           env.BRANCH_NAME == "main"
         }
       }
       steps {
