@@ -15,12 +15,12 @@ pipeline {
     stage("Deploy: Frontend") {
       when {
         expression {
-           env.BRANCH_NAME == "main"
+           env.BRANCH_NAME == "addJenkinsCICD"
         }
       }
       steps {
         dir("./frontend") {
-          sh "cp -r build /usr/share/nginx/customProjects/pinTheirTweet/"
+          sh "cp -r build /usr/share/nginx/leanCoffree/"
         }
       }
     }
