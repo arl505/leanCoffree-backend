@@ -6,5 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class CreateSessionResponse {
+
   private String id;
 }
