@@ -31,6 +31,7 @@ class JoinSessionModal extends React.Component {
   }
 
   render() {
+    let placeholder = process.env.REACT_APP_FRONTEND_BASEURL + "/session/67caf957-d01a-4bf2-85db-a4d4bb0fb80e";
     return (
       <div>
         <Modal backdrop="static" isOpen={this.props.isOpen} toggle={this.props.toggle}>
@@ -38,7 +39,7 @@ class JoinSessionModal extends React.Component {
           <ModalBody>
             Session link:
             <br/> 
-            <input type="text" onChange={this.captureChange} placeholder="https://leanCoffree.com/session/67caf957-d01a-4bf2-85db-a4d4bb0fb80e"></input>
+            <input type="text" onChange={this.captureChange} placeholder={placeholder}></input>
           </ModalBody>
           <ModalFooter>
             <Button color="primary" onClick={this.redirectToSession}>Join lean coffee session</Button>
