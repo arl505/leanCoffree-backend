@@ -7,7 +7,7 @@ class NewSessionModal extends React.Component {
   render() {
     return (
       <div>
-        <Modal modalTransition isOpen={this.props.isOpen} toggle={this.props.toggle}>
+        <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
           <ModalHeader toggle={this.props.toggle}>Launch a new Lean Coffree session</ModalHeader>
           <ModalBody>
             Your meeting link is: https://localhost:3000/new-session/1234
@@ -15,9 +15,8 @@ class NewSessionModal extends React.Component {
               <button>Copy to clipboard</button>
             </CopyToClipboard>
           </ModalBody>
-          <br/>
           <ModalFooter>
-            <Button color="primary" onClick={this.props.toggle}>Start lean coffee session</Button>{' '}
+            <Button color="primary" onClick={this.props.toggle}>Start lean coffee session</Button>
             <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
           </ModalFooter>
         </Modal>

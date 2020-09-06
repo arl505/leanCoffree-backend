@@ -8,17 +8,11 @@ class Splash extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      displayBasePage: true,
       displayLaunchNewSessionModal: false,
       displayJoinSessionModal: false,
     }
-    this.toggleBasePage = this.toggleBasePage.bind(this);
     this.toggleLaunchNewSessionModal = this.toggleLaunchNewSessionModal.bind(this);
     this.toggleJoinSessionModal = this.toggleJoinSessionModal.bind(this);
-  }
-
-  toggleBasePage() {
-    this.setState({displayBasePage: !this.state.displayBasePage})
   }
 
   toggleLaunchNewSessionModal() {
@@ -29,22 +23,12 @@ class Splash extends React.Component {
     this.setState({displayJoinSessionModal: !this.state.displayJoinSessionModal, displayLaunchNewSessionModal: false})
   }
 
-  render() {
-    let basePage = this.state.displayBasePage === false
-      ? null
-      : <BaseSplashPage toggleLaunchNewSessionModal={this.toggleLaunchNewSessionModal} toggleJoinSessionModal={this.toggleJoinSessionModal}/>;
-    let newSessionModal = this.state.displayLaunchNewSessionModal === false 
-      ? null
-      : <NewSessionModal isOpen={this.state.displayLaunchNewSessionModal} toggle={this.toggleLaunchNewSessionModal}/>;
-    let joinSessionModal = this.state.displayJoinSessionModal === false 
-      ? null
-      : <JoinSessionModal isOpen={this.state.displayJoinSessionModal} toggle={this.toggleJoinSessionModal}/>;
-    
+  render() {    
     return (
       <div>
-        {basePage}
-        {newSessionModal}
-        {joinSessionModal}
+        <BaseSplashPage toggleLaunchNewSessionModal={this.toggleLaunchNewSessionModal} toggleJoinSessionModal={this.toggleJoinSessionModal}/>
+        <NewSessionModal isOpen={this.state.displayLaunchNewSessionModal} toggle={this.toggleLaunchNewSessionModal}/>
+        <JoinSessionModal isOpen={this.state.displayJoinSessionModal} toggle={this.toggleJoinSessionModal}/>
       </div>
     )
   }

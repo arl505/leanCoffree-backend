@@ -6,14 +6,13 @@ class JoinSessionModal extends React.Component {
   render() {
     return (
       <div>
-        <Modal modalTransition isOpen={this.props.isOpen} toggle={this.props.toggle}>
+        <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
           <ModalHeader toggle={this.props.toggle}>Join a Lean Coffree session</ModalHeader>
           <ModalBody>
             Here is where I will ask for details on the session to join: link or id
           </ModalBody>
-          <br/>
           <ModalFooter>
-            <Button color="primary" onClick={this.props.toggle}>Join lean coffee session</Button>{' '}
+            <Button color="primary" onClick={this.props.toggle}>Join lean coffee session</Button>
             <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
           </ModalFooter>
         </Modal>
