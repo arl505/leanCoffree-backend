@@ -15,7 +15,7 @@ pipeline {
     stage("Deploy: Frontend") {
       when {
         expression {
-           env.BRANCH_NAME == "implementStartingFrontendFlow"
+           env.BRANCH_NAME == "main"
         }
       }
       steps {
