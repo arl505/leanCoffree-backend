@@ -11,6 +11,7 @@ class NewSessionModal extends React.Component {
       newSessionId: "",
     }
     this.componentDidUpdate = this.componentDidUpdate.bind(this);
+    this.redirectToSession = this.redirectToSession.bind(this);
   }
 
   componentDidUpdate() {
@@ -18,15 +19,19 @@ class NewSessionModal extends React.Component {
       var self = this;
       console.log("Calling backend url: " + process.env.REACT_APP_BACKEND_BASEURL);
       Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/create-session', null)
-      .then(function (response) {
+        .then(function (response) {
           console.log("received success response from backend: " + response.data.id);
           self.setState({newSessionId: response.data.id.toString()});
         })
         .catch(function (error) {
           console.log("Received an error while creating new session: " + error);
         });
-      }
     }
+  }
+
+  redirectToSession() {
+    window.location = process.env.REACT_APP_FRONTEND_BASEURL + '/session/' + this.state.newSessionId;
+  }
 
   render() {
     let newSessionUrl = process.env.REACT_APP_FRONTEND_BASEURL + '/session/' + this.state.newSessionId;
@@ -41,7 +46,7 @@ class NewSessionModal extends React.Component {
             </CopyToClipboard>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" onClick={this.props.toggle}>Create lean coffee session</Button>
+            <Button color="primary" onClick={this.redirectToSession}>Create lean coffee session</Button>
             <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
           </ModalFooter>
         </Modal>
