@@ -3,6 +3,7 @@ package com.leancoffree.backend.controller;
 import com.leancoffree.backend.domain.model.CreateSessionResponse;
 import com.leancoffree.backend.service.CreateSessionService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +16,7 @@ public class CreateSessionController {
     this.createSessionService = createSessionService;
   }
 
+  @CrossOrigin
   @PostMapping("/create-session")
   public ResponseEntity<CreateSessionResponse> createSessionEndpoint() {
     return ResponseEntity.ok(createSessionService.createSession());
