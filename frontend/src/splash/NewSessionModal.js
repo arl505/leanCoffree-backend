@@ -7,7 +7,7 @@ class NewSessionModal extends React.Component {
   render() {
     return (
       <div>
-        <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
+        <Modal backdrop="static" isOpen={this.props.isOpen} toggle={this.props.toggle}>
           <ModalHeader toggle={this.props.toggle}>Launch a new Lean Coffree session</ModalHeader>
           <ModalBody>
             Your meeting link is: https://localhost:3000/new-session/1234

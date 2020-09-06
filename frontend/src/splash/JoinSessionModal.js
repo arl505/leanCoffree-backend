@@ -6,7 +6,7 @@ class JoinSessionModal extends React.Component {
   render() {
     return (
       <div>
-        <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
+        <Modal backdrop="static" isOpen={this.props.isOpen} toggle={this.props.toggle}>
           <ModalHeader toggle={this.props.toggle}>Join a Lean Coffree session</ModalHeader>
           <ModalBody>
             Here is where I will ask for details on the session to join: link or id
