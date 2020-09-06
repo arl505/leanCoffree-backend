@@ -6,7 +6,7 @@ class BaseSplashPage extends React.Component {
     return (
       <div>
         <h1>Welcome to Lean Coffree, a free lean coffee discussion tool</h1>
-        <button onClick={this.props.toggleLaunchNewSessionModal}>Launch a new Lean Coffree session!</button>
+        <button onClick={this.props.toggleCreateNewSessionModal}>Create a new Lean Coffree session!</button>
         <br/>
         <br/>
         <button onClick={this.props.toggleJoinSessionModal}>Join a Lean Coffree session!</button>
