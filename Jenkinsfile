@@ -12,6 +12,14 @@ pipeline {
       }
     }
 
+    stage("Build/Test: Backend") {
+      steps {
+        dir("./backend") {
+          sh "./gradlew clean build"
+        }
+      }
+    }
+
     stage("Deploy: Frontend") {
       when {
         expression {
@@ -21,6 +29,20 @@ pipeline {
       steps {
         dir("./frontend") {
           sh "cp -r build /usr/share/nginx/leanCoffree/"
+        }
+      }
+    }
+
+    stage("Deploy: Backend") {
+      when {
+        expression {
+           env.BRANCH_NAME == "main"
+        }
+      }
+      steps {
+        dir("./backend/build/libs") {
+          sh "cp backend.jar /writeToFolder/"
+          sh "systemctl restart lean_coffree"
         }
       }
     }
