@@ -34,7 +34,7 @@ class JoinSessionModal extends React.Component {
     let placeholder = process.env.REACT_APP_FRONTEND_BASEURL + "/session/67caf957-d01a-4bf2-85db-a4d4bb0fb80e";
     return (
       <div>
-        <Modal backdrop="static" isOpen={this.props.isOpen} toggle={this.props.toggle}>
+        <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
           <ModalHeader toggle={this.props.toggle}>Join a Lean Coffree session</ModalHeader>
           <ModalBody>
             Session link:
