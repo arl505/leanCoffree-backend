@@ -23,12 +23,10 @@ class Splash extends React.Component {
 
   toggleLaunchNewSessionModal() {
     this.setState({displayLaunchNewSessionModal: !this.state.displayLaunchNewSessionModal, displayJoinSessionModal: false})
-    this.toggleBasePage();
   }
 
   toggleJoinSessionModal() {
     this.setState({displayJoinSessionModal: !this.state.displayJoinSessionModal, displayLaunchNewSessionModal: false})
-    this.toggleBasePage();
   }
 
   render() {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 class NewSessionModal extends React.Component {
 
@@ -7,14 +8,17 @@ class NewSessionModal extends React.Component {
     return (
       <div>
         <Modal modalTransition isOpen={this.props.isOpen} toggle={this.props.toggle}>
-          <ModalHeader>Launch a new Lean Coffree session</ModalHeader>
+          <ModalHeader toggle={this.props.toggle}>Launch a new Lean Coffree session</ModalHeader>
           <ModalBody>
-            Here is where I will give details on the session (ie here is the link to send out, or enter emails here to invite)
+            Your meeting link is: https://localhost:3000/new-session/1234
+            <CopyToClipboard text="https://localhost:3000/new-session/1234" onCopy={() => this.setState({copied: true})}>
+              <button>Copy to clipboard</button>
+            </CopyToClipboard>
           </ModalBody>
           <br/>
           <ModalFooter>
-            <Button onClick={this.props.toggle}>Start lean coffee session</Button>{' '}
-            <Button onClick={this.props.toggle}>Cancel</Button>
+            <Button color="primary" onClick={this.props.toggle}>Start lean coffee session</Button>{' '}
+            <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
           </ModalFooter>
         </Modal>
       </div>
