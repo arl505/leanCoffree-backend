@@ -1,0 +1,7 @@
+#spring:
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/PLACEHOLDER?user=root&useSSL=false&serverTimezone=UTC
+#    password: PLACEHOLDER
+#
+#server:
+#  port: 8085
