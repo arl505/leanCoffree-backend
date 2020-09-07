@@ -64,7 +64,7 @@ class Session extends React.Component {
   connectToWebSocketServer() {
     const Stomp = require('stompjs')
     var SockJS = require('sockjs-client')
-    SockJS = new SockJS('http://localhost:8085/lean-coffree')
+    SockJS = new SockJS(process.env.REACT_APP_BACKEND_BASEURL + '/lean-coffree')
     stompClient = Stomp.over(SockJS);
     stompClient.connect({}, this.onConnected, this.onError);   
   }
