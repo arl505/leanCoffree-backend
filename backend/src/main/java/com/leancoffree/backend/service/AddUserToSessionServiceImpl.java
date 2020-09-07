@@ -1,5 +1,6 @@
 package com.leancoffree.backend.service;
 
+import com.leancoffree.backend.controller.AddUserToSessionException;
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
 import com.leancoffree.backend.domain.model.DisplayNameAndSessionIdBody;
@@ -20,7 +21,8 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
   }
 
   public ListOfDisplayNamesBody addUserToSessionAndReturnAllUsers(
-      final DisplayNameAndSessionIdBody displayNameAndSessionIdBody) throws Exception {
+      final DisplayNameAndSessionIdBody displayNameAndSessionIdBody)
+      throws AddUserToSessionException {
 
     if (isRequestValid(displayNameAndSessionIdBody)) {
       final String displayName = displayNameAndSessionIdBody.getDisplayName();
@@ -41,24 +43,25 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
 
         if (optionalUsersEntityList.isPresent()) {
           final List<String> displayNames = new ArrayList<>();
-          for(final UsersEntity usersEntity : optionalUsersEntityList.get()) {
+          for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
             displayNames.add(usersEntity.getDisplayName());
           }
           return ListOfDisplayNamesBody.builder().displayNames(displayNames)
               .build();
         } else {
-          throw new Exception("How'd that happen? Please try again");
+          throw new AddUserToSessionException("How'd that happen? Please try again");
         }
 
       } else {
-        throw new Exception("Display name already in use for session");
+        throw new AddUserToSessionException("Display name already in use for session");
       }
     }
-    throw new Exception("Invalid request");
+    throw new AddUserToSessionException("Invalid request");
   }
 
   private boolean isRequestValid(final DisplayNameAndSessionIdBody displayNameAndSessionIdBody) {
-    return displayNameAndSessionIdBody != null && displayNameAndSessionIdBody.getDisplayName() != null
+    return displayNameAndSessionIdBody != null
+        && displayNameAndSessionIdBody.getDisplayName() != null
         && displayNameAndSessionIdBody.getSessionId() != null && !displayNameAndSessionIdBody
         .getDisplayName().isBlank() && !displayNameAndSessionIdBody.getSessionId().isBlank();
   }
