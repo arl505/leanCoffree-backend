@@ -26,6 +26,7 @@ public class UsersEntity {
   @Column(name = "display_name")
   private String displayName;
 
+  @Id
   @Column(name = "session_id")
   private String sessionId;
 
