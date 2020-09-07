@@ -22,15 +22,19 @@ public class VerifySessionServiceImpl implements VerifySessionService {
 
   public VerifySessionResponse verifySession(final String sessionId) {
     final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository.findById(sessionId);
-    if(sessionsEntityOptional.isEmpty()) {
+    if (sessionsEntityOptional.isEmpty()) {
       return VerifySessionResponse.builder()
           .verificationStatus(VERIFICATION_FAILURE)
           .build();
     }
 
     final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
-    sessionsEntity.setSessionStatus(STARTED);
-    sessionsRepository.save(sessionsEntity);
+
+    if(!sessionsEntity.getSessionStatus().equals(STARTED)){
+      return VerifySessionResponse.builder()
+          .verificationStatus(VERIFICATION_FAILURE)
+          .build();
+    }
 
     return VerifySessionResponse.builder()
         .verificationStatus(VERIFICATION_SUCCESS)
@@ -40,4 +44,34 @@ public class VerifySessionServiceImpl implements VerifySessionService {
             .build())
         .build();
   }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
