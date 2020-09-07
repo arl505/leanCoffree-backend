@@ -47,7 +47,7 @@ class Session extends React.Component {
             }
           })
         } else {
-          this.invalidSessionProvided();
+          self.invalidSessionProvided();
         }
       })
       .catch(function (error) {
