@@ -1,9 +1,10 @@
 package com.leancoffree.backend.service;
 
-import com.leancoffree.backend.domain.model.AddUserToSessionRequest;
-import com.leancoffree.backend.domain.model.AddUserToSessionResponse;
+import com.leancoffree.backend.domain.model.NewUserRequestNotification;
+import com.leancoffree.backend.domain.model.NewUserResponseNotification;
 
 public interface AddUserToSessionService {
 
-  AddUserToSessionResponse addUserToSession(final AddUserToSessionRequest addUserToSessionRequest);
+  NewUserResponseNotification addUserToSessionAndReturnAllUsers(
+      final NewUserRequestNotification newUserRequestNotification);
 }

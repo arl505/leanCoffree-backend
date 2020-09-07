@@ -1,7 +1,7 @@
 import React from 'react';
 import Axios from 'axios';
 
-var stompClient = null;
+let stompClient = null;
 class Session extends React.Component {
 
   constructor(props) {
@@ -11,11 +11,13 @@ class Session extends React.Component {
       sessionId: "",
       sessionStatus: "",
       userDisplayName: "",
+      usersInAttendance: []
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.captureDisplayNameChange = this.captureDisplayNameChange.bind(this);   
     this.submitDisplayName = this.submitDisplayName.bind(this);   
-    this.onConnected = this.onConnected.bind(this);   
+    this.onUpdateUsers = this.onUpdateUsers.bind(this);
+    this.onConnected = this.onConnected.bind(this);
   }
 
   invalidSessionProvided() {
@@ -38,6 +40,7 @@ class Session extends React.Component {
     Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/verify-session/' + sessionIdFromAddress, null)
       .then(function (response) {
         if(self.isVerificationResponseValid(response, sessionIdFromAddress[0])) {
+          self.connectToWebSocketServer();
           self.setState({
             isSessionVerified: true,
             sessionId: response.data.sessionDetails.sessionId,
@@ -58,7 +61,7 @@ class Session extends React.Component {
     response.data.sessionDetails.sessionStatus === "STARTED";
   }
 
-  connect() {
+  connectToWebSocketServer() {
     const Stomp = require('stompjs')
     var SockJS = require('sockjs-client')
     SockJS = new SockJS('http://localhost:8085/lean-coffree')
@@ -67,17 +70,13 @@ class Session extends React.Component {
   }
 
   onConnected() {
-    stompClient.subscribe('/topic/users', this.onMessageReceived);
-
-    let body = {displayName: this.state.userDisplayName};
-    stompClient.send("/ws/add-user", {}, JSON.stringify(body))
+    stompClient.subscribe('/topic/users', this.onUpdateUsers);
   }
 
-  onMessageReceived(payload) {
-    console.log("Received a message!")
-    let message = JSON.parse(payload.body);
-    alert(message);
-    alert(message.toString());
+  onUpdateUsers(payload) {
+    console.log("Message received...")
+    let updateUsersBody = JSON.parse(payload.body);
+    this.setState({usersInAttendance: updateUsersBody.displayNames});
   }
 
   onError(error) {
@@ -86,19 +85,8 @@ class Session extends React.Component {
 
   submitDisplayName() {
     if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
-      var self = this;
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/add-user-to-session', {displayName: this.state.userDisplayName, sessionId: this.state.sessionId})
-        .then(function (response) {
-          if(response.data.status === "SUCCESS") {
-            self.setState({sessionStatus: "QUERYING_AND_VOTING"});
-            self.connect(self.state.sessionId);
-          } else {
-            alert(response.data.error);
-          }
-        })
-        .catch(function (error) {
-          console.log("Received an error while creating new session: " + error.toString());
-        }); 
+      stompClient.send("/ws/add-user", {}, JSON.stringify({displayName: this.state.userDisplayName, sessionId: this.state.sessionId}));
+      this.setState({sessionStatus: "QUERYING_AND_VOTING"});
     }
   }
 
@@ -107,7 +95,6 @@ class Session extends React.Component {
   }
 
   render() {
-
     if(this.state.sessionStatus === "ASK_FOR_USERNAME") {
       return (
         <div>
@@ -119,10 +106,11 @@ class Session extends React.Component {
     }
 
     else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
+      let allHere = this.state.usersInAttendance.join(", ");
       return (
         <div>
           <p>Hello {this.state.userDisplayName}</p>
-          <p>Others here: {this.state.userDisplayName}</p>
+          <p>All here: {allHere}</p>
         </div>
       )
     }

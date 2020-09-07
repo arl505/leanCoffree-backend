@@ -1,13 +1,12 @@
 package com.leancoffree.backend.service;
 
-import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
-import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
-
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
-import com.leancoffree.backend.domain.model.AddUserToSessionRequest;
-import com.leancoffree.backend.domain.model.AddUserToSessionResponse;
+import com.leancoffree.backend.domain.model.NewUserRequestNotification;
+import com.leancoffree.backend.domain.model.NewUserResponseNotification;
 import com.leancoffree.backend.repository.UsersRepository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +19,12 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     this.usersRepository = usersRepository;
   }
 
-  public AddUserToSessionResponse addUserToSession(
-      final AddUserToSessionRequest addUserToSessionRequest) {
+  public NewUserResponseNotification addUserToSessionAndReturnAllUsers(
+      final NewUserRequestNotification newUserRequestNotification) {
 
-    if (isRequestValid(addUserToSessionRequest)) {
-      final String displayName = addUserToSessionRequest.getDisplayName();
-      final String sessionId = addUserToSessionRequest.getSessionId();
+    if (isRequestValid(newUserRequestNotification)) {
+      final String displayName = newUserRequestNotification.getDisplayName();
+      final String sessionId = newUserRequestNotification.getSessionId();
 
       final UsersId usersId = new UsersId(displayName, sessionId);
       final Optional<UsersEntity> usersEntityOptional = usersRepository.findById(usersId);
@@ -36,20 +35,26 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
             .sessionId(sessionId)
             .votesUsed(0)
             .build());
-        return new AddUserToSessionResponse(SUCCESS, null);
-      } else {
-        return new AddUserToSessionResponse(FAILURE,
-            "Display name already in use for this session");
-      }
 
-    } else {
-      return new AddUserToSessionResponse(FAILURE, "Invalid request");
+        final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
+            .findAllBySessionId(sessionId);
+
+        if (optionalUsersEntityList.isPresent()) {
+          final List<String> displayNames = new ArrayList<>();
+          for(final UsersEntity usersEntity : optionalUsersEntityList.get()) {
+            displayNames.add(usersEntity.getDisplayName());
+          }
+          return NewUserResponseNotification.builder().displayNames(displayNames)
+              .build();
+        }
+      }
     }
+    return null;
   }
 
-  private boolean isRequestValid(final AddUserToSessionRequest addUserToSessionRequest) {
-    return addUserToSessionRequest != null && addUserToSessionRequest.getDisplayName() != null
-        && addUserToSessionRequest.getSessionId() != null && !addUserToSessionRequest
-        .getDisplayName().isBlank() && !addUserToSessionRequest.getSessionId().isBlank();
+  private boolean isRequestValid(final NewUserRequestNotification newUserRequestNotification) {
+    return newUserRequestNotification != null && newUserRequestNotification.getDisplayName() != null
+        && newUserRequestNotification.getSessionId() != null && !newUserRequestNotification
+        .getDisplayName().isBlank() && !newUserRequestNotification.getSessionId().isBlank();
   }
 }
