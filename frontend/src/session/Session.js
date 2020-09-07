@@ -7,14 +7,13 @@ class Session extends React.Component {
     super(props);
     this.state = {
       isSessionVerified: false,
-      session: {
-        metadata: {
-          id: "",
-          status: ""
-        }
-      }
+      sessionId: "",
+      sessionStatus: "",
+      userDisplayName: "",
     }
     this.componentDidMount = this.componentDidMount.bind(this);
+    this.captureDisplayNameChange = this.captureDisplayNameChange.bind(this);   
+    this.submitDisplayName = this.submitDisplayName.bind(this);   
   }
 
   invalidSessionProvided() {
@@ -39,12 +38,8 @@ class Session extends React.Component {
         if(self.isVerificationResponseValid(response, sessionIdFromAddress[0])) {
           self.setState({
             isSessionVerified: true,
-            session: {
-              metadata: {
-                id: response.data.sessionDetails.sessionId,
-                status: response.data.sessionDetails.sessionStatus,
-              }
-            }
+            sessionId: response.data.sessionDetails.sessionId,
+            sessionStatus: "ASK_FOR_USERNAME",
           })
         } else {
           self.invalidSessionProvided();
@@ -61,12 +56,54 @@ class Session extends React.Component {
     response.data.sessionDetails.sessionStatus === "STARTED";
   }
 
+  submitDisplayName() {
+    if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
+      var self = this;
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/add-user-to-session', {displayName: this.state.userDisplayName, sessionId: this.state.sessionId})
+        .then(function (response) {
+          if(response.data.status === "SUCCESS") {
+            self.setState({sessionStatus: "QUERYING_AND_VOTING"});
+          } else {
+            alert(response.data.error);
+          }
+        })
+        .catch(function (error) {
+          console.log("Received an error while creating new session: " + error);
+        }); 
+    }
+  }
+
+  captureDisplayNameChange(event) {
+    this.setState({userDisplayName: event.target.value});
+  }
+
   render() {
-    return (
-      <div>
-        Session page
-      </div>
-    )
+
+    if(this.state.sessionStatus === "ASK_FOR_USERNAME") {
+      return (
+        <div>
+          Enter your display name
+          <input name="displayName" placeholder="Johnny C." onChange={this.captureDisplayNameChange}></input>
+          <button onClick={this.submitDisplayName}>Submit</button>
+        </div>
+      )
+    }
+
+    else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
+      return (
+        <div>
+          Hello {this.state.userDisplayName}
+        </div>
+      )
+    }
+
+    else {
+      return (
+        <div>
+          Session page
+        </div>
+      )
+    }
   }
 }
 
