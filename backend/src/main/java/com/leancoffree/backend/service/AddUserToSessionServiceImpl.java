@@ -34,6 +34,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
         usersRepository.save(UsersEntity.builder()
             .displayName(displayName)
             .sessionId(sessionId)
+            .votesUsed(0)
             .build());
         return new AddUserToSessionResponse(SUCCESS, null);
       } else {

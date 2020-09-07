@@ -29,6 +29,9 @@ public class UsersEntity {
   @Column(name = "session_id")
   private String sessionId;
 
+  @Column(name = "votes_used")
+  private Integer votesUsed;
+
   @Data
   @Builder
   @AllArgsConstructor
