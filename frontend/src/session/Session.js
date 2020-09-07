@@ -74,7 +74,6 @@ class Session extends React.Component {
   }
 
   onUpdateUsers(payload) {
-    console.log("Message received...")
     let updateUsersBody = JSON.parse(payload.body);
     this.setState({usersInAttendance: updateUsersBody.displayNames});
   }
