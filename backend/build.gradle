@@ -17,6 +17,7 @@ dependencies {
   implementation 'mysql:mysql-connector-java'
   implementation 'com.fasterxml.jackson.core:jackson-core'
   implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'org.json:json:20200518'
   compileOnly 'org.projectlombok:lombok:1.18.12'
   annotationProcessor 'org.projectlombok:lombok:1.18.12'
 }

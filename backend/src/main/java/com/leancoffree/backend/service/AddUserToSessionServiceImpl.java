@@ -1,9 +1,10 @@
 package com.leancoffree.backend.service;
 
+import com.leancoffree.backend.controller.AddUserToSessionException;
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
-import com.leancoffree.backend.domain.model.NewUserRequestNotification;
-import com.leancoffree.backend.domain.model.NewUserResponseNotification;
+import com.leancoffree.backend.domain.model.DisplayNameAndSessionIdBody;
+import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +20,13 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     this.usersRepository = usersRepository;
   }
 
-  public NewUserResponseNotification addUserToSessionAndReturnAllUsers(
-      final NewUserRequestNotification newUserRequestNotification) {
+  public ListOfDisplayNamesBody addUserToSessionAndReturnAllUsers(
+      final DisplayNameAndSessionIdBody displayNameAndSessionIdBody)
+      throws AddUserToSessionException {
 
-    if (isRequestValid(newUserRequestNotification)) {
-      final String displayName = newUserRequestNotification.getDisplayName();
-      final String sessionId = newUserRequestNotification.getSessionId();
+    if (isRequestValid(displayNameAndSessionIdBody)) {
+      final String displayName = displayNameAndSessionIdBody.getDisplayName();
+      final String sessionId = displayNameAndSessionIdBody.getSessionId();
 
       final UsersId usersId = new UsersId(displayName, sessionId);
       final Optional<UsersEntity> usersEntityOptional = usersRepository.findById(usersId);
@@ -41,20 +43,26 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
 
         if (optionalUsersEntityList.isPresent()) {
           final List<String> displayNames = new ArrayList<>();
-          for(final UsersEntity usersEntity : optionalUsersEntityList.get()) {
+          for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
             displayNames.add(usersEntity.getDisplayName());
           }
-          return NewUserResponseNotification.builder().displayNames(displayNames)
+          return ListOfDisplayNamesBody.builder().displayNames(displayNames)
               .build();
+        } else {
+          throw new AddUserToSessionException("How'd that happen? Please try again");
         }
+
+      } else {
+        throw new AddUserToSessionException("Display name already in use for session");
       }
     }
-    return null;
+    throw new AddUserToSessionException("Invalid request");
   }
 
-  private boolean isRequestValid(final NewUserRequestNotification newUserRequestNotification) {
-    return newUserRequestNotification != null && newUserRequestNotification.getDisplayName() != null
-        && newUserRequestNotification.getSessionId() != null && !newUserRequestNotification
-        .getDisplayName().isBlank() && !newUserRequestNotification.getSessionId().isBlank();
+  private boolean isRequestValid(final DisplayNameAndSessionIdBody displayNameAndSessionIdBody) {
+    return displayNameAndSessionIdBody != null
+        && displayNameAndSessionIdBody.getDisplayName() != null
+        && displayNameAndSessionIdBody.getSessionId() != null && !displayNameAndSessionIdBody
+        .getDisplayName().isBlank() && !displayNameAndSessionIdBody.getSessionId().isBlank();
   }
 }

@@ -83,9 +83,20 @@ class Session extends React.Component {
   }
 
   submitDisplayName() {
+    let self = this;
     if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
-      stompClient.send("/ws/add-user", {}, JSON.stringify({displayName: this.state.userDisplayName, sessionId: this.state.sessionId}));
-      this.setState({sessionStatus: "QUERYING_AND_VOTING"});
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/add-user-to-session", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId})
+      .then(function (response) {
+        if(response.data.status === "SUCCESS") {
+          self.setState({sessionStatus: "QUERYING_AND_VOTING"});
+        } else {
+          alert(response.data.error);
+        }
+      })
+      .catch(function (error) {
+        console.log("Error while adding displayname to backend: " + error)
+      });
+      
     }
   }
 
