@@ -22,27 +22,23 @@ public class VerifySessionServiceImpl implements VerifySessionService {
 
   public VerifySessionResponse verifySession(final String sessionId) {
     final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository.findById(sessionId);
-    if (sessionsEntityOptional.isEmpty()) {
-      return VerifySessionResponse.builder()
+
+    VerifySessionResponse verifySessionResponse;
+    if (sessionsEntityOptional.isPresent() && sessionsEntityOptional.get().getSessionStatus()
+        .equals(STARTED)) {
+      verifySessionResponse = VerifySessionResponse.builder()
+          .verificationStatus(VERIFICATION_SUCCESS)
+          .sessionDetails(SessionDetails.builder()
+              .sessionId(sessionId)
+              .sessionStatus(STARTED)
+              .build())
+          .build();
+    } else {
+      verifySessionResponse = VerifySessionResponse.builder()
           .verificationStatus(VERIFICATION_FAILURE)
           .build();
     }
-
-    final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
-
-    if(!sessionsEntity.getSessionStatus().equals(STARTED)){
-      return VerifySessionResponse.builder()
-          .verificationStatus(VERIFICATION_FAILURE)
-          .build();
-    }
-
-    return VerifySessionResponse.builder()
-        .verificationStatus(VERIFICATION_SUCCESS)
-        .sessionDetails(SessionDetails.builder()
-            .sessionId(sessionId)
-            .sessionStatus(STARTED)
-            .build())
-        .build();
+    return verifySessionResponse;
   }
 
 }
