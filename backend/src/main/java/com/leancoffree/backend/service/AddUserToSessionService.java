@@ -1,10 +1,10 @@
 package com.leancoffree.backend.service;
 
-import com.leancoffree.backend.domain.model.NewUserRequestNotification;
-import com.leancoffree.backend.domain.model.NewUserResponseNotification;
+import com.leancoffree.backend.domain.model.DisplayNameAndSessionIdBody;
+import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
 
 public interface AddUserToSessionService {
 
-  NewUserResponseNotification addUserToSessionAndReturnAllUsers(
-      final NewUserRequestNotification newUserRequestNotification);
+  ListOfDisplayNamesBody addUserToSessionAndReturnAllUsers(
+      final DisplayNameAndSessionIdBody displayNameAndSessionIdBody) throws Exception;
 }

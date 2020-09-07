@@ -1,5 +1,6 @@
 package com.leancoffree.backend.domain.model;
 
+import com.leancoffree.backend.enums.SuccessOrFailure;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NewUserRequestNotification {
+public class SuccessOrFailureAndErrorBody {
 
-  // adding session ID for now
-  // todo: remove session id by using sessionId as param in websocket path
-  private String sessionId;
-  private String displayName;
+  private SuccessOrFailure status;
+  private String error;
 }

@@ -1,11 +1,17 @@
 package com.leancoffree.backend.controller;
 
-import com.leancoffree.backend.domain.model.NewUserRequestNotification;
-import com.leancoffree.backend.domain.model.NewUserResponseNotification;
+import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
+import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
+
+import com.leancoffree.backend.domain.model.DisplayNameAndSessionIdBody;
+import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
+import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.service.AddUserToSessionService;
-import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class AddUserController {
@@ -16,12 +22,31 @@ public class AddUserController {
     this.addUserToSessionService = addUserToSessionService;
   }
 
-  @MessageMapping("/add-user")
+  @PostMapping("/add-user-to-session")
+  public ResponseEntity<SuccessOrFailureAndErrorBody> addUserHttpEndpoint(
+      @RequestBody final DisplayNameAndSessionIdBody displayNameAndSessionIdBody) {
+
+    final ListOfDisplayNamesBody listOfDisplayNamesBody;
+    try {
+      listOfDisplayNamesBody = addUserToSessionService
+          .addUserToSessionAndReturnAllUsers(displayNameAndSessionIdBody);
+    } catch (Exception e) {
+      return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
+          .status(FAILURE)
+          .error(e.getMessage())
+          .build());
+    }
+
+    refreshUsersList(listOfDisplayNamesBody);
+    return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
+        .status(SUCCESS)
+        .build());
+  }
+
   @SendTo("/topic/users")
-  public NewUserResponseNotification receiveNewUserRequestNotification(
-      final NewUserRequestNotification newUserRequestNotification) {
-    return addUserToSessionService
-        .addUserToSessionAndReturnAllUsers(newUserRequestNotification);
+  public ListOfDisplayNamesBody refreshUsersList(
+      final ListOfDisplayNamesBody listOfDisplayNamesBody) {
+    return listOfDisplayNamesBody;
   }
 
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NewUserResponseNotification {
+public class ListOfDisplayNamesBody {
 
   private List<String> displayNames;
 }
