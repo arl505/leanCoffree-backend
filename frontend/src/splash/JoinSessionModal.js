@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import Axios from 'axios';
 
 class JoinSessionModal extends React.Component {
 
@@ -14,9 +15,22 @@ class JoinSessionModal extends React.Component {
 
   redirectToSession() {
     let sessionGuid = this.getSessionGuidFromUrlOrReturnNullIfInvalid(this.state.sessionUrl);
-    if(sessionGuid !== null) {
-      window.location = process.env.REACT_APP_FRONTEND_BASEURL + '/session/' + sessionGuid;
-    }
+
+    let self = this;
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/verify-session/' + sessionGuid, null)
+      .then(function (response) {
+        if(self.isVerificationResponseValid(response, sessionGuid[0])) {
+          window.location = process.env.REACT_APP_FRONTEND_BASEURL + '/session/' + sessionGuid;
+        }
+      })
+      .catch(function (error) {
+        console.log("Received an error while verifying session: " + error);
+      });
+  }
+
+  isVerificationResponseValid(response, sessionGuid) {
+    return response.data.verificationStatus === "VERIFICATION_SUCCESS" && response.data.sessionDetails.sessionId === sessionGuid &&
+    response.data.sessionDetails.sessionStatus === "STARTED";
   }
 
   getSessionGuidFromUrlOrReturnNullIfInvalid(sessionUrl) {

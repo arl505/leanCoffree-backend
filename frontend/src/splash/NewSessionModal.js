@@ -28,6 +28,10 @@ class NewSessionModal extends React.Component {
   }
 
   redirectToSession() {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/start-session/' + this.state.newSessionId, null)
+        .catch(function (error) {
+          console.log("Received an error while creating new session: " + error);
+        });
     window.location = process.env.REACT_APP_FRONTEND_BASEURL + '/session/' + this.state.newSessionId;
   }
 
