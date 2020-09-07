@@ -1,6 +1,7 @@
 import React from 'react';
 import Axios from 'axios';
 
+var stompClient = null;
 class Session extends React.Component {
 
   constructor(props) {
@@ -14,6 +15,7 @@ class Session extends React.Component {
     this.componentDidMount = this.componentDidMount.bind(this);
     this.captureDisplayNameChange = this.captureDisplayNameChange.bind(this);   
     this.submitDisplayName = this.submitDisplayName.bind(this);   
+    this.onConnected = this.onConnected.bind(this);   
   }
 
   invalidSessionProvided() {
@@ -56,6 +58,32 @@ class Session extends React.Component {
     response.data.sessionDetails.sessionStatus === "STARTED";
   }
 
+  connect() {
+    const Stomp = require('stompjs')
+    var SockJS = require('sockjs-client')
+    SockJS = new SockJS('http://localhost:8085/lean-coffree')
+    stompClient = Stomp.over(SockJS);
+    stompClient.connect({}, this.onConnected, this.onError);   
+  }
+
+  onConnected() {
+    stompClient.subscribe('/topic/users', this.onMessageReceived);
+
+    let body = {displayName: this.state.userDisplayName};
+    stompClient.send("/ws/add-user", {}, JSON.stringify(body))
+  }
+
+  onMessageReceived(payload) {
+    console.log("Received a message!")
+    let message = JSON.parse(payload.body);
+    alert(message);
+    alert(message.toString());
+  }
+
+  onError(error) {
+    alert('Could not connect you: ' + error);
+  }
+
   submitDisplayName() {
     if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
       var self = this;
@@ -63,12 +91,13 @@ class Session extends React.Component {
         .then(function (response) {
           if(response.data.status === "SUCCESS") {
             self.setState({sessionStatus: "QUERYING_AND_VOTING"});
+            self.connect(self.state.sessionId);
           } else {
             alert(response.data.error);
           }
         })
         .catch(function (error) {
-          console.log("Received an error while creating new session: " + error);
+          console.log("Received an error while creating new session: " + error.toString());
         }); 
     }
   }
@@ -92,7 +121,8 @@ class Session extends React.Component {
     else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
       return (
         <div>
-          Hello {this.state.userDisplayName}
+          <p>Hello {this.state.userDisplayName}</p>
+          <p>Others here: {this.state.userDisplayName}</p>
         </div>
       )
     }
