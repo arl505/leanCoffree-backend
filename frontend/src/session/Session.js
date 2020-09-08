@@ -27,6 +27,8 @@ class Session extends React.Component {
   }
 
   sendDisconnectRequest() {
+    console.log("SessionId: " + this.state.sessionId);
+    console.log("websocketUserId: " + this.state.websocketUserId);
     let self = this;
     Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "DROP", websocketUserId: self.state.websocketUserId})
     .catch(function (error) {
@@ -36,6 +38,7 @@ class Session extends React.Component {
 
   componentDidMount() {
     window.addEventListener("beforeunload", (eventListener) => {  
+      eventListener.preventDefault();
       this.sendDisconnectRequest();
     });
 
