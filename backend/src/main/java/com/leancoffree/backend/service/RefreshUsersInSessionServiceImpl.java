@@ -4,7 +4,6 @@ import static com.leancoffree.backend.enums.RefreshUsersCommand.ADD;
 
 import com.leancoffree.backend.controller.RefreshUsersInSessionException;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
-import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +18,7 @@ public class RefreshUsersInSessionServiceImpl implements RefreshUsersInSessionSe
     this.dropUserInSessionService = dropUserInSessionService;
   }
 
-  public JSONArray refreshUsersInSession(
+  public String refreshUsersInSession(
       final RefreshUsersRequest refreshUsersRequest) throws RefreshUsersInSessionException {
     return ADD.equals(refreshUsersRequest.getCommand())
         ? addUserToSessionService.addUserToSessionAndReturnAllUsers(refreshUsersRequest)

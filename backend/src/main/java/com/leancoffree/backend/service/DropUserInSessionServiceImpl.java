@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +22,7 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
   }
 
   @Transactional
-  public JSONArray dropUserInSessionAndReturnAllUsers(
+  public String dropUserInSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest) {
 
     final List<String> displayNames = new ArrayList<>();
@@ -37,7 +38,7 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
         }
       }
     }
-    return new JSONArray(displayNames);
+    return new JSONObject().put("displayNames", new JSONArray(displayNames)).toString();
   }
 
   private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {

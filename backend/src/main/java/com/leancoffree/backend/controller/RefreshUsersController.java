@@ -4,7 +4,6 @@ import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.service.RefreshUsersInSessionService;
@@ -42,12 +41,8 @@ public class RefreshUsersController {
     }
 
     try {
-      final JSONArray displayNamesJsonArray = refreshUsersInSessionService
+      final String websocketMessageString = refreshUsersInSessionService
           .refreshUsersInSession(refreshUsersRequest);
-
-      final JSONObject webSocketMessageJson = new JSONObject()
-          .put("displayNames", displayNamesJsonArray);
-      final String websocketMessageString = webSocketMessageJson.toString();
 
       webSocketMessagingTemplate
           .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,7 +21,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     this.usersRepository = usersRepository;
   }
 
-  public JSONArray addUserToSessionAndReturnAllUsers(
+  public String addUserToSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest)
       throws RefreshUsersInSessionException {
 
@@ -47,7 +48,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
           for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
             displayNames.add(usersEntity.getDisplayName());
           }
-          return new JSONArray(displayNames);
+          return new JSONObject().put("displayNames", new JSONArray(displayNames)).toString();
         } else {
           throw new RefreshUsersInSessionException("How'd that happen? Please try again");
         }
