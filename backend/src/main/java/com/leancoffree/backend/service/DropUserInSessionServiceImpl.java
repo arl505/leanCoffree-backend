@@ -9,40 +9,52 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DropUserInSessionServiceImpl implements DropUserInSessionService {
 
   private final UsersRepository usersRepository;
+  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public DropUserInSessionServiceImpl(final UsersRepository usersRepository) {
+  public DropUserInSessionServiceImpl(final UsersRepository usersRepository,
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.usersRepository = usersRepository;
+    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
 
   }
 
   @Transactional
-  public String dropUserInSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest) {
+  public void dropUserInSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest) {
     final List<String> displayNames = new ArrayList<>();
     if (isRequestValid(refreshUsersRequest)) {
-      usersRepository.deleteByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
+      final Optional<UsersEntity> optionalUsersEntity = usersRepository
+          .findByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
 
-      final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
-          .findAllBySessionId(refreshUsersRequest.getSessionId());
+      if (optionalUsersEntity.isPresent()) {
+        usersRepository.delete(optionalUsersEntity.get());
 
-      if (optionalUsersEntityList.isPresent()) {
-        for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
-          displayNames.add(usersEntity.getDisplayName());
+        final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
+            .findAllBySessionId(optionalUsersEntity.get().getSessionId());
+
+        if (optionalUsersEntityList.isPresent()) {
+          for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
+            displayNames.add(usersEntity.getDisplayName());
+          }
+          final String websocketMessageString = new JSONObject()
+              .put("displayNames", new JSONArray(displayNames)).toString();
+          webSocketMessagingTemplate
+              .convertAndSend("/topic/session/" + optionalUsersEntity.get().getSessionId(),
+                  websocketMessageString);
         }
       }
     }
-    return new JSONObject().put("displayNames", new JSONArray(displayNames)).toString();
   }
 
   private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {
-    return refreshUsersRequest != null && refreshUsersRequest.getDisplayName() != null
-        && refreshUsersRequest.getSessionId() != null && !refreshUsersRequest.getDisplayName()
-        .isBlank() && !refreshUsersRequest.getSessionId().isBlank();
+    return refreshUsersRequest.getWebsocketUserId() != null && !refreshUsersRequest
+        .getWebsocketUserId().isBlank();
   }
 
 }

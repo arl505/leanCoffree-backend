@@ -5,6 +5,6 @@ import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 
 public interface RefreshUsersInSessionService {
 
-  String refreshUsersInSession(final RefreshUsersRequest refreshUsersRequest)
+  void refreshUsersInSession(final RefreshUsersRequest refreshUsersRequest)
       throws RefreshUsersInSessionException;
 }

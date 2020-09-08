@@ -5,6 +5,6 @@ import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 
 public interface DropUserInSessionService {
 
-  String dropUserInSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
+  void dropUserInSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
       throws RefreshUsersInSessionException;
 }
