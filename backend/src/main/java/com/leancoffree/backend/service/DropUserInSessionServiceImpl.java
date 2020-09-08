@@ -6,6 +6,7 @@ import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.json.JSONObject;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
 
   }
 
+  @Transactional
   public void dropUserInSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest) {
 
