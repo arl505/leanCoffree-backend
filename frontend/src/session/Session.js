@@ -11,6 +11,7 @@ class Session extends React.Component {
       sessionId: "",
       sessionStatus: "",
       userDisplayName: "",
+      websocketUserId: "",
       usersInAttendance: []
     }
     this.componentDidMount = this.componentDidMount.bind(this);
@@ -18,13 +19,26 @@ class Session extends React.Component {
     this.submitDisplayName = this.submitDisplayName.bind(this);   
     this.onUpdateUsers = this.onUpdateUsers.bind(this);
     this.onConnected = this.onConnected.bind(this);
+    this.sendDisconnectRequest = this.sendDisconnectRequest.bind(this);
   }
 
   invalidSessionProvided() {
     window.location = process.env.REACT_APP_FRONTEND_BASEURL;
   }
 
+  sendDisconnectRequest() {
+    let self = this;
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "DROP", websocketUserId: self.state.websocketUserId})
+    .catch(function (error) {
+      console.log("Error while adding displayname to backend: " + error + " - " + JSON.stringify(error.response.data))
+    });
+  }
+
   componentDidMount() {
+    window.addEventListener("beforeunload", (eventListener) => {  
+      this.sendDisconnectRequest();
+    });
+
     let windowHref = window.location.href;
     let url = windowHref.match(process.env.REACT_APP_SESSION_REGEX);
     if(url === null) {
@@ -66,11 +80,12 @@ class Session extends React.Component {
     var SockJS = require('sockjs-client')
     SockJS = new SockJS(process.env.REACT_APP_BACKEND_BASEURL + '/lean-coffree')
     stompClient = Stomp.over(SockJS);
-    stompClient.connect({}, this.onConnected, this.onError);   
+    stompClient.connect({}, this.onConnected, this.onError);
   }
 
-  onConnected() {
+  onConnected(frame) {
     stompClient.subscribe('/topic/session/' + this.state.sessionId, this.onUpdateUsers);
+    this.setState({websocketUserId: frame.headers['user-name']})
   }
 
   onUpdateUsers(payload) {
@@ -85,7 +100,7 @@ class Session extends React.Component {
   submitDisplayName() {
     let self = this;
     if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/add-user-to-session", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId})
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "ADD", websocketUserId: self.state.websocketUserId})
       .then(function (response) {
         if(response.data.status === "SUCCESS") {
           self.setState({sessionStatus: "QUERYING_AND_VOTING"});
@@ -94,7 +109,7 @@ class Session extends React.Component {
         }
       })
       .catch(function (error) {
-        console.log("Error while adding displayname to backend: " + error)
+        console.log("Error while adding displayname to backend: " + error + " - " + JSON.stringify(error.response.data))
       });
       
     }

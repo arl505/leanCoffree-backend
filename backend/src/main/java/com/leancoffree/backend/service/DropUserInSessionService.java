@@ -3,8 +3,8 @@ package com.leancoffree.backend.service;
 import com.leancoffree.backend.controller.RefreshUsersInSessionException;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 
-public interface AddUserToSessionService {
+public interface DropUserInSessionService {
 
-  String addUserToSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
+  String dropUserInSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
       throws RefreshUsersInSessionException;
 }

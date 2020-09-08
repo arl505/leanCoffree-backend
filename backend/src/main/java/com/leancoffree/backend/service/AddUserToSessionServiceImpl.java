@@ -1,14 +1,15 @@
 package com.leancoffree.backend.service;
 
-import com.leancoffree.backend.controller.AddUserToSessionException;
+import com.leancoffree.backend.controller.RefreshUsersInSessionException;
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
-import com.leancoffree.backend.domain.model.DisplayNameAndSessionIdBody;
-import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
+import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,13 +21,12 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     this.usersRepository = usersRepository;
   }
 
-  public ListOfDisplayNamesBody addUserToSessionAndReturnAllUsers(
-      final DisplayNameAndSessionIdBody displayNameAndSessionIdBody)
-      throws AddUserToSessionException {
+  public String addUserToSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
+      throws RefreshUsersInSessionException {
 
-    if (isRequestValid(displayNameAndSessionIdBody)) {
-      final String displayName = displayNameAndSessionIdBody.getDisplayName();
-      final String sessionId = displayNameAndSessionIdBody.getSessionId();
+    if (isRequestValid(refreshUsersRequest)) {
+      final String displayName = refreshUsersRequest.getDisplayName();
+      final String sessionId = refreshUsersRequest.getSessionId();
 
       final UsersId usersId = new UsersId(displayName, sessionId);
       final Optional<UsersEntity> usersEntityOptional = usersRepository.findById(usersId);
@@ -36,6 +36,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
             .displayName(displayName)
             .sessionId(sessionId)
             .votesUsed(0)
+            .websocketUserId(refreshUsersRequest.getWebsocketUserId())
             .build());
 
         final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
@@ -46,23 +47,23 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
           for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
             displayNames.add(usersEntity.getDisplayName());
           }
-          return ListOfDisplayNamesBody.builder().displayNames(displayNames)
-              .build();
+          return new JSONObject().put("displayNames", new JSONArray(displayNames)).toString();
         } else {
-          throw new AddUserToSessionException("How'd that happen? Please try again");
+          throw new RefreshUsersInSessionException("How'd that happen? Please try again");
         }
 
       } else {
-        throw new AddUserToSessionException("Display name already in use for session");
+        throw new RefreshUsersInSessionException("Display name already in use for session");
       }
+    } else {
+      throw new RefreshUsersInSessionException("Invalid request");
     }
-    throw new AddUserToSessionException("Invalid request");
   }
 
-  private boolean isRequestValid(final DisplayNameAndSessionIdBody displayNameAndSessionIdBody) {
-    return displayNameAndSessionIdBody != null
-        && displayNameAndSessionIdBody.getDisplayName() != null
-        && displayNameAndSessionIdBody.getSessionId() != null && !displayNameAndSessionIdBody
-        .getDisplayName().isBlank() && !displayNameAndSessionIdBody.getSessionId().isBlank();
+  private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {
+    return refreshUsersRequest != null && refreshUsersRequest.getDisplayName() != null
+        && refreshUsersRequest.getSessionId() != null && !refreshUsersRequest.getDisplayName()
+        .isBlank() && !refreshUsersRequest.getSessionId().isBlank();
   }
+
 }

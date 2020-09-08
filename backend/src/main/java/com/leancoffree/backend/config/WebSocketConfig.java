@@ -18,7 +18,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void registerStompEndpoints(final StompEndpointRegistry registry) {
-    registry.addEndpoint("/lean-coffree").setAllowedOrigins("*").withSockJS();
+    registry.addEndpoint("/lean-coffree").setHandshakeHandler(new CustomHandshakeHandler())
+        .setAllowedOrigins("*").withSockJS();
   }
 
 }
