@@ -23,17 +23,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class RefreshUsersController {
 
   private final RefreshUsersInSessionService refreshUsersInSessionService;
-  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public RefreshUsersController(final RefreshUsersInSessionService refreshUsersInSessionService,
-      final SimpMessagingTemplate webSocketMessagingTemplate) {
+  public RefreshUsersController(final RefreshUsersInSessionService refreshUsersInSessionService) {
     this.refreshUsersInSessionService = refreshUsersInSessionService;
-    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
   @CrossOrigin
   @PostMapping("/refresh-users")
-  public ResponseEntity<Object> addUserHttpEndpoint(
+  public ResponseEntity<Object> refreshUsersEndpoint(
       @Valid @RequestBody final RefreshUsersRequest refreshUsersRequest, final Errors errors) {
 
     if (errors.hasErrors()) {
@@ -41,12 +38,7 @@ public class RefreshUsersController {
     }
 
     try {
-      final String websocketMessageString = refreshUsersInSessionService
-          .refreshUsersInSession(refreshUsersRequest);
-
-      webSocketMessagingTemplate
-          .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),
-              websocketMessageString);
+      refreshUsersInSessionService.refreshUsersInSession(refreshUsersRequest);
 
       return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
           .status(SUCCESS)

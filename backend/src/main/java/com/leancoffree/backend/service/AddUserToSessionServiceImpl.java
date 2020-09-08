@@ -10,18 +10,22 @@ import java.util.List;
 import java.util.Optional;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AddUserToSessionServiceImpl implements AddUserToSessionService {
 
   private final UsersRepository usersRepository;
+  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public AddUserToSessionServiceImpl(final UsersRepository usersRepository) {
+  public AddUserToSessionServiceImpl(final UsersRepository usersRepository,
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.usersRepository = usersRepository;
+    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
-  public String addUserToSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
+  public void addUserToSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
       throws RefreshUsersInSessionException {
 
     if (isRequestValid(refreshUsersRequest)) {
@@ -47,7 +51,11 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
           for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
             displayNames.add(usersEntity.getDisplayName());
           }
-          return new JSONObject().put("displayNames", new JSONArray(displayNames)).toString();
+          final String websocketMessageString = new JSONObject()
+              .put("displayNames", new JSONArray(displayNames)).toString();
+          webSocketMessagingTemplate
+              .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),
+                  websocketMessageString);
         } else {
           throw new RefreshUsersInSessionException("How'd that happen? Please try again");
         }
