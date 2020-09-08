@@ -4,9 +4,8 @@ import com.leancoffree.backend.controller.RefreshUsersInSessionException;
 import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 
-public interface AddUserToSessionService {
+public interface DropUserInSessionService {
 
-  ListOfDisplayNamesBody addUserToSessionAndReturnAllUsers(
-      final RefreshUsersRequest refreshUsersRequest)
-      throws RefreshUsersInSessionException;
+  ListOfDisplayNamesBody dropUserInSessionAndReturnAllUsers(
+      final RefreshUsersRequest refreshUsersRequest) throws RefreshUsersInSessionException;
 }

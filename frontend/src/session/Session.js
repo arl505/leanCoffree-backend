@@ -85,7 +85,7 @@ class Session extends React.Component {
   submitDisplayName() {
     let self = this;
     if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/add-user-to-session", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId})
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "ADD"})
       .then(function (response) {
         if(response.data.status === "SUCCESS") {
           self.setState({sessionStatus: "QUERYING_AND_VOTING"});

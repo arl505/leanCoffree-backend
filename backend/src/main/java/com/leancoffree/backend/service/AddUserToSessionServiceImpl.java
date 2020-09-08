@@ -1,10 +1,10 @@
 package com.leancoffree.backend.service;
 
-import com.leancoffree.backend.controller.AddUserToSessionException;
+import com.leancoffree.backend.controller.RefreshUsersInSessionException;
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
-import com.leancoffree.backend.domain.model.DisplayNameAndSessionIdBody;
 import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
+import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +21,12 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
   }
 
   public ListOfDisplayNamesBody addUserToSessionAndReturnAllUsers(
-      final DisplayNameAndSessionIdBody displayNameAndSessionIdBody)
-      throws AddUserToSessionException {
+      final RefreshUsersRequest refreshUsersRequest)
+      throws RefreshUsersInSessionException {
 
-    if (isRequestValid(displayNameAndSessionIdBody)) {
-      final String displayName = displayNameAndSessionIdBody.getDisplayName();
-      final String sessionId = displayNameAndSessionIdBody.getSessionId();
+    if (isRequestValid(refreshUsersRequest)) {
+      final String displayName = refreshUsersRequest.getDisplayName();
+      final String sessionId = refreshUsersRequest.getSessionId();
 
       final UsersId usersId = new UsersId(displayName, sessionId);
       final Optional<UsersEntity> usersEntityOptional = usersRepository.findById(usersId);
@@ -49,20 +49,20 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
           return ListOfDisplayNamesBody.builder().displayNames(displayNames)
               .build();
         } else {
-          throw new AddUserToSessionException("How'd that happen? Please try again");
+          throw new RefreshUsersInSessionException("How'd that happen? Please try again");
         }
 
       } else {
-        throw new AddUserToSessionException("Display name already in use for session");
+        throw new RefreshUsersInSessionException("Display name already in use for session");
       }
     }
-    throw new AddUserToSessionException("Invalid request");
+    throw new RefreshUsersInSessionException("Invalid request");
   }
 
-  private boolean isRequestValid(final DisplayNameAndSessionIdBody displayNameAndSessionIdBody) {
-    return displayNameAndSessionIdBody != null
-        && displayNameAndSessionIdBody.getDisplayName() != null
-        && displayNameAndSessionIdBody.getSessionId() != null && !displayNameAndSessionIdBody
-        .getDisplayName().isBlank() && !displayNameAndSessionIdBody.getSessionId().isBlank();
+  private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {
+    return refreshUsersRequest != null && refreshUsersRequest.getDisplayName() != null
+        && refreshUsersRequest.getSessionId() != null && !refreshUsersRequest.getDisplayName()
+        .isBlank() && !refreshUsersRequest.getSessionId().isBlank();
   }
+
 }
