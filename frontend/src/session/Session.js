@@ -19,29 +19,13 @@ class Session extends React.Component {
     this.submitDisplayName = this.submitDisplayName.bind(this);   
     this.onUpdateUsers = this.onUpdateUsers.bind(this);
     this.onConnected = this.onConnected.bind(this);
-    this.sendDisconnectRequest = this.sendDisconnectRequest.bind(this);
   }
 
   invalidSessionProvided() {
     window.location = process.env.REACT_APP_FRONTEND_BASEURL;
   }
 
-  sendDisconnectRequest() {
-    console.log("SessionId: " + this.state.sessionId);
-    console.log("websocketUserId: " + this.state.websocketUserId);
-    let self = this;
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "DROP", websocketUserId: self.state.websocketUserId})
-    .catch(function (error) {
-      console.log("Error while adding displayname to backend: " + error + " - " + JSON.stringify(error.response.data))
-    });
-  }
-
   componentDidMount() {
-    window.addEventListener("beforeunload", (eventListener) => {  
-      eventListener.preventDefault();
-      this.sendDisconnectRequest();
-    });
-
     let windowHref = window.location.href;
     let url = windowHref.match(process.env.REACT_APP_SESSION_REGEX);
     if(url === null) {
