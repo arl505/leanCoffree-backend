@@ -22,9 +22,7 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
   }
 
   @Transactional
-  public String dropUserInSessionAndReturnAllUsers(
-      final RefreshUsersRequest refreshUsersRequest) {
-
+  public String dropUserInSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest) {
     final List<String> displayNames = new ArrayList<>();
     if (isRequestValid(refreshUsersRequest)) {
       usersRepository.deleteByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
@@ -42,10 +40,9 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
   }
 
   private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {
-    return refreshUsersRequest != null
-        && refreshUsersRequest.getDisplayName() != null
-        && refreshUsersRequest.getSessionId() != null && !refreshUsersRequest
-        .getDisplayName().isBlank() && !refreshUsersRequest.getSessionId().isBlank();
+    return refreshUsersRequest != null && refreshUsersRequest.getDisplayName() != null
+        && refreshUsersRequest.getSessionId() != null && !refreshUsersRequest.getDisplayName()
+        .isBlank() && !refreshUsersRequest.getSessionId().isBlank();
   }
 
 }

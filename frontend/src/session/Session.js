@@ -11,8 +11,8 @@ class Session extends React.Component {
       sessionId: "",
       sessionStatus: "",
       userDisplayName: "",
-      usersInAttendance: [],
       websocketUserId: "",
+      usersInAttendance: []
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.captureDisplayNameChange = this.captureDisplayNameChange.bind(this);   

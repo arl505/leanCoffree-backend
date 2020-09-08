@@ -21,8 +21,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     this.usersRepository = usersRepository;
   }
 
-  public String addUserToSessionAndReturnAllUsers(
-      final RefreshUsersRequest refreshUsersRequest)
+  public String addUserToSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
       throws RefreshUsersInSessionException {
 
     if (isRequestValid(refreshUsersRequest)) {

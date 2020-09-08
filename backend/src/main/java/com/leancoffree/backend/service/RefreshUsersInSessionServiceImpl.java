@@ -18,8 +18,8 @@ public class RefreshUsersInSessionServiceImpl implements RefreshUsersInSessionSe
     this.dropUserInSessionService = dropUserInSessionService;
   }
 
-  public String refreshUsersInSession(
-      final RefreshUsersRequest refreshUsersRequest) throws RefreshUsersInSessionException {
+  public String refreshUsersInSession(final RefreshUsersRequest refreshUsersRequest)
+      throws RefreshUsersInSessionException {
     return ADD.equals(refreshUsersRequest.getCommand())
         ? addUserToSessionService.addUserToSessionAndReturnAllUsers(refreshUsersRequest)
         : dropUserInSessionService.dropUserInSessionAndReturnAllUsers(refreshUsersRequest);
