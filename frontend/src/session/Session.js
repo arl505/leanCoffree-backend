@@ -70,7 +70,7 @@ class Session extends React.Component {
   }
 
   onConnected() {
-    stompClient.subscribe('/topic/users', this.onUpdateUsers);
+    stompClient.subscribe('/topic/session/' + this.state.sessionId, this.onUpdateUsers);
   }
 
   onUpdateUsers(payload) {

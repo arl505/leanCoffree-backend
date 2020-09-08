@@ -38,7 +38,9 @@ public class AddUserController {
       final JSONObject webSocketMessageJson = new JSONObject()
           .put("displayNames", listOfDisplayNamesBody.getDisplayNames());
       final String websocketMessageString = webSocketMessageJson.toString();
-      webSocketMessagingTemplate.convertAndSend("/topic/users", websocketMessageString);
+      webSocketMessagingTemplate
+          .convertAndSend("/topic/session/" + displayNameAndSessionIdBody.getSessionId(),
+              websocketMessageString);
 
       return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
           .status(SUCCESS)
