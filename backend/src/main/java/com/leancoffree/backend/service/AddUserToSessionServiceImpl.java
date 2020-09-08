@@ -3,24 +3,28 @@ package com.leancoffree.backend.service;
 import com.leancoffree.backend.controller.RefreshUsersInSessionException;
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
-import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.json.JSONObject;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AddUserToSessionServiceImpl implements AddUserToSessionService {
 
   private final UsersRepository usersRepository;
+  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public AddUserToSessionServiceImpl(final UsersRepository usersRepository) {
+  public AddUserToSessionServiceImpl(final UsersRepository usersRepository,
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.usersRepository = usersRepository;
+    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
-  public ListOfDisplayNamesBody addUserToSessionAndReturnAllUsers(
+  public void addUserToSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest)
       throws RefreshUsersInSessionException {
 
@@ -36,6 +40,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
             .displayName(displayName)
             .sessionId(sessionId)
             .votesUsed(0)
+            .websocketUserId(refreshUsersRequest.getWebsocketUserId())
             .build());
 
         final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
@@ -46,8 +51,15 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
           for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
             displayNames.add(usersEntity.getDisplayName());
           }
-          return ListOfDisplayNamesBody.builder().displayNames(displayNames)
-              .build();
+
+          final JSONObject webSocketMessageJson = new JSONObject()
+              .put("displayNames", displayNames);
+          final String websocketMessageString = webSocketMessageJson.toString();
+
+          webSocketMessagingTemplate
+              .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),
+                  websocketMessageString);
+
         } else {
           throw new RefreshUsersInSessionException("How'd that happen? Please try again");
         }
@@ -55,8 +67,9 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
       } else {
         throw new RefreshUsersInSessionException("Display name already in use for session");
       }
+    } else {
+      throw new RefreshUsersInSessionException("Invalid request");
     }
-    throw new RefreshUsersInSessionException("Invalid request");
   }
 
   private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {

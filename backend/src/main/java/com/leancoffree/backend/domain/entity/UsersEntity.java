@@ -33,6 +33,9 @@ public class UsersEntity {
   @Column(name = "votes_used")
   private Integer votesUsed;
 
+  @Column(name = "websocket_user_id")
+  private String websocketUserId;
+
   @Data
   @Builder
   @AllArgsConstructor

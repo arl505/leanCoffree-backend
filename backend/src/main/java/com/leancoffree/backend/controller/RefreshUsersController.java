@@ -24,12 +24,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class RefreshUsersController {
 
   private final RefreshUsersInSessionService refreshUsersInSessionService;
-  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public RefreshUsersController(final RefreshUsersInSessionService refreshUsersInSessionService,
-      final SimpMessagingTemplate webSocketMessagingTemplate) {
+  public RefreshUsersController(final RefreshUsersInSessionService refreshUsersInSessionService) {
     this.refreshUsersInSessionService = refreshUsersInSessionService;
-    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
   @CrossOrigin
@@ -42,15 +39,7 @@ public class RefreshUsersController {
     }
 
     try {
-      final ListOfDisplayNamesBody listOfDisplayNamesBody = refreshUsersInSessionService
-          .refreshUsersInSession(refreshUsersRequest);
-
-      final JSONObject webSocketMessageJson = new JSONObject()
-          .put("displayNames", listOfDisplayNamesBody.getDisplayNames());
-      final String websocketMessageString = webSocketMessageJson.toString();
-      webSocketMessagingTemplate
-          .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),
-              websocketMessageString);
+      refreshUsersInSessionService.refreshUsersInSession(refreshUsersRequest);
 
       return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
           .status(SUCCESS)
@@ -66,7 +55,7 @@ public class RefreshUsersController {
 
   private ResponseEntity<Object> buildValidationErrorsResponse(final Errors errors) {
     final JSONArray errorsJsonArray = new JSONArray();
-    for(final ObjectError error : errors.getAllErrors()) {
+    for (final ObjectError error : errors.getAllErrors()) {
       errorsJsonArray.put(error.getDefaultMessage());
     }
     final String errorsJsonString = new JSONObject()

@@ -11,7 +11,8 @@ class Session extends React.Component {
       sessionId: "",
       sessionStatus: "",
       userDisplayName: "",
-      usersInAttendance: []
+      usersInAttendance: [],
+      websocketUserId: "",
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.captureDisplayNameChange = this.captureDisplayNameChange.bind(this);   
@@ -66,11 +67,12 @@ class Session extends React.Component {
     var SockJS = require('sockjs-client')
     SockJS = new SockJS(process.env.REACT_APP_BACKEND_BASEURL + '/lean-coffree')
     stompClient = Stomp.over(SockJS);
-    stompClient.connect({}, this.onConnected, this.onError);   
+    stompClient.connect({}, this.onConnected, this.onError);
   }
 
-  onConnected() {
+  onConnected(frame) {
     stompClient.subscribe('/topic/session/' + this.state.sessionId, this.onUpdateUsers);
+    this.setState({websocketUserId: frame.headers['user-name']})
   }
 
   onUpdateUsers(payload) {
@@ -85,7 +87,7 @@ class Session extends React.Component {
   submitDisplayName() {
     let self = this;
     if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "ADD"})
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "ADD", websocketUserId: self.state.websocketUserId})
       .then(function (response) {
         if(response.data.status === "SUCCESS") {
           self.setState({sessionStatus: "QUERYING_AND_VOTING"});
@@ -94,7 +96,7 @@ class Session extends React.Component {
         }
       })
       .catch(function (error) {
-        console.log("Error while adding displayname to backend: " + error)
+        console.log("Error while adding displayname to backend: " + error + " - " + JSON.stringify(error.response.data))
       });
       
     }

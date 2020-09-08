@@ -23,4 +23,7 @@ public class RefreshUsersRequest {
   @NotEmpty(message = "sessionId should not be empty")
   private String sessionId;
 
+  @NotEmpty(message = "websocketUserId should not be empty")
+  private String websocketUserId;
+
 }

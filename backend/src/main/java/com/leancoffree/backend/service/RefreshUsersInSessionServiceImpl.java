@@ -1,9 +1,9 @@
 package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.RefreshUsersCommand.ADD;
+import static com.leancoffree.backend.enums.RefreshUsersCommand.DROP;
 
 import com.leancoffree.backend.controller.RefreshUsersInSessionException;
-import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +19,12 @@ public class RefreshUsersInSessionServiceImpl implements RefreshUsersInSessionSe
     this.dropUserInSessionService = dropUserInSessionService;
   }
 
-  public ListOfDisplayNamesBody refreshUsersInSession(
+  public void refreshUsersInSession(
       final RefreshUsersRequest refreshUsersRequest) throws RefreshUsersInSessionException {
-    return ADD.equals(refreshUsersRequest.getCommand())
-        ? addUserToSessionService.addUserToSessionAndReturnAllUsers(refreshUsersRequest)
-        : dropUserInSessionService.dropUserInSessionAndReturnAllUsers(refreshUsersRequest);
+    if(ADD.equals(refreshUsersRequest.getCommand())) {
+      addUserToSessionService.addUserToSessionAndReturnAllUsers(refreshUsersRequest);
+    } else if(DROP.equals(refreshUsersRequest.getCommand())) {
+      dropUserInSessionService.dropUserInSessionAndReturnAllUsers(refreshUsersRequest);
+    }
   }
 }

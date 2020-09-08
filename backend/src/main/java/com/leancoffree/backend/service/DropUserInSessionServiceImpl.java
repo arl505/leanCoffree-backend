@@ -1,49 +1,53 @@
 package com.leancoffree.backend.service;
 
-import com.leancoffree.backend.controller.RefreshUsersInSessionException;
 import com.leancoffree.backend.domain.entity.UsersEntity;
-import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
-import com.leancoffree.backend.domain.model.ListOfDisplayNamesBody;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.json.JSONObject;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DropUserInSessionServiceImpl implements DropUserInSessionService {
 
   private final UsersRepository usersRepository;
+  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public DropUserInSessionServiceImpl(final UsersRepository usersRepository) {
+  public DropUserInSessionServiceImpl(final UsersRepository usersRepository,
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.usersRepository = usersRepository;
+    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
+
   }
 
-  public ListOfDisplayNamesBody dropUserInSessionAndReturnAllUsers(
+  public void dropUserInSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest) {
 
-    final List<String> displayNames = new ArrayList<>();
     if (isRequestValid(refreshUsersRequest)) {
-      final String displayName = refreshUsersRequest.getDisplayName();
-      final String sessionId = refreshUsersRequest.getSessionId();
 
-      usersRepository.deleteById(UsersId.builder()
-          .displayName(displayName)
-          .sessionId(sessionId)
-          .build());
+      usersRepository.deleteByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
 
       final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
-          .findAllBySessionId(sessionId);
+          .findAllBySessionId(refreshUsersRequest.getSessionId());
 
       if (optionalUsersEntityList.isPresent()) {
+        final List<String> displayNames = new ArrayList<>();
         for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
           displayNames.add(usersEntity.getDisplayName());
         }
+
+        final JSONObject webSocketMessageJson = new JSONObject()
+            .put("displayNames", displayNames);
+        final String websocketMessageString = webSocketMessageJson.toString();
+
+        webSocketMessagingTemplate
+            .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),
+                websocketMessageString);
       }
     }
-    return ListOfDisplayNamesBody.builder().displayNames(displayNames)
-        .build();
   }
 
   private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {
