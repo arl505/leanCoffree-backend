@@ -24,9 +24,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class RefreshUsersController {
 
   private final RefreshUsersInSessionService refreshUsersInSessionService;
+  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public RefreshUsersController(final RefreshUsersInSessionService refreshUsersInSessionService) {
+  public RefreshUsersController(final RefreshUsersInSessionService refreshUsersInSessionService,
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.refreshUsersInSessionService = refreshUsersInSessionService;
+    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
   @CrossOrigin
@@ -39,7 +42,16 @@ public class RefreshUsersController {
     }
 
     try {
-      refreshUsersInSessionService.refreshUsersInSession(refreshUsersRequest);
+      final JSONArray displayNamesJsonArray = refreshUsersInSessionService
+          .refreshUsersInSession(refreshUsersRequest);
+
+      final JSONObject webSocketMessageJson = new JSONObject()
+          .put("displayNames", displayNamesJsonArray);
+      final String websocketMessageString = webSocketMessageJson.toString();
+
+      webSocketMessagingTemplate
+          .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),
+              websocketMessageString);
 
       return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
           .status(SUCCESS)

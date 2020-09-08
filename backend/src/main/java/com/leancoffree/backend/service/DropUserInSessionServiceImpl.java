@@ -7,49 +7,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
-import org.json.JSONObject;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DropUserInSessionServiceImpl implements DropUserInSessionService {
 
   private final UsersRepository usersRepository;
-  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public DropUserInSessionServiceImpl(final UsersRepository usersRepository,
-      final SimpMessagingTemplate webSocketMessagingTemplate) {
+  public DropUserInSessionServiceImpl(final UsersRepository usersRepository) {
     this.usersRepository = usersRepository;
-    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
 
   }
 
   @Transactional
-  public void dropUserInSessionAndReturnAllUsers(
+  public JSONArray dropUserInSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest) {
 
+    final List<String> displayNames = new ArrayList<>();
     if (isRequestValid(refreshUsersRequest)) {
-
       usersRepository.deleteByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
 
       final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
           .findAllBySessionId(refreshUsersRequest.getSessionId());
 
       if (optionalUsersEntityList.isPresent()) {
-        final List<String> displayNames = new ArrayList<>();
         for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
           displayNames.add(usersEntity.getDisplayName());
         }
-
-        final JSONObject webSocketMessageJson = new JSONObject()
-            .put("displayNames", displayNames);
-        final String websocketMessageString = webSocketMessageJson.toString();
-
-        webSocketMessagingTemplate
-            .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),
-                websocketMessageString);
       }
     }
+    return new JSONArray(displayNames);
   }
 
   private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {
