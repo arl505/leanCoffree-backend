@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DisplayNameAndSessionIdBody {
 
-  // adding session ID for now
-  // todo: remove session id by using sessionId as param in websocket path
   private String sessionId;
   private String displayName;
 }
