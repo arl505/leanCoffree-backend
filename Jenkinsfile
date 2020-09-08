@@ -23,7 +23,7 @@ pipeline {
     stage("Deploy: Frontend") {
       when {
         expression {
-           env.BRANCH_NAME == "enhanceWebsocketsForPrivateConnections"
+           env.BRANCH_NAME == "ehanceWebsocketsForPrivateConnection"
         }
       }
       steps {
@@ -36,7 +36,7 @@ pipeline {
     stage("Deploy: Backend") {
       when {
         expression {
-           env.BRANCH_NAME == "enhanceWebsocketsForPrivateConnections"
+           env.BRANCH_NAME == "ehanceWebsocketsForPrivateConnection"
         }
       }
       steps {
