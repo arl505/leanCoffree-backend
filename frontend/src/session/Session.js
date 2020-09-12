@@ -107,6 +107,23 @@ class Session extends React.Component {
     this.setState({userDisplayName: event.target.value});
   }
 
+  getAllHere() {
+    let allHereListItems = [];
+    for(let i = 0; i < this.state.usersInAttendance.length; i++) {
+      let username = this.state.usersInAttendance[i];
+      if(username === this.state.userDisplayName) {
+        allHereListItems.push(<li class="usernameList"><b>{this.state.usersInAttendance[i]}</b></li>);
+      } else {
+        allHereListItems.push(<li class="usernameList">{this.state.usersInAttendance[i]}</li>);
+      }
+    }
+    return (
+      <ul class="usernameList">
+        {allHereListItems}
+      </ul>
+    )
+  }
+
   render() {
     if(this.state.sessionStatus === "ASK_FOR_USERNAME") {
       return (
@@ -119,7 +136,6 @@ class Session extends React.Component {
     }
 
     else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
-      let allHere = this.state.usersInAttendance.join(", ");
       return (
         <div class="voting-grid-container">
           <div class="voting-grid-item cardsItem">
@@ -130,8 +146,8 @@ class Session extends React.Component {
             </div>
           </div>
           <div class="voting-grid-item usersItem">
-            <p class="username">Hello <p style={{display: 'inline'}} class="username">{this.state.userDisplayName}</p></p>
-            <p class="username">All here: {allHere}</p>
+            <div>All here:</div>
+            <div>{this.getAllHere()}</div>
           </div>
         </div>
       )
