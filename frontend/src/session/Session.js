@@ -1,5 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
+import './session.css'
 
 let stompClient = null;
 class Session extends React.Component {
@@ -106,6 +107,23 @@ class Session extends React.Component {
     this.setState({userDisplayName: event.target.value});
   }
 
+  getAllHere() {
+    let allHereListItems = [];
+    for(let i = 0; i < this.state.usersInAttendance.length; i++) {
+      let username = this.state.usersInAttendance[i];
+      if(username === this.state.userDisplayName) {
+        allHereListItems.push(<li class="usernameList"><b>{this.state.usersInAttendance[i]}</b></li>);
+      } else {
+        allHereListItems.push(<li class="usernameList">{this.state.usersInAttendance[i]}</li>);
+      }
+    }
+    return (
+      <ul class="usernameList">
+        {allHereListItems}
+      </ul>
+    )
+  }
+
   render() {
     if(this.state.sessionStatus === "ASK_FOR_USERNAME") {
       return (
@@ -118,11 +136,19 @@ class Session extends React.Component {
     }
 
     else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
-      let allHere = this.state.usersInAttendance.join(", ");
       return (
-        <div>
-          <p>Hello {this.state.userDisplayName}</p>
-          <p>All here: {allHere}</p>
+        <div class="voting-grid-container">
+          <div class="voting-grid-item cardsItem">
+            <div>
+              <p>
+                Here is where cards will go
+              </p>
+            </div>
+          </div>
+          <div class="voting-grid-item usersItem">
+            <div>All here:</div>
+            <div>{this.getAllHere()}</div>
+          </div>
         </div>
       )
     }
