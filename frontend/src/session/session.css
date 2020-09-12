@@ -1,0 +1,24 @@
+.voting-grid-container {
+  display: grid;
+  grid-gap: 1px;
+  background-color: black;
+  max-width: 100vw;
+}
+
+.voting-grid-item{
+  background-color: white;
+  padding: 1vw;
+}
+
+.cardsItem {
+  grid-column: 1;
+  grid-row: 1;
+  width: 90vw;
+}
+
+.usersItem {
+  grid-column: 2;
+  grid-row: 1;
+  text-align: right;
+  width: 10vw;
+}

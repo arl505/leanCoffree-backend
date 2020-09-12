@@ -1,5 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
+import './session.css'
 
 let stompClient = null;
 class Session extends React.Component {
@@ -120,9 +121,18 @@ class Session extends React.Component {
     else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
       let allHere = this.state.usersInAttendance.join(", ");
       return (
-        <div>
-          <p>Hello {this.state.userDisplayName}</p>
-          <p>All here: {allHere}</p>
+        <div class="voting-grid-container">
+          <div class="voting-grid-item cardsItem">
+            <div>
+              <p>
+              Here is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuff
+              </p>
+            </div>
+          </div>
+          <div class="voting-grid-item usersItem">
+            <p>Hello {this.state.userDisplayName}</p>
+            <p>All here: {allHere}</p>
+          </div>
         </div>
       )
     }
