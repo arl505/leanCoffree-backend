@@ -125,15 +125,23 @@ class Session extends React.Component {
 
     else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
       return (
-        <div class="voting-grid-container">
-          <div class="voting-grid-item cardsItem">
-            <div>
-              <p>
-                Here is where cards will go
-              </p>
+        <div class="session-grid-container">
+          <div class="session-grid-item cardsSection">
+            <div class="cards-grid-container">
+              <div style={{gridRow: 1, gridColumn: 1}}/>
+              <div style={{gridRow: 1, gridColumn: 2}}/>
+              <div style={{gridRow: 1, gridColumn: 3}}/>
+              <div style={{gridRow: 1, gridColumn: 4}}/>
+              <div style={{gridRow: 1, gridColumn: 5}}/>
+
+              <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
+                <textarea id="composeTextArea" type="" placeholder="Submit a discussion topic!"></textarea>
+                <button id="submitCardButton">Submit</button>
+              </div>
+              
             </div>
           </div>
-          <div class="voting-grid-item usersItem">
+          <div class="session-grid-item usersSection">
             <div>All here:</div>
             <div>{this.getAllHere()}</div>
           </div>
