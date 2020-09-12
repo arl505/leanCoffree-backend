@@ -23,7 +23,7 @@ pipeline {
     stage("Deploy: Frontend") {
       when {
         expression {
-           env.BRANCH_NAME == "addCardsToSession"
+           env.BRANCH_NAME == "main"
         }
       }
       steps {
@@ -36,7 +36,7 @@ pipeline {
     stage("Deploy: Backend") {
       when {
         expression {
-           env.BRANCH_NAME == "addCardsToSession"
+           env.BRANCH_NAME == "main"
         }
       }
       steps {

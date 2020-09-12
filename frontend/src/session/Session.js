@@ -141,7 +141,7 @@ class Session extends React.Component {
           <div class="voting-grid-item cardsItem">
             <div>
               <p>
-              Here is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuffHere is where I will put cards and stuff
+                Here is where cards will go
               </p>
             </div>
           </div>
