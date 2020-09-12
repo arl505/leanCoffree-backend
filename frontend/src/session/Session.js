@@ -130,8 +130,8 @@ class Session extends React.Component {
             </div>
           </div>
           <div class="voting-grid-item usersItem">
-            <p>Hello {this.state.userDisplayName}</p>
-            <p>All here: {allHere}</p>
+            <p class="username">Hello <p style={{display: 'inline'}} class="username">{this.state.userDisplayName}</p></p>
+            <p class="username">All here: {allHere}</p>
           </div>
         </div>
       )

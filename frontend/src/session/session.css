@@ -1,24 +1,42 @@
+#sessionBody {
+  min-height:100vh;
+  min-width: 100vw;
+  width: 100%;
+  height: 100%;
+}
+
 .voting-grid-container {
   display: grid;
-  grid-gap: 1px;
-  background-color: black;
-  max-width: 100vw;
+  gap: 0px 1px;
+  min-height: 100vh;
 }
 
 .voting-grid-item{
-  background-color: white;
-  padding: 1vw;
+  padding-right: 1vw;
+  padding-left: 1vw;
 }
 
 .cardsItem {
   grid-column: 1;
   grid-row: 1;
-  width: 90vw;
+  width: 85vw;
+  word-wrap: break-word;
 }
 
 .usersItem {
   grid-column: 2;
   grid-row: 1;
   text-align: right;
-  width: 10vw;
+  width: 15vw;
+  border-left: 1px solid black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.username {
+  width: 13vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
