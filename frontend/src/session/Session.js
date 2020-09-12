@@ -16,31 +16,24 @@ class Session extends React.Component {
       usersInAttendance: []
     }
     this.componentDidMount = this.componentDidMount.bind(this);
-    this.captureDisplayNameChange = this.captureDisplayNameChange.bind(this);   
     this.submitDisplayName = this.submitDisplayName.bind(this);   
-    this.onUpdateUsers = this.onUpdateUsers.bind(this);
-    this.onConnected = this.onConnected.bind(this);
-  }
-
-  invalidSessionProvided() {
-    window.location = process.env.REACT_APP_FRONTEND_BASEURL;
   }
 
   componentDidMount() {
     let windowHref = window.location.href;
     let url = windowHref.match(process.env.REACT_APP_SESSION_REGEX);
     if(url === null) {
-      return this.invalidSessionProvided();
+      return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
     }
 
     let sessionIdFromAddress = url[0].match("[0-9, a-f]{8}-[0-9, a-f]{4}-[0-9, a-f]{4}-[0-9, a-f]{4}-[0-9, a-f]{12}");
     if(sessionIdFromAddress === null) {
-      return this.invalidSessionProvided();
+      return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
     }
 
     var self = this;  
     Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/verify-session/' + sessionIdFromAddress, null)
-      .then(function (response) {
+      .then((response) => {
         if(self.isVerificationResponseValid(response, sessionIdFromAddress[0])) {
           self.connectToWebSocketServer();
           self.setState({
@@ -49,12 +42,12 @@ class Session extends React.Component {
             sessionStatus: "ASK_FOR_USERNAME",
           })
         } else {
-          self.invalidSessionProvided();
+          return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
         }
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log("Received an error while verifying session: " + error);
-        return self.invalidSessionProvided();
+        return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
       });
   }
 
@@ -68,43 +61,38 @@ class Session extends React.Component {
     var SockJS = require('sockjs-client')
     SockJS = new SockJS(process.env.REACT_APP_BACKEND_BASEURL + '/lean-coffree')
     stompClient = Stomp.over(SockJS);
-    stompClient.connect({}, this.onConnected, this.onError);
-  }
-
-  onConnected(frame) {
-    stompClient.subscribe('/topic/session/' + this.state.sessionId, this.onUpdateUsers);
-    this.setState({websocketUserId: frame.headers['user-name']})
-  }
-
-  onUpdateUsers(payload) {
-    let updateUsersBody = JSON.parse(payload.body);
-    this.setState({usersInAttendance: updateUsersBody.displayNames});
-  }
-
-  onError(error) {
-    alert('Could not connect you: ' + error);
+    stompClient.connect({}, 
+      (frame) => {
+        stompClient.subscribe('/topic/session/' + this.state.sessionId, 
+          (payload) => {
+            let updateUsersBody = JSON.parse(payload.body);
+            this.setState({usersInAttendance: updateUsersBody.displayNames});
+          }
+        );
+        this.setState({websocketUserId: frame.headers['user-name']})
+      }, 
+      (error) => {
+        alert('Could not connect you: ' + error);
+      }
+    );
   }
 
   submitDisplayName() {
     let self = this;
     if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
       Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "ADD", websocketUserId: self.state.websocketUserId})
-      .then(function (response) {
+      .then((response) => {
         if(response.data.status === "SUCCESS") {
           self.setState({sessionStatus: "QUERYING_AND_VOTING"});
         } else {
           alert(response.data.error);
         }
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log("Error while adding displayname to backend: " + error + " - " + JSON.stringify(error.response.data))
       });
       
     }
-  }
-
-  captureDisplayNameChange(event) {
-    this.setState({userDisplayName: event.target.value});
   }
 
   getAllHere() {
@@ -129,7 +117,7 @@ class Session extends React.Component {
       return (
         <div>
           Enter your display name
-          <input name="displayName" placeholder="Johnny C." onChange={this.captureDisplayNameChange}></input>
+          <input name="displayName" placeholder="Johnny C." onChange={(event) => {this.setState({userDisplayName: event.target.value});}}></input>
           <button onClick={this.submitDisplayName}>Submit</button>
         </div>
       )
@@ -137,15 +125,23 @@ class Session extends React.Component {
 
     else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
       return (
-        <div class="voting-grid-container">
-          <div class="voting-grid-item cardsItem">
-            <div>
-              <p>
-                Here is where cards will go
-              </p>
+        <div class="session-grid-container">
+          <div class="session-grid-item cardsSection">
+            <div class="cards-grid-container">
+              <div style={{gridRow: 1, gridColumn: 1}}/>
+              <div style={{gridRow: 1, gridColumn: 2}}/>
+              <div style={{gridRow: 1, gridColumn: 3}}/>
+              <div style={{gridRow: 1, gridColumn: 4}}/>
+              <div style={{gridRow: 1, gridColumn: 5}}/>
+
+              <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
+                <textarea id="composeTextArea" type="" placeholder="Submit a discussion topic!"></textarea>
+                <button id="submitCardButton">Submit</button>
+              </div>
+              
             </div>
           </div>
-          <div class="voting-grid-item usersItem">
+          <div class="session-grid-item usersSection">
             <div>All here:</div>
             <div>{this.getAllHere()}</div>
           </div>
