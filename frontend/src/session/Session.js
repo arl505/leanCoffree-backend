@@ -92,7 +92,7 @@ class Session extends React.Component {
         }
       })
       .catch((error) => {
-        alert("Error while adding displayname to backend\n" + error + " - " + error.response.data.error)
+        alert("Error while adding displayname to backend\n" + error.response.data)
       });
       
     }
@@ -127,7 +127,7 @@ class Session extends React.Component {
           }
         })
         .catch((error) => 
-          alert("Unable to subit discussion topic\n" + error + " - " + error.response.data.error)
+          alert("Unable to subit discussion topic\n" + error.response.data)
         );
     }
   }

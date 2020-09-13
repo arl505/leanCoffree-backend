@@ -42,7 +42,7 @@ public class SubmitTopicController {
     for (final ObjectError error : errors.getAllErrors()) {
       errorsList.add(error.getDefaultMessage());
     }
-    return ResponseEntity.status(400).body(SuccessOrFailureAndErrorBody.builder()
+    return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
         .status(FAILURE)
         .error(String.join(", ", errorsList))
         .build());
