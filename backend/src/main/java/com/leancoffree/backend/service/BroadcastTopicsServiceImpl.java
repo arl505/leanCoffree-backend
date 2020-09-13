@@ -1,17 +1,13 @@
 package com.leancoffree.backend.service;
 
-import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
-import com.leancoffree.backend.domain.entity.TopicsEntity;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.repository.TopicsRepository;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -34,7 +30,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
   public SuccessOrFailureAndErrorBody broadcastTopics(final String sessionId) {
     final List<Object[]> votesList = topicsRepository.findAllVotes(sessionId);
 
-    final Map<String, List<String>> topicsAndVotersMap = new TreeMap<>();
+    final Map<String, List<String>> topicsAndVotersMap = new LinkedHashMap<>();
     for (final Object[] objects : votesList) {
       final String text = (String) objects[0];
       final List<String> voters = topicsAndVotersMap.containsKey(text)
