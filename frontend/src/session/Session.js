@@ -13,10 +13,12 @@ class Session extends React.Component {
       sessionStatus: "",
       userDisplayName: "",
       websocketUserId: "",
-      usersInAttendance: []
+      usersInAttendance: [],
+      cardSubmissionText: "",
     }
     this.componentDidMount = this.componentDidMount.bind(this);
-    this.submitDisplayName = this.submitDisplayName.bind(this);   
+    this.submitDisplayName = this.submitDisplayName.bind(this);
+    this.submitCard = this.submitCard.bind(this);
   }
 
   componentDidMount() {
@@ -63,7 +65,8 @@ class Session extends React.Component {
     stompClient = Stomp.over(SockJS);
     stompClient.connect({}, 
       (frame) => {
-        stompClient.subscribe('/topic/session/' + this.state.sessionId, 
+        stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, this.updateDiscussionTopics)
+        stompClient.subscribe('/topic/users/session/' + this.state.sessionId, 
           (payload) => {
             let updateUsersBody = JSON.parse(payload.body);
             this.setState({usersInAttendance: updateUsersBody.displayNames});
@@ -89,7 +92,7 @@ class Session extends React.Component {
         }
       })
       .catch((error) => {
-        console.log("Error while adding displayname to backend: " + error + " - " + JSON.stringify(error.response.data))
+        alert("Error while adding displayname to backend\n" + error + " - " + error.response.data.error)
       });
       
     }
@@ -110,6 +113,28 @@ class Session extends React.Component {
         {allHereListItems}
       </ul>
     )
+  }
+
+  submitCard() {
+    if(this.state.cardSubmissionText !== "") {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/submit-topic", {submissionText: this.state.cardSubmissionText, sessionId: this.state.sessionId})
+        .then((response) => {
+          if(response.data.status === "SUCCESS") {
+            // clear the text area
+
+          } else {
+            alert(response.data.error);
+          }
+        })
+        .catch((error) => 
+          alert("Unable to subit discussion topic\n" + error + " - " + error.response.data.error)
+        );
+    }
+  }
+
+  updateDiscussionTopics(payload) {
+    let updateDiscussionTopicsBody = JSON.parse(payload.body);
+    console.log(updateDiscussionTopicsBody.topics)
   }
 
   render() {
@@ -135,8 +160,8 @@ class Session extends React.Component {
               <div style={{gridRow: 1, gridColumn: 5}}/>
 
               <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
-                <textarea id="composeTextArea" type="" placeholder="Submit a discussion topic!"></textarea>
-                <button id="submitCardButton">Submit</button>
+                <textarea id="composeTextArea" onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"></textarea>
+                <button id="submitCardButton" onClick={this.submitCard}>Submit</button>
               </div>
               
             </div>

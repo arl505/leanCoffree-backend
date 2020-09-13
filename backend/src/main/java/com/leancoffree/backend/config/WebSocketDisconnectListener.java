@@ -2,7 +2,6 @@ package com.leancoffree.backend.config;
 
 import static com.leancoffree.backend.enums.RefreshUsersCommand.DROP;
 
-import com.leancoffree.backend.controller.RefreshUsersInSessionException;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.service.DropUserInSessionService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +24,10 @@ public class WebSocketDisconnectListener {
   public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
     final StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
     final StompPrincipal userIdObject = (StompPrincipal) headerAccessor.getHeader("simpUser");
-    try {
-      dropUserInSessionService.dropUserInSessionAndReturnAllUsers(RefreshUsersRequest.builder()
-          .command(DROP)
-          .sessionId(headerAccessor.getSessionId())
-          .websocketUserId(userIdObject.getName())
-          .build());
-    } catch (final RefreshUsersInSessionException e) {
-      log.error("Caught RefreshUsersInSessionException in disconnect listener: ", e);
-    }
+    dropUserInSessionService.dropUserInSessionAndReturnAllUsers(RefreshUsersRequest.builder()
+        .command(DROP)
+        .sessionId(headerAccessor.getSessionId())
+        .websocketUserId(userIdObject.getName())
+        .build());
   }
 }

@@ -1,9 +1,12 @@
 package com.leancoffree.backend.service;
 
-import com.leancoffree.backend.controller.RefreshUsersInSessionException;
+import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
+import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
+
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
+import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,53 +28,44 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
-  public void addUserToSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest)
-      throws RefreshUsersInSessionException {
+  public SuccessOrFailureAndErrorBody addUserToSessionAndReturnAllUsers(
+      final RefreshUsersRequest refreshUsersRequest) {
 
-    if (isRequestValid(refreshUsersRequest)) {
-      final String displayName = refreshUsersRequest.getDisplayName();
-      final String sessionId = refreshUsersRequest.getSessionId();
+    final String displayName = refreshUsersRequest.getDisplayName();
+    final String sessionId = refreshUsersRequest.getSessionId();
 
-      final UsersId usersId = new UsersId(displayName, sessionId);
-      final Optional<UsersEntity> usersEntityOptional = usersRepository.findById(usersId);
+    final UsersId usersId = new UsersId(displayName, sessionId);
+    final Optional<UsersEntity> usersEntityOptional = usersRepository.findById(usersId);
 
-      if (usersEntityOptional.isEmpty()) {
-        usersRepository.save(UsersEntity.builder()
-            .displayName(displayName)
-            .sessionId(sessionId)
-            .votesUsed(0)
-            .websocketUserId(refreshUsersRequest.getWebsocketUserId())
-            .build());
+    if (usersEntityOptional.isEmpty()) {
+      usersRepository.save(UsersEntity.builder()
+          .displayName(displayName)
+          .sessionId(sessionId)
+          .votesUsed(0)
+          .websocketUserId(refreshUsersRequest.getWebsocketUserId())
+          .build());
 
-        final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
-            .findAllBySessionId(sessionId);
+      final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
+          .findAllBySessionId(sessionId);
 
-        if (optionalUsersEntityList.isPresent()) {
-          final List<String> displayNames = new ArrayList<>();
-          for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
-            displayNames.add(usersEntity.getDisplayName());
-          }
-          final String websocketMessageString = new JSONObject()
-              .put("displayNames", new JSONArray(displayNames)).toString();
-          webSocketMessagingTemplate
-              .convertAndSend("/topic/session/" + refreshUsersRequest.getSessionId(),
-                  websocketMessageString);
-        } else {
-          throw new RefreshUsersInSessionException("How'd that happen? Please try again");
+      if (optionalUsersEntityList.isPresent()) {
+        final List<String> displayNames = new ArrayList<>();
+        for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
+          displayNames.add(usersEntity.getDisplayName());
         }
-
+        final String websocketMessageString = new JSONObject()
+            .put("displayNames", new JSONArray(displayNames)).toString();
+        webSocketMessagingTemplate
+            .convertAndSend("/topic/users/session/" + refreshUsersRequest.getSessionId(),
+                websocketMessageString);
+        return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       } else {
-        throw new RefreshUsersInSessionException("Display name already in use for session");
+        return new SuccessOrFailureAndErrorBody(FAILURE, "How'd that happen? Please try again");
       }
-    } else {
-      throw new RefreshUsersInSessionException("Invalid request");
-    }
-  }
 
-  private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {
-    return refreshUsersRequest != null && refreshUsersRequest.getDisplayName() != null
-        && refreshUsersRequest.getSessionId() != null && !refreshUsersRequest.getDisplayName()
-        .isBlank() && !refreshUsersRequest.getSessionId().isBlank();
+    } else {
+      return new SuccessOrFailureAndErrorBody(FAILURE, "Display name already in use in session");
+    }
   }
 
 }
