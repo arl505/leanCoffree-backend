@@ -49,14 +49,12 @@ public class SubmitTopicServiceImpl implements SubmitTopicService {
           .findAllBySessionId(sessionId);
 
       if (optionalTopicsEntityList.isPresent()) {
-        final List<String> displayNames = new ArrayList<>();
-        for (final TopicsEntity usersEntity : optionalTopicsEntityList.get()) {
-          displayNames.add(usersEntity.getText());
+        final JSONArray usersJsonArray = new JSONArray();
+        for (final TopicsEntity topicsEntity : optionalTopicsEntityList.get()) {
+          usersJsonArray.put(new JSONObject().put("votes", 0).put("text", topicsEntity.getText()));
         }
-        final String websocketMessageString = new JSONObject()
-            .put("topics", new JSONArray(displayNames)).toString();
         webSocketMessagingTemplate
-            .convertAndSend(websocketDestination + sessionId, websocketMessageString);
+            .convertAndSend(websocketDestination + sessionId, usersJsonArray.toString());
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       } else {
         return new SuccessOrFailureAndErrorBody(FAILURE, "How'd that happen? Please try again");

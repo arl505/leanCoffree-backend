@@ -2,6 +2,7 @@ package com.leancoffree.backend.domain.entity;
 
 import com.leancoffree.backend.domain.entity.TopicsEntity.TopicsId;
 import java.io.Serializable;
+import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Data
 @Builder
@@ -29,6 +31,10 @@ public class TopicsEntity {
   @Id
   @Column(name = "topic_text")
   private String text;
+
+  @CreationTimestamp
+  @Column(name = "created_timestamp")
+  private Instant createdTimestamp;
 
   @Data
   @Builder
