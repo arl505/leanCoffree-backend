@@ -44,12 +44,12 @@
   border: solid black 1px;
   width: 15vw;
   height: 15vw;
+  position: relative;
 }
 
 .composeCard {
   padding: 0;
   text-align: right;
-  position: relative;
 }
 
 #composeTextArea {
@@ -60,10 +60,25 @@
   border-bottom: solid black 1px;
 }
 
-#submitCardButton {
+#votesText {
+  position: absolute;
+  left: 2.5%;
+  bottom: 2.5%;
+  margin-bottom: 0;
+}
+
+#cardButton {
   font-size: 10%;
   height: 10%;
   position: absolute;
   bottom: 2.5%;
   right: 2.5%;
+}
+
+#topicText {
+  overflow: scroll;
+
+  width: 100%;
+  height: 85%;
+  border-bottom: solid black 1px;
 }

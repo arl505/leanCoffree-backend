@@ -140,6 +140,7 @@ class Session extends React.Component {
     let allTopics = this.state.topics;
     for(let i = 0; i < allTopics.length; i++) {
       let text = allTopics[i].text;
+      let votes = allTopics[i].votes;
       // i + 1 because first square taken by compose card
       // mod by 5 to get column number, count is 1 based so add 1 to result
       let columnNum = ((i + 1) % 5) + 1;
@@ -147,14 +148,20 @@ class Session extends React.Component {
       // i + 1 because first square taken by compose card
       // divide by 5 to get row number, count is 1 based so add 1 to result
       let rowNum = Math.floor((i + 1) / 5) + 1;
-      topicsElements.push(<div class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}} >{text}</div>);
+      topicsElements.push(
+        <div class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
+          <p id="topicText">{text}</p>
+          <p id="votesText">Votes: {votes}</p>
+          <button id="cardButton">Vote</button>
+        </div>
+      );
     }
 
     return (
       <div class="cards-grid-container">
         <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
           <textarea id="composeTextArea" value={this.state.cardSubmissionText} onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"/>
-          <button id="submitCardButton" onClick={this.submitCard}>Submit</button>
+          <button id="cardButton" onClick={this.submitCard}>Submit</button>
         </div>
 
         {topicsElements}
