@@ -22,14 +22,11 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
 
   private final UsersRepository usersRepository;
   private final SimpMessagingTemplate webSocketMessagingTemplate;
-  private final VotesRepository votesRepository;
 
   public DropUserInSessionServiceImpl(final UsersRepository usersRepository,
-      final SimpMessagingTemplate webSocketMessagingTemplate,
-      final VotesRepository votesRepository) {
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.usersRepository = usersRepository;
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
-    this.votesRepository = votesRepository;
   }
 
   @Transactional
@@ -40,20 +37,21 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
         .findByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
 
     if (optionalUsersEntity.isPresent()) {
-      votesRepository.deleteByDisplayName(optionalUsersEntity.get().getDisplayName());
-      usersRepository.delete(optionalUsersEntity.get());
+      final UsersEntity usersEntity = optionalUsersEntity.get();
+      usersEntity.setIsOnline(false);
+      usersRepository.save(usersEntity);
 
       final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
-          .findAllBySessionId(optionalUsersEntity.get().getSessionId());
+          .findBySessionIdAndIsOnlineTrue(usersEntity.getSessionId());
 
       if (optionalUsersEntityList.isPresent()) {
-        for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
-          displayNames.add(usersEntity.getDisplayName());
+        for (final UsersEntity user : optionalUsersEntityList.get()) {
+          displayNames.add(user.getDisplayName());
         }
         final String websocketMessageString = new JSONObject()
             .put("displayNames", new JSONArray(displayNames)).toString();
         webSocketMessagingTemplate
-            .convertAndSend("/topic/session/" + optionalUsersEntity.get().getSessionId(),
+            .convertAndSend("/topic/users/session/" + usersEntity.getSessionId(),
                 websocketMessageString);
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       } else {

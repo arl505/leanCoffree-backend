@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 @Data
 @Builder
@@ -35,6 +36,10 @@ public class UsersEntity {
 
   @Column(name = "websocket_user_id")
   private String websocketUserId;
+
+  @Column(name = "is_online")
+  @Type(type = "org.hibernate.type.NumericBooleanType")
+  private Boolean isOnline;
 
   @Data
   @Builder

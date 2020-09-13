@@ -143,10 +143,10 @@ class Session extends React.Component {
       let text = allTopics[i].text;
       let votes = allTopics[i].voters.length;
       let votingButton;
-      if(allTopics[i].voters.includes(this.state.websocketUserId)) {
-        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text)}>UnVote</button>;
+      if(allTopics[i].voters.includes(this.state.userDisplayName)) {
+        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'UNCAST')}>UnVote</button>;
       } else if(this.state.votesLeft !== 0) {
-        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text)}>Vote</button>;
+        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST')}>Vote</button>;
       }
 
       // i + 1 because first square taken by compose card
@@ -177,8 +177,16 @@ class Session extends React.Component {
     )
   }
 
-  postVoteForTopic(topicText) {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/post-vote", {command: "CAST", sessionId: this.state.sessionId, text: topicText, voterDisplayName: this.state.userDisplayName})
+  postVoteForTopic(topicText, commandType) {
+    if(commandType === "CAST") {
+      let newVotesLeft = this.state.votesLeft - 1;
+      this.setState({votesLeft: newVotesLeft})
+    } else {
+      let newVotesLeft = this.state.votesLeft + 1;
+      this.setState({votesLeft: newVotesLeft})
+    }
+
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/post-vote", {command: commandType, sessionId: this.state.sessionId, text: topicText, voterDisplayName: this.state.userDisplayName})
       .then((response) => {
         if(response.data.status !== "SUCCESS") {
           alert(response.data.error);

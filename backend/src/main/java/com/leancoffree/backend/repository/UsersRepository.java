@@ -8,6 +8,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface UsersRepository extends CrudRepository<UsersEntity, UsersId> {
 
-  Optional<List<UsersEntity>> findAllBySessionId(final String sessionId);
+  Optional<List<UsersEntity>> findBySessionIdAndIsOnlineTrue(final String sessionId);
   Optional<UsersEntity> findByWebsocketUserId(final String websocketUserId);
 }
