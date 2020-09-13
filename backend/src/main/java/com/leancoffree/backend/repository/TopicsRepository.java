@@ -8,5 +8,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface TopicsRepository extends CrudRepository<TopicsEntity, TopicsId> {
 
-  Optional<List<TopicsEntity>> findAllBySessionId(final String sessionId);
+  Optional<List<TopicsEntity>> findAllBySessionIdOrderByCreatedTimestamp(
+      final String sessionId);
 }

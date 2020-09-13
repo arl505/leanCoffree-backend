@@ -21,11 +21,14 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
 
   private final UsersRepository usersRepository;
   private final SimpMessagingTemplate webSocketMessagingTemplate;
+  private final BroadcastTopicsService broadcastTopicsService;
 
   public AddUserToSessionServiceImpl(final UsersRepository usersRepository,
-      final SimpMessagingTemplate webSocketMessagingTemplate) {
+      final SimpMessagingTemplate webSocketMessagingTemplate,
+      final BroadcastTopicsService broadcastTopicsService) {
     this.usersRepository = usersRepository;
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
+    this.broadcastTopicsService = broadcastTopicsService;
   }
 
   public SuccessOrFailureAndErrorBody addUserToSessionAndReturnAllUsers(
@@ -58,6 +61,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
         webSocketMessagingTemplate
             .convertAndSend("/topic/users/session/" + refreshUsersRequest.getSessionId(),
                 websocketMessageString);
+        broadcastTopicsService.broadcastTopics(sessionId);
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       } else {
         return new SuccessOrFailureAndErrorBody(FAILURE, "How'd that happen? Please try again");
