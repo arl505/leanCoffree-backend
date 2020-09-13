@@ -7,6 +7,7 @@ import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.repository.UsersRepository;
+import com.leancoffree.backend.repository.VotesRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,12 +22,14 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
 
   private final UsersRepository usersRepository;
   private final SimpMessagingTemplate webSocketMessagingTemplate;
+  private final VotesRepository votesRepository;
 
   public DropUserInSessionServiceImpl(final UsersRepository usersRepository,
-      final SimpMessagingTemplate webSocketMessagingTemplate) {
+      final SimpMessagingTemplate webSocketMessagingTemplate,
+      final VotesRepository votesRepository) {
     this.usersRepository = usersRepository;
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
-
+    this.votesRepository = votesRepository;
   }
 
   @Transactional
@@ -37,6 +40,7 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
         .findByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
 
     if (optionalUsersEntity.isPresent()) {
+      votesRepository.deleteByDisplayName(optionalUsersEntity.get().getDisplayName());
       usersRepository.delete(optionalUsersEntity.get());
 
       final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository

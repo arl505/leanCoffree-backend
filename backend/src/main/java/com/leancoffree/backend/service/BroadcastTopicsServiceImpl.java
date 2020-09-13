@@ -40,7 +40,9 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
       final List<String> voters = topicsAndVotersMap.containsKey(text)
         ? topicsAndVotersMap.get(text)
         : new ArrayList<>();
-      voters.add((String) objects[1]);
+      if(objects[1] != null) {
+        voters.add((String) objects[1]);
+      }
       topicsAndVotersMap.put(text, voters);
     }
 

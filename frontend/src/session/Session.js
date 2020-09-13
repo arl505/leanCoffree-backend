@@ -141,9 +141,7 @@ class Session extends React.Component {
     let allTopics = this.state.topics;
     for(let i = 0; i < allTopics.length; i++) {
       let text = allTopics[i].text;
-      let votes = allTopics[i].voters === null
-        ? 0
-        : allTopics[i].voters.length;
+      let votes = allTopics[i].voters.length;
       let votingButton;
       if(allTopics[i].voters.includes(this.state.websocketUserId)) {
         votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text)}>UnVote</button>;
