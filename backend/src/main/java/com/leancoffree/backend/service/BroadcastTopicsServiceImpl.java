@@ -6,8 +6,12 @@ import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import com.leancoffree.backend.domain.entity.TopicsEntity;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.repository.TopicsRepository;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -28,19 +32,27 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
   }
 
   public SuccessOrFailureAndErrorBody broadcastTopics(final String sessionId) {
-    final Optional<List<TopicsEntity>> optionalTopicsEntityList = topicsRepository
-        .findAllBySessionIdOrderByCreatedTimestamp(sessionId);
+    final List<Object[]> votesList = topicsRepository.findAllVotes(sessionId);
 
-    if (optionalTopicsEntityList.isPresent()) {
-      final JSONArray usersJsonArray = new JSONArray();
-      for (final TopicsEntity topicsEntity : optionalTopicsEntityList.get()) {
-        usersJsonArray.put(new JSONObject().put("votes", 0).put("text", topicsEntity.getText()));
-      }
-      webSocketMessagingTemplate
-          .convertAndSend(websocketDestination + sessionId, usersJsonArray.toString());
-      return new SuccessOrFailureAndErrorBody(SUCCESS, null);
-    } else {
-      return new SuccessOrFailureAndErrorBody(FAILURE, "No topics to broadcast");
+    final Map<String, List<String>> topicsAndVotersMap = new TreeMap<>();
+    for (final Object[] objects : votesList) {
+      final String text = (String) objects[0];
+      final List<String> voters = topicsAndVotersMap.containsKey(text)
+        ? topicsAndVotersMap.get(text)
+        : new ArrayList<>();
+      voters.add((String) objects[1]);
+      topicsAndVotersMap.put(text, voters);
     }
+
+    final JSONArray messageJson = new JSONArray();
+    for(final Map.Entry<String, List<String>> entry : topicsAndVotersMap.entrySet()) {
+      messageJson.put(new JSONObject()
+          .put("text", entry.getKey())
+          .put("voters", new JSONArray(entry.getValue())));
+    }
+
+    webSocketMessagingTemplate
+        .convertAndSend(websocketDestination + sessionId, messageJson.toString());
+    return new SuccessOrFailureAndErrorBody(SUCCESS, null);
   }
 }

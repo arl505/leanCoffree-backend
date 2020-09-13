@@ -15,7 +15,8 @@ class Session extends React.Component {
       websocketUserId: "",
       usersInAttendance: [],
       cardSubmissionText: "",
-      topics: []
+      topics: [],
+      votesLeft: 3,
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.submitDisplayName = this.submitDisplayName.bind(this);
@@ -140,7 +141,16 @@ class Session extends React.Component {
     let allTopics = this.state.topics;
     for(let i = 0; i < allTopics.length; i++) {
       let text = allTopics[i].text;
-      let votes = allTopics[i].votes;
+      let votes = allTopics[i].voters === null
+        ? 0
+        : allTopics[i].voters.length;
+      let votingButton;
+      if(allTopics[i].voters.includes(this.state.websocketUserId)) {
+        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text)}>UnVote</button>;
+      } else if(this.state.votesLeft !== 0) {
+        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text)}>Vote</button>;
+      }
+
       // i + 1 because first square taken by compose card
       // mod by 5 to get column number, count is 1 based so add 1 to result
       let columnNum = ((i + 1) % 5) + 1;
@@ -152,7 +162,7 @@ class Session extends React.Component {
         <div class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
           <p id="topicText">{text}</p>
           <p id="votesText">Votes: {votes}</p>
-          <button id="cardButton">Vote</button>
+          {votingButton}
         </div>
       );
     }
@@ -167,6 +177,18 @@ class Session extends React.Component {
         {topicsElements}
       </div>
     )
+  }
+
+  postVoteForTopic(topicText) {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/post-vote", {command: "CAST", sessionId: this.state.sessionId, text: topicText, voterDisplayName: this.state.userDisplayName})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        }
+      })
+      .catch((error) => 
+        alert("Unable to submit vote\n" + error)
+      );
   }
 
   render() {
