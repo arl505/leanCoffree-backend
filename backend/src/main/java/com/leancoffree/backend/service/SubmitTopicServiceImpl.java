@@ -59,29 +59,10 @@ public class SubmitTopicServiceImpl implements SubmitTopicService {
             .convertAndSend(websocketDestination + sessionId, websocketMessageString);
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       } else {
-        return SuccessOrFailureAndErrorBody.builder()
-            .status(FAILURE)
-            .error("How'd that happen? Please try again")
-            .build();
+        return new SuccessOrFailureAndErrorBody(FAILURE, "How'd that happen? Please try again");
       }
     } else {
-      return SuccessOrFailureAndErrorBody.builder()
-          .status(FAILURE)
-          .error("Topic already submitted")
-          .build();
+      return new SuccessOrFailureAndErrorBody(FAILURE, "Topic already submitted");
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
