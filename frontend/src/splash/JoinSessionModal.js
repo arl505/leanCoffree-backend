@@ -16,16 +16,18 @@ class JoinSessionModal extends React.Component {
   redirectToSession() {
     let sessionGuid = this.getSessionGuidFromUrlOrReturnNullIfInvalid(this.state.sessionUrl);
 
-    let self = this;
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/verify-session/' + sessionGuid, null)
-      .then(function (response) {
-        if(self.isVerificationResponseValid(response, sessionGuid[0])) {
-          window.location = process.env.REACT_APP_FRONTEND_BASEURL + '/session/' + sessionGuid;
-        }
-      })
-      .catch(function (error) {
-        console.log("Received an error while verifying session: " + error);
-      });
+    if(sessionGuid !== null) {
+      let self = this;
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/verify-session/' + sessionGuid, null)
+        .then(function (response) {
+          if(self.isVerificationResponseValid(response, sessionGuid[0])) {
+            window.location = process.env.REACT_APP_FRONTEND_BASEURL + '/session/' + sessionGuid;
+          }
+        })
+        .catch(function (error) {
+          console.log("Received an error while verifying session: " + error);
+        });
+    }
   }
 
   isVerificationResponseValid(response, sessionGuid) {

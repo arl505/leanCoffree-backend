@@ -2,38 +2,38 @@ package com.leancoffree.backend.controller;
 
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 
-import com.leancoffree.backend.domain.model.RefreshUsersRequest;
+import com.leancoffree.backend.domain.model.SubmitTopicRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
-import com.leancoffree.backend.service.RefreshUsersService;
+import com.leancoffree.backend.service.SubmitTopicService;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-public class RefreshUsersController {
+@RestController
+public class SubmitTopicController {
 
-  private final RefreshUsersService refreshUsersService;
+  private final SubmitTopicService submitTopicService;
 
-  public RefreshUsersController(final RefreshUsersService refreshUsersService) {
-    this.refreshUsersService = refreshUsersService;
+  public SubmitTopicController(final SubmitTopicService submitTopicService) {
+    this.submitTopicService = submitTopicService;
   }
 
   @CrossOrigin
-  @PostMapping("/refresh-users")
-  public ResponseEntity<SuccessOrFailureAndErrorBody> refreshUsersEndpoint(
-      @Valid @RequestBody final RefreshUsersRequest refreshUsersRequest, final Errors errors) {
+  @PostMapping("/submit-topic")
+  public ResponseEntity<SuccessOrFailureAndErrorBody> submitTopicEndpoint(
+      @Valid @RequestBody final SubmitTopicRequest submitTopicRequest, final Errors errors) {
 
     if (errors.hasErrors()) {
       return buildValidationErrorsResponse(errors);
     }
-    return ResponseEntity.ok(refreshUsersService.refreshUsers(refreshUsersRequest));
+    return ResponseEntity.ok(submitTopicService.submitTopic(submitTopicRequest));
   }
 
   private ResponseEntity<SuccessOrFailureAndErrorBody> buildValidationErrorsResponse(
@@ -47,5 +47,4 @@ public class RefreshUsersController {
         .error(String.join(", ", errorsList))
         .build());
   }
-
 }

@@ -3,8 +3,7 @@ package com.leancoffree.backend.service;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 
-public interface DropUserInSessionService {
+public interface RefreshUsersService {
 
-  SuccessOrFailureAndErrorBody dropUserInSessionAndReturnAllUsers(
-      final RefreshUsersRequest refreshUsersRequest);
+  SuccessOrFailureAndErrorBody refreshUsers(final RefreshUsersRequest refreshUsersRequest);
 }

@@ -1,7 +1,11 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
+import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
+
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
+import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,35 +30,35 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
   }
 
   @Transactional
-  public void dropUserInSessionAndReturnAllUsers(final RefreshUsersRequest refreshUsersRequest) {
+  public SuccessOrFailureAndErrorBody dropUserInSessionAndReturnAllUsers(
+      final RefreshUsersRequest refreshUsersRequest) {
     final List<String> displayNames = new ArrayList<>();
-    if (isRequestValid(refreshUsersRequest)) {
-      final Optional<UsersEntity> optionalUsersEntity = usersRepository
-          .findByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
+    final Optional<UsersEntity> optionalUsersEntity = usersRepository
+        .findByWebsocketUserId(refreshUsersRequest.getWebsocketUserId());
 
-      if (optionalUsersEntity.isPresent()) {
-        usersRepository.delete(optionalUsersEntity.get());
+    if (optionalUsersEntity.isPresent()) {
+      usersRepository.delete(optionalUsersEntity.get());
 
-        final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
-            .findAllBySessionId(optionalUsersEntity.get().getSessionId());
+      final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
+          .findAllBySessionId(optionalUsersEntity.get().getSessionId());
 
-        if (optionalUsersEntityList.isPresent()) {
-          for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
-            displayNames.add(usersEntity.getDisplayName());
-          }
-          final String websocketMessageString = new JSONObject()
-              .put("displayNames", new JSONArray(displayNames)).toString();
-          webSocketMessagingTemplate
-              .convertAndSend("/topic/session/" + optionalUsersEntity.get().getSessionId(),
-                  websocketMessageString);
+      if (optionalUsersEntityList.isPresent()) {
+        for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
+          displayNames.add(usersEntity.getDisplayName());
         }
+        final String websocketMessageString = new JSONObject()
+            .put("displayNames", new JSONArray(displayNames)).toString();
+        webSocketMessagingTemplate
+            .convertAndSend("/topic/session/" + optionalUsersEntity.get().getSessionId(),
+                websocketMessageString);
+        return new SuccessOrFailureAndErrorBody(SUCCESS, null);
+      } else {
+        return new SuccessOrFailureAndErrorBody(FAILURE, "How'd that happen? Please try again");
       }
+
+    } else {
+      return new SuccessOrFailureAndErrorBody(FAILURE,
+          "Username not in use in session, nothing to drop");
     }
   }
-
-  private boolean isRequestValid(final RefreshUsersRequest refreshUsersRequest) {
-    return refreshUsersRequest.getWebsocketUserId() != null && !refreshUsersRequest
-        .getWebsocketUserId().isBlank();
-  }
-
 }

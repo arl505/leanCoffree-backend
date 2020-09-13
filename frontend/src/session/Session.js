@@ -13,10 +13,13 @@ class Session extends React.Component {
       sessionStatus: "",
       userDisplayName: "",
       websocketUserId: "",
-      usersInAttendance: []
+      usersInAttendance: [],
+      cardSubmissionText: "",
+      topics: []
     }
     this.componentDidMount = this.componentDidMount.bind(this);
-    this.submitDisplayName = this.submitDisplayName.bind(this);   
+    this.submitDisplayName = this.submitDisplayName.bind(this);
+    this.submitCard = this.submitCard.bind(this);
   }
 
   componentDidMount() {
@@ -63,7 +66,10 @@ class Session extends React.Component {
     stompClient = Stomp.over(SockJS);
     stompClient.connect({}, 
       (frame) => {
-        stompClient.subscribe('/topic/session/' + this.state.sessionId, 
+        stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
+          (payload) => this.setState({topics: JSON.parse(payload.body)})
+        )
+        stompClient.subscribe('/topic/users/session/' + this.state.sessionId, 
           (payload) => {
             let updateUsersBody = JSON.parse(payload.body);
             this.setState({usersInAttendance: updateUsersBody.displayNames});
@@ -89,7 +95,7 @@ class Session extends React.Component {
         }
       })
       .catch((error) => {
-        console.log("Error while adding displayname to backend: " + error + " - " + JSON.stringify(error.response.data))
+        alert("Error while adding displayname to backend\n" + error)
       });
       
     }
@@ -112,6 +118,50 @@ class Session extends React.Component {
     )
   }
 
+  submitCard() {
+    if(this.state.cardSubmissionText !== "") {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/submit-topic", {submissionText: this.state.cardSubmissionText, sessionId: this.state.sessionId})
+        .then((response) => {
+          if(response.data.status === "SUCCESS") {
+            this.setState({cardSubmissionText: ""})
+          } else {
+            alert(response.data.error);
+          }
+        })
+        .catch((error) => 
+          alert("Unable to subit discussion topic\n" + error)
+        );
+    }
+  }
+
+  populateCards() {
+    let topicsElements = [];
+
+    let allTopics = this.state.topics;
+    for(let i = 0; i < allTopics.length; i++) {
+      let text = allTopics[i].text;
+      // i + 1 because first square taken by compose card
+      // mod by 5 to get column number, count is 1 based so add 1 to result
+      let columnNum = ((i + 1) % 5) + 1;
+
+      // i + 1 because first square taken by compose card
+      // divide by 5 to get row number, count is 1 based so add 1 to result
+      let rowNum = Math.floor((i + 1) / 5) + 1;
+      topicsElements.push(<div class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}} >{text}</div>);
+    }
+
+    return (
+      <div class="cards-grid-container">
+        <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
+          <textarea id="composeTextArea" value={this.state.cardSubmissionText} onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"/>
+          <button id="submitCardButton" onClick={this.submitCard}>Submit</button>
+        </div>
+
+        {topicsElements}
+      </div>
+    )
+  }
+
   render() {
     if(this.state.sessionStatus === "ASK_FOR_USERNAME") {
       return (
@@ -127,19 +177,7 @@ class Session extends React.Component {
       return (
         <div class="session-grid-container">
           <div class="session-grid-item cardsSection">
-            <div class="cards-grid-container">
-              <div style={{gridRow: 1, gridColumn: 1}}/>
-              <div style={{gridRow: 1, gridColumn: 2}}/>
-              <div style={{gridRow: 1, gridColumn: 3}}/>
-              <div style={{gridRow: 1, gridColumn: 4}}/>
-              <div style={{gridRow: 1, gridColumn: 5}}/>
-
-              <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
-                <textarea id="composeTextArea" type="" placeholder="Submit a discussion topic!"></textarea>
-                <button id="submitCardButton">Submit</button>
-              </div>
-              
-            </div>
+            {this.populateCards()}
           </div>
           <div class="session-grid-item usersSection">
             <div>All here:</div>
