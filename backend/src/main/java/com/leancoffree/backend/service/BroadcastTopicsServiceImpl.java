@@ -40,7 +40,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
           .convertAndSend(websocketDestination + sessionId, usersJsonArray.toString());
       return new SuccessOrFailureAndErrorBody(SUCCESS, null);
     } else {
-      return new SuccessOrFailureAndErrorBody(FAILURE, "No users to broadcast");
+      return new SuccessOrFailureAndErrorBody(FAILURE, "No topics to broadcast");
     }
   }
 }
