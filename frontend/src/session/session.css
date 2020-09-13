@@ -39,6 +39,7 @@
 }
 
 .cardItem {
+  overflow: scroll;
   margin: 1vw;
   border: solid black 1px;
   width: 15vw;
