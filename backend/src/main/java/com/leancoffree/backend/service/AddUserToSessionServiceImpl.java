@@ -44,7 +44,6 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
       usersRepository.save(UsersEntity.builder()
           .displayName(displayName)
           .sessionId(sessionId)
-          .votesUsed(0)
           .websocketUserId(refreshUsersRequest.getWebsocketUserId())
           .isOnline(true)
           .build());

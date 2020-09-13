@@ -1,5 +1,6 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.VoteType.CAST;
 
 import com.leancoffree.backend.domain.entity.VotesEntity;
@@ -30,6 +31,12 @@ public class PostVoteServiceImpl implements PostVoteService {
         .build();
 
     if (CAST.equals(postVoteRequest.getCommand())) {
+      final Long votesCastPreviously = votesRepository
+          .countByDisplayNameAndSessionId(postVoteRequest.getVoterDisplayName(),
+              postVoteRequest.getSessionId());
+      if (votesCastPreviously >= 3) {
+        return new SuccessOrFailureAndErrorBody(FAILURE, "You can only vote thrice");
+      }
       votesRepository.save(votesEntity);
     } else {
       votesRepository.delete(votesEntity);
