@@ -40,16 +40,16 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     final UsersId usersId = new UsersId(displayName, sessionId);
     final Optional<UsersEntity> usersEntityOptional = usersRepository.findById(usersId);
 
-    if (usersEntityOptional.isEmpty()) {
+    if (usersEntityOptional.isEmpty() || !usersEntityOptional.get().getIsOnline()) {
       usersRepository.save(UsersEntity.builder()
           .displayName(displayName)
           .sessionId(sessionId)
-          .votesUsed(0)
           .websocketUserId(refreshUsersRequest.getWebsocketUserId())
+          .isOnline(true)
           .build());
 
       final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
-          .findAllBySessionId(sessionId);
+          .findBySessionIdAndIsOnlineTrue(sessionId);
 
       if (optionalUsersEntityList.isPresent()) {
         final List<String> displayNames = new ArrayList<>();

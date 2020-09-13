@@ -1,6 +1,6 @@
 package com.leancoffree.backend.domain.entity;
 
-import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
+import com.leancoffree.backend.domain.entity.VotesEntity.VotesId;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,40 +12,37 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 
 @Data
 @Builder
 @Entity
-@Table(name = "users")
+@Table(name = "votes")
+@IdClass(VotesId.class)
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(UsersId.class)
-public class UsersEntity {
-
-  @Id
-  @Column(name = "display_name")
-  private String displayName;
+public class VotesEntity {
 
   @Id
   @Column(name = "session_id")
   private String sessionId;
 
-  @Column(name = "websocket_user_id")
-  private String websocketUserId;
+  @Id
+  @Column(name = "topic_text")
+  private String text;
 
-  @Column(name = "is_online")
-  @Type(type = "org.hibernate.type.NumericBooleanType")
-  private Boolean isOnline;
+  @Id
+  @Column(name = "display_name")
+  private String displayName;
 
   @Data
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
   @EqualsAndHashCode
-  public static class UsersId implements Serializable {
+  public static class VotesId implements Serializable {
 
-    private String displayName;
     private String sessionId;
+    private String text;
+    private String displayName;
   }
 }

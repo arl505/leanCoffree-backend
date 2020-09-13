@@ -15,7 +15,8 @@ class Session extends React.Component {
       websocketUserId: "",
       usersInAttendance: [],
       cardSubmissionText: "",
-      topics: []
+      topics: [],
+      votesLeft: 3,
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.submitDisplayName = this.submitDisplayName.bind(this);
@@ -140,6 +141,14 @@ class Session extends React.Component {
     let allTopics = this.state.topics;
     for(let i = 0; i < allTopics.length; i++) {
       let text = allTopics[i].text;
+      let votes = allTopics[i].voters.length;
+      let votingButton;
+      if(allTopics[i].voters.includes(this.state.userDisplayName)) {
+        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'UNCAST')}>UnVote</button>;
+      } else if(this.state.votesLeft !== 0) {
+        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST')}>Vote</button>;
+      }
+
       // i + 1 because first square taken by compose card
       // mod by 5 to get column number, count is 1 based so add 1 to result
       let columnNum = ((i + 1) % 5) + 1;
@@ -147,19 +156,45 @@ class Session extends React.Component {
       // i + 1 because first square taken by compose card
       // divide by 5 to get row number, count is 1 based so add 1 to result
       let rowNum = Math.floor((i + 1) / 5) + 1;
-      topicsElements.push(<div class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}} >{text}</div>);
+      topicsElements.push(
+        <div class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
+          <p id="topicText">{text}</p>
+          <p id="votesText">Votes: {votes}</p>
+          {votingButton}
+        </div>
+      );
     }
 
     return (
       <div class="cards-grid-container">
         <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
           <textarea id="composeTextArea" value={this.state.cardSubmissionText} onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"/>
-          <button id="submitCardButton" onClick={this.submitCard}>Submit</button>
+          <button id="cardButton" onClick={this.submitCard}>Submit</button>
         </div>
 
         {topicsElements}
       </div>
     )
+  }
+
+  postVoteForTopic(topicText, commandType) {
+    if(commandType === "CAST") {
+      let newVotesLeft = this.state.votesLeft - 1;
+      this.setState({votesLeft: newVotesLeft})
+    } else {
+      let newVotesLeft = this.state.votesLeft + 1;
+      this.setState({votesLeft: newVotesLeft})
+    }
+
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/post-vote", {command: commandType, sessionId: this.state.sessionId, text: topicText, voterDisplayName: this.state.userDisplayName})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        }
+      })
+      .catch((error) => 
+        alert("Unable to submit vote\n" + error)
+      );
   }
 
   render() {
