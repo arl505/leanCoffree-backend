@@ -19,11 +19,11 @@ class DiscussionPage extends React.Component {
       let bLength = b.voters.length;
       return bLength - aLength;
     });
-    for(let i = 0; i < allTopics.length; i++) {
+    for(let i = 1; i <= allTopics.length - 1; i++) {
       let text = allTopics[i].text;
       let votes = allTopics[i].voters.length;
       topicsElements.push(
-        <div key={i.toString()} class="cardItem" style={{gridRow: i+1, gridColumn: 1}}>
+        <div key={i.toString()} class="cardItem" style={{gridRow: i, gridColumn: 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
           <p class="topicsText">{text}</p>
           <p class="votesText">Votes: {votes}</p>
         </div>
@@ -39,7 +39,8 @@ class DiscussionPage extends React.Component {
           {this.getAllTopicCards()}
         </div>
           <div class="currentDiscussionItem">
-            {this.state.topics[0].text}
+            <h5 style={{textAlign: "center"}}>Current discussion item</h5>
+            <h2 style={{textAlign: "center"}}>{this.state.topics[0].text}</h2>
           </div>
 
           <div class="session-grid-item usersSection column3">
