@@ -23,6 +23,7 @@ class Session extends React.Component {
     this.submitDisplayName = this.submitDisplayName.bind(this);
     this.submitCard = this.submitCard.bind(this);
     this.transitionToDiscussion = this.transitionToDiscussion.bind(this);
+    this.getAllHere = this.getAllHere.bind(this);
   }
 
   componentDidMount() {
@@ -111,9 +112,9 @@ class Session extends React.Component {
     for(let i = 0; i < this.state.usersInAttendance.length; i++) {
       let username = this.state.usersInAttendance[i];
       if(username === this.state.userDisplayName) {
-        allHereListItems.push(<li class="usernameList"><b>{this.state.usersInAttendance[i]}</b></li>);
+        allHereListItems.push(<li key={i.toString()} class="usernameList"><b>{this.state.usersInAttendance[i]}</b></li>);
       } else {
-        allHereListItems.push(<li class="usernameList">{this.state.usersInAttendance[i]}</li>);
+        allHereListItems.push(<li key={i.toString()} class="usernameList">{this.state.usersInAttendance[i]}</li>);
       }
     }
     return (
@@ -161,7 +162,7 @@ class Session extends React.Component {
       // divide by 5 to get row number, count is 1 based so add 1 to result
       let rowNum = Math.floor((i + 1) / 5) + 1;
       topicsElements.push(
-        <div class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
+        <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
           <p id="topicText">{text}</p>
           <p id="votesText">Votes: {votes}</p>
           {votingButton}
@@ -245,15 +246,7 @@ class Session extends React.Component {
 
     else if (this.state.sessionStatus === "DISCUSSING") {
       return (
-        <div class="session-grid-container">
-          <div class="session-grid-item cardsSection">
-              <DiscussionPage topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
-          </div>
-          <div class="session-grid-item usersSection">
-            <div>All here:</div>
-            <div>{this.getAllHere()}</div>
-          </div>
-        </div>
+        <DiscussionPage getAllHere={this.getAllHere} topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
       )
     }
 
