@@ -23,6 +23,7 @@ class Session extends React.Component {
     this.submitDisplayName = this.submitDisplayName.bind(this);
     this.submitCard = this.submitCard.bind(this);
     this.transitionToDiscussion = this.transitionToDiscussion.bind(this);
+    this.getAllHere = this.getAllHere.bind(this);
   }
 
   componentDidMount() {
@@ -245,15 +246,7 @@ class Session extends React.Component {
 
     else if (this.state.sessionStatus === "DISCUSSING") {
       return (
-        <div class="session-grid-container">
-          <div class="session-grid-item cardsSection">
-              <DiscussionPage topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
-          </div>
-          <div class="session-grid-item usersSection">
-            <div>All here:</div>
-            <div>{this.getAllHere()}</div>
-          </div>
-        </div>
+        <DiscussionPage getAllHere={this.getAllHere} topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
       )
     }
 
