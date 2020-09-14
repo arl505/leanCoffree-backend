@@ -112,9 +112,9 @@ class Session extends React.Component {
     for(let i = 0; i < this.state.usersInAttendance.length; i++) {
       let username = this.state.usersInAttendance[i];
       if(username === this.state.userDisplayName) {
-        allHereListItems.push(<li class="usernameList"><b>{this.state.usersInAttendance[i]}</b></li>);
+        allHereListItems.push(<li key={i.toString()} class="usernameList"><b>{this.state.usersInAttendance[i]}</b></li>);
       } else {
-        allHereListItems.push(<li class="usernameList">{this.state.usersInAttendance[i]}</li>);
+        allHereListItems.push(<li key={i.toString()} class="usernameList">{this.state.usersInAttendance[i]}</li>);
       }
     }
     return (
@@ -162,7 +162,7 @@ class Session extends React.Component {
       // divide by 5 to get row number, count is 1 based so add 1 to result
       let rowNum = Math.floor((i + 1) / 5) + 1;
       topicsElements.push(
-        <div class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
+        <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
           <p id="topicText">{text}</p>
           <p id="votesText">Votes: {votes}</p>
           {votingButton}

@@ -14,11 +14,16 @@ class DiscussionPage extends React.Component {
     let topicsElements = [];
 
     let allTopics = this.state.topics;
+    allTopics.sort((a,b) => {
+      let aLength = a.voters.length;
+      let bLength = b.voters.length;
+      return bLength - aLength;
+    });
     for(let i = 0; i < allTopics.length; i++) {
       let text = allTopics[i].text;
       let votes = allTopics[i].voters.length;
       topicsElements.push(
-        <div class="cardItem" style={{gridRow: i, gridColumn: 1}}>
+        <div key={i.toString()} class="cardItem" style={{gridRow: i+1, gridColumn: 1}}>
           <p class="topicsText">{text}</p>
           <p class="votesText">Votes: {votes}</p>
         </div>
