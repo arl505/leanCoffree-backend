@@ -203,17 +203,19 @@ class Session extends React.Component {
   }
 
   transitionToDiscussion() {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId, {})
-    .then((response) => {
-      if(response.data.status !== "SUCCESS") {
-        alert(response.data.error);
-      } else {
-        this.setState({sessionStatus: "DISCUSSING"})
-      }
-    })
-    .catch((error) => {
-      alert("Unable to transition to next section\n" + error)
-    })
+    if(this.state.topics.length >= 2) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId, {})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        } else {
+          this.setState({sessionStatus: "DISCUSSING"})
+        }
+      })
+      .catch((error) => {
+        alert("Unable to transition to next section\n" + error)
+      })
+    }
   }
 
   render() {
@@ -228,6 +230,11 @@ class Session extends React.Component {
     }
 
     else if (this.state.sessionStatus === "STARTED") {
+      let nextSectionButton = this.state.topics.length >= 2
+        ? <div class="nextSectionButton">
+            <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
+          </div>
+        : null;
       return (
         <div class="session-grid-container">
           <div class="session-grid-item cardsSection">
@@ -236,9 +243,7 @@ class Session extends React.Component {
           <div class="session-grid-item usersSection">
             <div>All here:</div>
             <div>{this.getAllHere()}</div>
-            <div class="nextSectionButton">
-              <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
-            </div>
+            {nextSectionButton}
           </div>
         </div>
       )
