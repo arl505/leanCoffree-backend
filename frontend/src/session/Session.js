@@ -22,6 +22,7 @@ class Session extends React.Component {
     this.componentDidMount = this.componentDidMount.bind(this);
     this.submitDisplayName = this.submitDisplayName.bind(this);
     this.submitCard = this.submitCard.bind(this);
+    this.transitionToDiscussion = this.transitionToDiscussion.bind(this);
   }
 
   componentDidMount() {
@@ -39,7 +40,7 @@ class Session extends React.Component {
     var self = this;  
     Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/verify-session/' + sessionIdFromAddress, null)
       .then((response) => {
-        if(self.isVerificationResponseValid(response, sessionIdFromAddress[0])) {
+        if(self.isVerificationResponseValid(response, sessionIdFromAddress[0]) && response.data.sessionDetails.sessionStatus === "STARTED" || response.data.sessionDetails.sessionStatus === "DISCUSSING") {
           self.connectToWebSocketServer();
           self.setState({
             isSessionVerified: true,
@@ -57,8 +58,7 @@ class Session extends React.Component {
   }
 
   isVerificationResponseValid(response, sessionIdFromAddress) {
-    return response.data.verificationStatus === "VERIFICATION_SUCCESS" && response.data.sessionDetails.sessionId === sessionIdFromAddress &&
-    response.data.sessionDetails.sessionStatus === "STARTED";
+    return response.data.verificationStatus === "VERIFICATION_SUCCESS" && response.data.sessionDetails.sessionId === sessionIdFromAddress;
   }
 
   connectToWebSocketServer() {
@@ -70,7 +70,10 @@ class Session extends React.Component {
       (frame) => {
         stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
           (payload) => this.setState({topics: JSON.parse(payload.body)})
-        )
+        );
+        stompClient.subscribe('/topic/status/session/' + this.state.sessionId,
+          (payload) => this.setState({sessionStatus: payload.body})
+        );
         stompClient.subscribe('/topic/users/session/' + this.state.sessionId, 
           (payload) => {
             let updateUsersBody = JSON.parse(payload.body);
@@ -91,7 +94,7 @@ class Session extends React.Component {
       Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "ADD", websocketUserId: self.state.websocketUserId})
       .then((response) => {
         if(response.data.status === "SUCCESS") {
-          self.setState({sessionStatus: "QUERYING_AND_VOTING"});
+          self.setState({sessionStatus: response.data.sessionStatus});
         } else {
           alert(response.data.error);
         }
@@ -198,6 +201,20 @@ class Session extends React.Component {
       );
   }
 
+  transitionToDiscussion() {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId, {})
+    .then((response) => {
+      if(response.data.status !== "SUCCESS") {
+        alert(response.data.error);
+      } else {
+        this.setState({sessionStatus: "DISCUSSING"})
+      }
+    })
+    .catch((error) => {
+      alert("Unable to transition to next section\n" + error)
+    })
+  }
+
   render() {
     if(this.state.sessionStatus === "ASK_FOR_USERNAME") {
       return (
@@ -209,7 +226,7 @@ class Session extends React.Component {
       )
     }
 
-    else if (this.state.sessionStatus === "QUERYING_AND_VOTING") {
+    else if (this.state.sessionStatus === "STARTED") {
       return (
         <div class="session-grid-container">
           <div class="session-grid-item cardsSection">
@@ -219,7 +236,7 @@ class Session extends React.Component {
             <div>All here:</div>
             <div>{this.getAllHere()}</div>
             <div class="nextSectionButton">
-              <button onClick={() => this.setState({sessionStatus: "DISCUSSING"})}>End voting and go to next section</button>
+              <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
             </div>
           </div>
         </div>
@@ -228,7 +245,15 @@ class Session extends React.Component {
 
     else if (this.state.sessionStatus === "DISCUSSING") {
       return (
-        <DiscussionPage topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
+        <div class="session-grid-container">
+          <div class="session-grid-item cardsSection">
+              <DiscussionPage topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
+          </div>
+          <div class="session-grid-item usersSection">
+            <div>All here:</div>
+            <div>{this.getAllHere()}</div>
+          </div>
+        </div>
       )
     }
 

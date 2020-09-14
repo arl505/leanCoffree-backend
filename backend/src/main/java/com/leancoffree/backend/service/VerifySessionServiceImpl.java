@@ -1,5 +1,6 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SessionStatus.DISCUSSING;
 import static com.leancoffree.backend.enums.SessionStatus.STARTED;
 import static com.leancoffree.backend.enums.SessionVerificationStatus.VERIFICATION_FAILURE;
 import static com.leancoffree.backend.enums.SessionVerificationStatus.VERIFICATION_SUCCESS;
@@ -24,13 +25,13 @@ public class VerifySessionServiceImpl implements VerifySessionService {
     final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository.findById(sessionId);
 
     VerifySessionResponse verifySessionResponse;
-    if (sessionsEntityOptional.isPresent() && sessionsEntityOptional.get().getSessionStatus()
-        .equals(STARTED)) {
+    if (sessionsEntityOptional.isPresent() && (sessionsEntityOptional.get().getSessionStatus()
+        .equals(STARTED) || sessionsEntityOptional.get().getSessionStatus().equals(DISCUSSING))) {
       verifySessionResponse = VerifySessionResponse.builder()
           .verificationStatus(VERIFICATION_SUCCESS)
           .sessionDetails(SessionDetails.builder()
               .sessionId(sessionId)
-              .sessionStatus(STARTED)
+              .sessionStatus(sessionsEntityOptional.get().getSessionStatus())
               .build())
           .build();
     } else {
