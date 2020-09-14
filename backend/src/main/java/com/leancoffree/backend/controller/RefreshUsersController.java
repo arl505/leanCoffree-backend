@@ -3,7 +3,7 @@ package com.leancoffree.backend.controller;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
-import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.domain.model.SessionStatusResponse;
 import com.leancoffree.backend.service.RefreshUsersService;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class RefreshUsersController {
 
   @CrossOrigin
   @PostMapping("/refresh-users")
-  public ResponseEntity<SuccessOrFailureAndErrorBody> refreshUsersEndpoint(
+  public ResponseEntity<SessionStatusResponse> refreshUsersEndpoint(
       @Valid @RequestBody final RefreshUsersRequest refreshUsersRequest, final Errors errors) {
 
     if (errors.hasErrors()) {
@@ -36,13 +36,13 @@ public class RefreshUsersController {
     return ResponseEntity.ok(refreshUsersService.refreshUsers(refreshUsersRequest));
   }
 
-  private ResponseEntity<SuccessOrFailureAndErrorBody> buildValidationErrorsResponse(
+  private ResponseEntity<SessionStatusResponse> buildValidationErrorsResponse(
       final Errors errors) {
     final List<String> errorsList = new ArrayList<>();
     for (final ObjectError error : errors.getAllErrors()) {
       errorsList.add(error.getDefaultMessage());
     }
-    return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
+    return ResponseEntity.ok(SessionStatusResponse.builder()
         .status(FAILURE)
         .error(String.join(", ", errorsList))
         .build());

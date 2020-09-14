@@ -3,11 +3,12 @@ package com.leancoffree.backend.service;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
+import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
-import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.domain.model.SessionStatusResponse;
+import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.UsersRepository;
-import com.leancoffree.backend.repository.VotesRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,15 +23,18 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
 
   private final UsersRepository usersRepository;
   private final SimpMessagingTemplate webSocketMessagingTemplate;
+  private final SessionsRepository sessionsRepository;
 
   public DropUserInSessionServiceImpl(final UsersRepository usersRepository,
-      final SimpMessagingTemplate webSocketMessagingTemplate) {
+      final SimpMessagingTemplate webSocketMessagingTemplate,
+      final SessionsRepository sessionsRepository) {
     this.usersRepository = usersRepository;
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
+    this.sessionsRepository = sessionsRepository;
   }
 
   @Transactional
-  public SuccessOrFailureAndErrorBody dropUserInSessionAndReturnAllUsers(
+  public SessionStatusResponse dropUserInSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest) {
     final List<String> displayNames = new ArrayList<>();
     final Optional<UsersEntity> optionalUsersEntity = usersRepository
@@ -53,14 +57,26 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
         webSocketMessagingTemplate
             .convertAndSend("/topic/users/session/" + usersEntity.getSessionId(),
                 websocketMessageString);
-        return new SuccessOrFailureAndErrorBody(SUCCESS, null);
-      } else {
-        return new SuccessOrFailureAndErrorBody(FAILURE, "How'd that happen? Please try again");
-      }
 
+        final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository
+            .findById(usersEntity.getSessionId());
+        if (sessionsEntityOptional.isPresent()) {
+          return SessionStatusResponse.builder()
+              .status(SUCCESS)
+              .error(null)
+              .sessionStatus(sessionsEntityOptional.get().getSessionStatus())
+              .build();
+        }
+      }
+      return SessionStatusResponse.builder()
+          .status(FAILURE)
+          .error("How'd that happen? Please try again")
+          .build();
     } else {
-      return new SuccessOrFailureAndErrorBody(FAILURE,
-          "Username not in use in session, nothing to drop");
+      return SessionStatusResponse.builder()
+          .status(FAILURE)
+          .error("Username not in use in session, nothing to drop")
+          .build();
     }
   }
 }

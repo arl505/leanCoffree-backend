@@ -42,9 +42,7 @@ public class PostVoteController {
     for (final ObjectError error : errors.getAllErrors()) {
       errorsList.add(error.getDefaultMessage());
     }
-    return ResponseEntity.ok(SuccessOrFailureAndErrorBody.builder()
-        .status(FAILURE)
-        .error(String.join(", ", errorsList))
-        .build());
+    return ResponseEntity
+        .ok(new SuccessOrFailureAndErrorBody(FAILURE, String.join(", ", errorsList)));
   }
 }

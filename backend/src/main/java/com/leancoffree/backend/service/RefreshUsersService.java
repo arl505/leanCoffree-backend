@@ -1,9 +1,9 @@
 package com.leancoffree.backend.service;
 
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
-import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.domain.model.SessionStatusResponse;
 
 public interface RefreshUsersService {
 
-  SuccessOrFailureAndErrorBody refreshUsers(final RefreshUsersRequest refreshUsersRequest);
+  SessionStatusResponse refreshUsers(final RefreshUsersRequest refreshUsersRequest);
 }

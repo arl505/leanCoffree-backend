@@ -3,7 +3,7 @@ package com.leancoffree.backend.service;
 import static com.leancoffree.backend.enums.RefreshUsersCommand.ADD;
 
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
-import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.domain.model.SessionStatusResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +18,7 @@ public class RefreshUsersServiceImpl implements RefreshUsersService {
     this.dropUserInSessionService = dropUserInSessionService;
   }
 
-  public SuccessOrFailureAndErrorBody refreshUsers(final RefreshUsersRequest refreshUsersRequest) {
+  public SessionStatusResponse refreshUsers(final RefreshUsersRequest refreshUsersRequest) {
     if (ADD.equals(refreshUsersRequest.getCommand())) {
       return addUserToSessionService.addUserToSessionAndReturnAllUsers(refreshUsersRequest);
     } else {

@@ -82,3 +82,9 @@
   height: 85%;
   border-bottom: solid black 1px;
 }
+
+.nextSectionButton {
+  position: absolute;
+  width: 13vw;
+  bottom: 1vw;
+}
