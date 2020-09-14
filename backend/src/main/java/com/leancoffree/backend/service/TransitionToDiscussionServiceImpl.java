@@ -8,15 +8,20 @@ import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.enums.SessionStatus;
 import com.leancoffree.backend.repository.SessionsRepository;
 import java.util.Optional;
+import org.json.JSONObject;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TransitionToDiscussionServiceImpl implements TransitionToDiscussionService {
 
   private final SessionsRepository sessionsRepository;
+  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
-  public TransitionToDiscussionServiceImpl(final SessionsRepository sessionsRepository) {
+  public TransitionToDiscussionServiceImpl(final SessionsRepository sessionsRepository,
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.sessionsRepository = sessionsRepository;
+    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
   public SuccessOrFailureAndErrorBody transitionToDiscussion(final String sessionId) {
@@ -28,6 +33,9 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
     final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
     sessionsEntity.setSessionStatus(SessionStatus.DISCUSSING);
     sessionsRepository.save(sessionsEntity);
+
+    webSocketMessagingTemplate
+        .convertAndSend("/topic/status/session/" + sessionId, "DISCUSSING");
     return new SuccessOrFailureAndErrorBody(SUCCESS, null);
   }
 }

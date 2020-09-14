@@ -40,7 +40,7 @@ class Session extends React.Component {
     var self = this;  
     Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/verify-session/' + sessionIdFromAddress, null)
       .then((response) => {
-        if(self.isVerificationResponseValid(response, sessionIdFromAddress[0]) && response.data.sessionDetails.sessionStatus === "STARTED" || response.data.sessionDetails.sessionStatus === "DISCUSSING") {
+        if(self.isVerificationResponseValid(response, sessionIdFromAddress[0]) && (response.data.sessionDetails.sessionStatus === "STARTED" || response.data.sessionDetails.sessionStatus === "DISCUSSING")) {
           self.connectToWebSocketServer();
           self.setState({
             isSessionVerified: true,
