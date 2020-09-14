@@ -1,5 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
+import DiscussionPage from './DiscussionPage';
 import './session.css'
 
 let stompClient = null;
@@ -217,8 +218,17 @@ class Session extends React.Component {
           <div class="session-grid-item usersSection">
             <div>All here:</div>
             <div>{this.getAllHere()}</div>
+            <div class="nextSectionButton">
+              <button onClick={() => this.setState({sessionStatus: "DISCUSSING"})}>End voting and go to next section</button>
+            </div>
           </div>
         </div>
+      )
+    }
+
+    else if (this.state.sessionStatus === "DISCUSSING") {
+      return (
+        <DiscussionPage topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
       )
     }
 
