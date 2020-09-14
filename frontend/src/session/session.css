@@ -110,3 +110,13 @@
 .column3 {
   grid-column: 3;
 }
+
+.discussionCardItem {
+  grid-column: 1;
+  margin-left: 2.5vw;
+  margin-right: 2.5vw;
+}
+
+.currentTopicHeader{
+  text-align: center;
+}

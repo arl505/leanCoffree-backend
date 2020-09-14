@@ -23,7 +23,7 @@ class DiscussionPage extends React.Component {
       let text = allTopics[i].text;
       let votes = allTopics[i].voters.length;
       topicsElements.push(
-        <div key={i.toString()} class="cardItem" style={{gridRow: i, gridColumn: 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
+        <div key={i.toString()} class="cardItem discussionCardItem" style={{gridRow: i}}>
           <p class="topicsText">{text}</p>
           <p class="votesText">Votes: {votes}</p>
         </div>
@@ -39,8 +39,8 @@ class DiscussionPage extends React.Component {
           {this.getAllTopicCards()}
         </div>
           <div class="currentDiscussionItem">
-            <h5 style={{textAlign: "center"}}>Current discussion item</h5>
-            <h2 style={{textAlign: "center"}}>{this.state.topics[0].text}</h2>
+            <h5 class="currentTopicHeader">Current discussion item</h5>
+            <h2 class="currentTopicHeader">{this.state.topics[0].text}</h2>
           </div>
 
           <div class="session-grid-item usersSection column3">
