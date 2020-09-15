@@ -9,6 +9,7 @@ class DiscussionPage extends React.Component {
       topics: props.topics,
       userDisplayName: props.userInfo.displayName,
       currentTopicSecondsRemaining: -1,
+      finished: false
     }
   }
 
@@ -25,7 +26,7 @@ class DiscussionPage extends React.Component {
       let nowSeconds = Math.round(new Date().getTime() / 1000);
       if(Math.max(0, endSeconds - nowSeconds) !== 0) {
         this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
-      } else {
+      } else if(this.state.finished === false) {
         let body;
         if(this.state.topics.discussionBacklogTopics.length !== 0) {
           body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
@@ -35,6 +36,9 @@ class DiscussionPage extends React.Component {
         Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
           .then((response) => {
             if(response.data.status !== "SUCCESS") {
+              if(response.data.error === "Mocked finish!") {
+                this.setState({finished: true})
+              }
               alert(response.data.error);
             }
           })
