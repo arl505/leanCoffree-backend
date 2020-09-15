@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface TopicsRepository extends CrudRepository<TopicsEntity, TopicsId> {
 
-  @Query(value = "SELECT topics.topic_text, votes.display_name"
+  @Query(value = "SELECT topics.topic_text, votes.display_name, topics.topic_status"
       + " FROM topics"
       + " LEFT JOIN votes ON topics.session_id = votes.session_id AND topics.topic_text = votes.topic_text"
       + " WHERE  topics.session_id = :sessionId"

@@ -1,10 +1,14 @@
 package com.leancoffree.backend.domain.entity;
 
+import static javax.persistence.EnumType.STRING;
+
 import com.leancoffree.backend.domain.entity.TopicsEntity.TopicsId;
+import com.leancoffree.backend.enums.TopicStatus;
 import java.io.Serializable;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
@@ -35,6 +39,10 @@ public class TopicsEntity {
   @CreationTimestamp
   @Column(name = "created_timestamp")
   private Instant createdTimestamp;
+
+  @Enumerated(STRING)
+  @Column(name = "topic_status")
+  private TopicStatus topicStatus;
 
   @Data
   @Builder
