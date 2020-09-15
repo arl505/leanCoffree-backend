@@ -18,6 +18,7 @@ class Session extends React.Component {
       cardSubmissionText: "",
       topics: [],
       votesLeft: 3,
+      currentTopicEndTime: ''
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.submitDisplayName = this.submitDisplayName.bind(this);
@@ -70,10 +71,13 @@ class Session extends React.Component {
     stompClient.connect({}, 
       (frame) => {
         stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
-          (payload) => this.setState({topics: JSON.parse(payload.body)})
-        );
-        stompClient.subscribe('/topic/status/session/' + this.state.sessionId,
-          (payload) => this.setState({sessionStatus: payload.body})
+          (payload) => {
+            if(JSON.parse(payload.body).currentTopicEndTime === null) {
+              this.setState({topics: JSON.parse(payload.body).topics, currentTopicEndTime: JSON.parse(payload.body).currentTopicEndTime});
+            } else {
+              this.setState({topics: JSON.parse(payload.body).topics, currentTopicEndTime: JSON.parse(payload.body).currentTopicEndTime}, () => this.setState({sessionStatus: "DISCUSSING"}));
+            }
+          }
         );
         stompClient.subscribe('/topic/users/session/' + this.state.sessionId, 
           (payload) => {
@@ -203,17 +207,17 @@ class Session extends React.Component {
   }
 
   transitionToDiscussion() {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId, {})
-    .then((response) => {
-      if(response.data.status !== "SUCCESS") {
-        alert(response.data.error);
-      } else {
-        this.setState({sessionStatus: "DISCUSSING"})
-      }
-    })
-    .catch((error) => {
-      alert("Unable to transition to next section\n" + error)
-    })
+    if(this.state.topics.length >= 2) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId, {})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        }
+      })
+      .catch((error) => {
+        alert("Unable to transition to next section\n" + error)
+      })
+    }
   }
 
   render() {
@@ -228,6 +232,11 @@ class Session extends React.Component {
     }
 
     else if (this.state.sessionStatus === "STARTED") {
+      let nextSectionButton = this.state.topics.length >= 2
+        ? <div class="nextSectionButton">
+            <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
+          </div>
+        : null;
       return (
         <div class="session-grid-container">
           <div class="session-grid-item cardsSection">
@@ -236,17 +245,15 @@ class Session extends React.Component {
           <div class="session-grid-item usersSection">
             <div>All here:</div>
             <div>{this.getAllHere()}</div>
-            <div class="nextSectionButton">
-              <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
-            </div>
+            {nextSectionButton}
           </div>
         </div>
       )
     }
 
-    else if (this.state.sessionStatus === "DISCUSSING") {
+    else if (this.state.sessionStatus === "DISCUSSING" && this.state.currentTopicEndTime !== null) {
       return (
-        <DiscussionPage getAllHere={this.getAllHere} topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
+        <DiscussionPage getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} />
       )
     }
 

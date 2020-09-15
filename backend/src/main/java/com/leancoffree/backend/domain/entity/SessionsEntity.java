@@ -39,4 +39,7 @@ public class SessionsEntity {
   @UpdateTimestamp
   @Column(name = "updated_timestamp")
   private Instant updatedTimestamp;
+
+  @Column(name = "current_topic_end_time")
+  private Instant currentTopicEndTime;
 }
