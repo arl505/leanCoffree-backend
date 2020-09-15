@@ -9,21 +9,17 @@ import com.leancoffree.backend.enums.SessionStatus;
 import com.leancoffree.backend.repository.SessionsRepository;
 import java.time.Instant;
 import java.util.Optional;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TransitionToDiscussionServiceImpl implements TransitionToDiscussionService {
 
   private final SessionsRepository sessionsRepository;
-  private final SimpMessagingTemplate webSocketMessagingTemplate;
   private final BroadcastTopicsService broadcastTopicsService;
 
   public TransitionToDiscussionServiceImpl(final SessionsRepository sessionsRepository,
-      final SimpMessagingTemplate webSocketMessagingTemplate,
       final BroadcastTopicsService broadcastTopicsService) {
     this.sessionsRepository = sessionsRepository;
-    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
     this.broadcastTopicsService = broadcastTopicsService;
   }
 
@@ -37,8 +33,6 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
     sessionsEntity.setSessionStatus(SessionStatus.DISCUSSING);
     sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(180));
     sessionsRepository.save(sessionsEntity);
-    webSocketMessagingTemplate
-        .convertAndSend("/topic/status/session/" + sessionId, "DISCUSSING");
     broadcastTopicsService.broadcastTopics(sessionId);
     return new SuccessOrFailureAndErrorBody(SUCCESS, null);
   }

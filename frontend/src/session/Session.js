@@ -79,9 +79,6 @@ class Session extends React.Component {
             }
           }
         );
-        stompClient.subscribe('/topic/status/session/' + this.state.sessionId,
-          (payload) => this.setState({sessionStatus: payload.body})
-        );
         stompClient.subscribe('/topic/users/session/' + this.state.sessionId, 
           (payload) => {
             let updateUsersBody = JSON.parse(payload.body);
