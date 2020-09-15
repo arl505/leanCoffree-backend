@@ -30,7 +30,7 @@ class DiscussionPage extends React.Component {
         if(this.state.topics.discussionBacklogTopics.length !== 0) {
           body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
         } else {
-          body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, displayName: this.state.userDisplayName};
+          body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, displayName: this.state.userDisplayName, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
         }
         Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
           .then((response) => {

@@ -1,5 +1,6 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.RefreshTopicsCommand.FINISH;
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.NEXT;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
@@ -57,12 +58,14 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
         topicsRepository.save(nextTopicsEntity);
 
         final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
-        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(180));
+        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(5));
         sessionsRepository.save(sessionsEntity);
 
         broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId());
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       }
+    } else if (FINISH.equals(refreshTopicsRequest.getCommand())) {
+      return new SuccessOrFailureAndErrorBody(FAILURE, "Mocked finish!");
     }
     return new SuccessOrFailureAndErrorBody(FAILURE, "Command or topic/session invalid");
   }
