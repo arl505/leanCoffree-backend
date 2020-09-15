@@ -39,10 +39,10 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
 
       final Optional<TopicsEntity> currentTopicsEntityOptional = topicsRepository
           .findById(new TopicsId(refreshTopicsRequest.getSessionId(),
-              refreshTopicsRequest.getCurrentTopicText()));
+              refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getCurrentTopicAuthorDisplayName()));
       final Optional<TopicsEntity> nextTopicsEntityOptional = topicsRepository
           .findById(new TopicsId(refreshTopicsRequest.getSessionId(),
-              refreshTopicsRequest.getNextTopicText()));
+              refreshTopicsRequest.getNextTopicText(), refreshTopicsRequest.getNextTopicAuthorDisplayName()));
       final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository
           .findById(refreshTopicsRequest.getSessionId());
 

@@ -19,9 +19,11 @@ public class TransitionToDiscussionController {
   }
 
   @CrossOrigin
-  @PostMapping("/transition-to-discussion/{sessionId}")
+  @PostMapping("/transition-to-discussion/{sessionId}/{displayName}")
   public ResponseEntity<SuccessOrFailureAndErrorBody> transitionToDiscussionEndpoint(
-      @PathVariable("sessionId") final String sessionId) {
-    return ResponseEntity.ok(transitionToDiscussionService.transitionToDiscussion(sessionId));
+      @PathVariable("sessionId") final String sessionId,
+      @PathVariable("displayName") final String displayName) {
+    return ResponseEntity
+        .ok(transitionToDiscussionService.transitionToDiscussion(sessionId, displayName));
   }
 }

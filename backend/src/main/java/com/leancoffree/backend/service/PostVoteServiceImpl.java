@@ -23,23 +23,28 @@ public class PostVoteServiceImpl implements PostVoteService {
   }
 
   @Transactional
-  public SuccessOrFailureAndErrorBody postVote(PostVoteRequest postVoteRequest) {
+  public SuccessOrFailureAndErrorBody postVote(final PostVoteRequest postVoteRequest) {
+
     final VotesEntity votesEntity = VotesEntity.builder()
-        .displayName(postVoteRequest.getVoterDisplayName())
-        .sessionId(postVoteRequest.getSessionId())
+        .voterDisplayName(postVoteRequest.getVoterDisplayName())
+        .topicAuthorDisplayName(postVoteRequest.getAuthorDisplayName())
+        .topicAuthorSessionId(postVoteRequest.getSessionId())
+        .voterSessionId(postVoteRequest.getSessionId())
         .text(postVoteRequest.getText())
         .build();
 
     if (CAST.equals(postVoteRequest.getCommand())) {
       final Long votesCastPreviously = votesRepository
-          .countByDisplayNameAndSessionId(postVoteRequest.getVoterDisplayName(),
+          .countByVoterDisplayNameAndVoterSessionId(postVoteRequest.getVoterDisplayName(),
               postVoteRequest.getSessionId());
       if (votesCastPreviously >= 3) {
         return new SuccessOrFailureAndErrorBody(FAILURE, "You can only vote thrice");
       }
       votesRepository.save(votesEntity);
     } else {
-      votesRepository.delete(votesEntity);
+      votesRepository
+          .deleteByVoterSessionIdAndTextAndVoterDisplayName(postVoteRequest.getSessionId(),
+              postVoteRequest.getText(), postVoteRequest.getVoterDisplayName());
     }
     return broadcastTopicsService.broadcastTopics(postVoteRequest.getSessionId());
   }

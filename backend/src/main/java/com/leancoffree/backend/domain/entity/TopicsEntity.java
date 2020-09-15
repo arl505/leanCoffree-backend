@@ -33,15 +33,19 @@ public class TopicsEntity {
   private String sessionId;
 
   @Id
-  @Column(name = "topic_text")
+  @Column(name = "text")
   private String text;
+
+  @Id
+  @Column(name = "display_name")
+  private String displayName;
 
   @CreationTimestamp
   @Column(name = "created_timestamp")
   private Instant createdTimestamp;
 
   @Enumerated(STRING)
-  @Column(name = "topic_status")
+  @Column(name = "status")
   private TopicStatus topicStatus;
 
   @Data
@@ -53,5 +57,6 @@ public class TopicsEntity {
 
     private String sessionId;
     private String text;
+    private String displayName;
   }
 }

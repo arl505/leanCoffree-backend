@@ -8,9 +8,9 @@ import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.entity.TopicsEntity;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.enums.SessionStatus;
-import com.leancoffree.backend.enums.TopicStatus;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -31,9 +31,10 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
     this.topicsRepository = topicsRepository;
   }
 
-  public SuccessOrFailureAndErrorBody transitionToDiscussion(final String sessionId) {
+  public SuccessOrFailureAndErrorBody transitionToDiscussion(final String sessionId,
+      final String displayName) {
     final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository.findById(sessionId);
-    if(sessionsEntityOptional.isEmpty()) {
+    if (sessionsEntityOptional.isEmpty()) {
       return new SuccessOrFailureAndErrorBody(FAILURE, "Couldn't find session with that ID");
     }
 
@@ -47,6 +48,8 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
         .sessionId(sessionId)
         .text((String) resultObjects.get(0)[0])
         .topicStatus(DISCUSSING)
+        .displayName(displayName)
+        .createdTimestamp(((Timestamp) resultObjects.get(0)[4]).toInstant())
         .build();
     topicsRepository.save(topicsEntity);
 

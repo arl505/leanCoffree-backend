@@ -26,5 +26,11 @@ public class RefreshTopicsRequest {
   @NotBlank(message = "currentTopicText should not be blank")
   private String currentTopicText;
 
+  @Size(min = 1, max = 20, message = "currentTopicAuthorDisplayName should be between 1-20 chars")
+  @NotBlank(message = "currentTopicAuthorDisplayName should not be blank")
+  private String currentTopicAuthorDisplayName;
+
+  private String nextTopicAuthorDisplayName;
+
   private String nextTopicText;
 }

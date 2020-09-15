@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface TopicsRepository extends CrudRepository<TopicsEntity, TopicsId> {
 
-  @Query(value = "SELECT topics.topic_text, votes.display_name, topics.topic_status"
+  @Query(value = "SELECT topics.text, votes.voter_display_name, topics.status, topics.display_name, topics.created_timestamp"
       + " FROM topics"
-      + " LEFT JOIN votes ON topics.session_id = votes.session_id AND topics.topic_text = votes.topic_text"
+      + " LEFT JOIN votes ON topics.session_id = votes.topic_author_session_id AND topics.text = votes.topic_text"
       + " WHERE  topics.session_id = :sessionId"
       + " ORDER BY topics.created_timestamp",
       nativeQuery = true)

@@ -29,7 +29,7 @@ public class SubmitTopicServiceImpl implements SubmitTopicService {
     final String text = submitTopicRequest.getSubmissionText();
     final String sessionId = submitTopicRequest.getSessionId();
 
-    final TopicsId topicsId = new TopicsId(sessionId, text);
+    final TopicsId topicsId = new TopicsId(sessionId, text, submitTopicRequest.getDisplayName());
 
     final Optional<TopicsEntity> topicsEntityOptional = topicsRepository.findById(topicsId);
 
@@ -38,6 +38,7 @@ public class SubmitTopicServiceImpl implements SubmitTopicService {
           .text(text)
           .sessionId(sessionId)
           .topicStatus(QUEUED)
+          .displayName(submitTopicRequest.getDisplayName())
           .build());
       return broadcastTopicsService.broadcastTopics(sessionId);
     } else {
