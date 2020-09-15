@@ -7,7 +7,22 @@ class DiscussionPage extends React.Component {
     this.state = {
       topics: props.topics,
       userDisplayName: props.userInfo.displayName,
+      currentTopicSecondsRemaining: -1,
+      currentTopicEndTime: props.currentEndTime
     }
+  }
+
+  componentDidMount() {
+    if(this.state.currentTopicSecondsRemaining === -1 && this.state.currentTopicEndTime !== '' && this.state.currentTopicEndTime !== null && this.state.currentTopicEndTime !== undefined) {
+      let endSeconds = Math.round(new Date(this.state.currentTopicEndTime).getTime() / 1000);
+      let nowSeconds = Math.round(new Date().getTime() / 1000);
+      this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
+    }
+    setInterval(() => {
+        let endSeconds = Math.round(new Date(this.state.currentTopicEndTime).getTime() / 1000);
+        let nowSeconds = Math.round(new Date().getTime() / 1000);
+        this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
+    }, 500);
   }
 
   getAllTopicCards() {
@@ -32,7 +47,14 @@ class DiscussionPage extends React.Component {
     return topicsElements;
   }
 
-  render() {
+  render() {  
+    let countdown;
+    if(this.state.currentTopicSecondsRemaining !== -1) {
+      let minutesNum = Math.floor(this.state.currentTopicSecondsRemaining / 60);
+      let secondsNum = this.state.currentTopicSecondsRemaining % 60;
+      countdown = <p>{minutesNum} : {secondsNum}</p>
+    }
+    
     return (
       <div class="session-grid-container">
         <div class="discussCards-grid-container">
@@ -41,6 +63,7 @@ class DiscussionPage extends React.Component {
           <div class="currentDiscussionItem">
             <h5 class="currentTopicHeader">Current discussion item</h5>
             <h2 class="currentTopicHeader">{this.state.topics[0].text}</h2>
+            {countdown}
           </div>
 
           <div class="session-grid-item usersSection column3">

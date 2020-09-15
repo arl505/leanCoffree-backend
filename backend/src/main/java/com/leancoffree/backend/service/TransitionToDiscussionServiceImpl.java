@@ -7,8 +7,8 @@ import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.enums.SessionStatus;
 import com.leancoffree.backend.repository.SessionsRepository;
+import java.time.Instant;
 import java.util.Optional;
-import org.json.JSONObject;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +17,14 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
 
   private final SessionsRepository sessionsRepository;
   private final SimpMessagingTemplate webSocketMessagingTemplate;
+  private final BroadcastTopicsService broadcastTopicsService;
 
   public TransitionToDiscussionServiceImpl(final SessionsRepository sessionsRepository,
-      final SimpMessagingTemplate webSocketMessagingTemplate) {
+      final SimpMessagingTemplate webSocketMessagingTemplate,
+      final BroadcastTopicsService broadcastTopicsService) {
     this.sessionsRepository = sessionsRepository;
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
+    this.broadcastTopicsService = broadcastTopicsService;
   }
 
   public SuccessOrFailureAndErrorBody transitionToDiscussion(final String sessionId) {
@@ -32,10 +35,11 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
 
     final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
     sessionsEntity.setSessionStatus(SessionStatus.DISCUSSING);
+    sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(180));
     sessionsRepository.save(sessionsEntity);
-
     webSocketMessagingTemplate
         .convertAndSend("/topic/status/session/" + sessionId, "DISCUSSING");
+    broadcastTopicsService.broadcastTopics(sessionId);
     return new SuccessOrFailureAndErrorBody(SUCCESS, null);
   }
 }

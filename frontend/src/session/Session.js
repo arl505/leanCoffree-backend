@@ -18,6 +18,7 @@ class Session extends React.Component {
       cardSubmissionText: "",
       topics: [],
       votesLeft: 3,
+      currentTopicEndTime: ''
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.submitDisplayName = this.submitDisplayName.bind(this);
@@ -70,7 +71,13 @@ class Session extends React.Component {
     stompClient.connect({}, 
       (frame) => {
         stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
-          (payload) => this.setState({topics: JSON.parse(payload.body)})
+          (payload) => {
+            if(JSON.parse(payload.body).currentTopicEndTime === null) {
+              this.setState({topics: JSON.parse(payload.body).topics, currentTopicEndTime: JSON.parse(payload.body).currentTopicEndTime});
+            } else {
+              this.setState({topics: JSON.parse(payload.body).topics, currentTopicEndTime: JSON.parse(payload.body).currentTopicEndTime}, () => this.setState({sessionStatus: "DISCUSSING"}));
+            }
+          }
         );
         stompClient.subscribe('/topic/status/session/' + this.state.sessionId,
           (payload) => this.setState({sessionStatus: payload.body})
@@ -208,8 +215,6 @@ class Session extends React.Component {
       .then((response) => {
         if(response.data.status !== "SUCCESS") {
           alert(response.data.error);
-        } else {
-          this.setState({sessionStatus: "DISCUSSING"})
         }
       })
       .catch((error) => {
@@ -249,9 +254,9 @@ class Session extends React.Component {
       )
     }
 
-    else if (this.state.sessionStatus === "DISCUSSING") {
+    else if (this.state.sessionStatus === "DISCUSSING" && this.state.currentTopicEndTime !== null) {
       return (
-        <DiscussionPage getAllHere={this.getAllHere} topics={this.state.topics} userInfo={{displayName: this.state.userDisplayName}} />
+        <DiscussionPage getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} />
       )
     }
 
