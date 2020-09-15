@@ -52,7 +52,10 @@ class DiscussionPage extends React.Component {
     if(this.state.currentTopicSecondsRemaining !== -1) {
       let minutesNum = Math.floor(this.state.currentTopicSecondsRemaining / 60);
       let secondsNum = this.state.currentTopicSecondsRemaining % 60;
-      countdown = <p>{minutesNum} : {secondsNum}</p>
+      if(secondsNum < 10) {
+        secondsNum = ("0" + secondsNum).slice(-2);
+      }
+      countdown = <h5 class="countdown">{minutesNum} : {secondsNum}</h5>
     }
     
     return (
