@@ -1,5 +1,6 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import static com.leancoffree.backend.enums.TopicStatus.DISCUSSING;
@@ -8,6 +9,7 @@ import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.entity.TopicsEntity;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.enums.SessionStatus;
+import com.leancoffree.backend.enums.SortTopicsBy;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
 import java.sql.Timestamp;
@@ -52,7 +54,7 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
         .build();
     topicsRepository.save(topicsEntity);
 
-    broadcastTopicsService.broadcastTopics(sessionId);
+    broadcastTopicsService.broadcastTopics(sessionId, VOTES);
     return new SuccessOrFailureAndErrorBody(SUCCESS, null);
   }
 }

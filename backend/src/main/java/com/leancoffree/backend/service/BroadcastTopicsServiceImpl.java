@@ -5,6 +5,7 @@ import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.enums.SortTopicsBy;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
 import java.util.ArrayList;
@@ -18,7 +19,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.data.util.Pair;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -39,9 +39,15 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
-  public SuccessOrFailureAndErrorBody broadcastTopics(final String sessionId) {
+  public SuccessOrFailureAndErrorBody broadcastTopics(final String sessionId,
+      final SortTopicsBy sortTopicsBy) {
 
-    final List<Object[]> votesList = topicsRepository.findAllVotes(sessionId);
+    final List<Object[]> votesList;
+    if(SortTopicsBy.VOTES.equals(sortTopicsBy)) {
+      votesList = topicsRepository.findAllVotes(sessionId);
+    } else {
+      votesList = ;
+    }
 
     final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository.findById(sessionId);
     if (sessionsEntityOptional.isPresent()) {

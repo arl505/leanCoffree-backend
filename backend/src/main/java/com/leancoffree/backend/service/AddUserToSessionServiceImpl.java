@@ -1,5 +1,8 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SessionStatus.DISCUSSING;
+import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
+import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
@@ -8,6 +11,7 @@ import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.domain.model.SessionStatusResponse;
+import com.leancoffree.backend.enums.SortTopicsBy;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
@@ -56,38 +60,41 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
       final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
           .findBySessionIdAndIsOnlineTrue(sessionId);
 
-      if (optionalUsersEntityList.isPresent()) {
+      final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository
+          .findById(refreshUsersRequest.getSessionId());
+
+      if (optionalUsersEntityList.isPresent() && sessionsEntityOptional.isPresent()) {
         final List<String> displayNames = new ArrayList<>();
         for (final UsersEntity usersEntity : optionalUsersEntityList.get()) {
           displayNames.add(usersEntity.getDisplayName());
         }
         final String websocketMessageString = new JSONObject()
             .put("displayNames", new JSONArray(displayNames)).toString();
+        final SortTopicsBy sortTopicsBy =
+            sessionsEntityOptional.get().getSessionStatus().equals(DISCUSSING)
+                ? VOTES
+                : CREATION;
+
         webSocketMessagingTemplate
-            .convertAndSend("/topic/users/session/" + refreshUsersRequest.getSessionId(),
-                websocketMessageString);
-        broadcastTopicsService.broadcastTopics(sessionId);
+            .convertAndSend("/topic/users/session/" + sessionId, websocketMessageString);
+        broadcastTopicsService.broadcastTopics(sessionId, sortTopicsBy);
 
-        final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository
-            .findById(refreshUsersRequest.getSessionId());
-        if (sessionsEntityOptional.isPresent()) {
-          return SessionStatusResponse.builder()
-              .status(SUCCESS)
-              .error(null)
-              .sessionStatus(sessionsEntityOptional.get().getSessionStatus())
-              .build();
-        }
+        return SessionStatusResponse.builder()
+            .status(SUCCESS)
+            .error(null)
+            .sessionStatus(sessionsEntityOptional.get().getSessionStatus())
+            .build();
+      } else {
+        return SessionStatusResponse.builder()
+            .status(FAILURE)
+            .error("How'd that happen? Please try again")
+            .build();
       }
-      return SessionStatusResponse.builder()
-          .status(FAILURE)
-          .error("How'd that happen? Please try again")
-          .build();
-
     } else {
       return SessionStatusResponse.builder()
           .status(FAILURE)
           .error("Display name already in use in session")
           .build();
-    } }
-
+    }
+  }
 }

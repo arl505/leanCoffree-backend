@@ -1,5 +1,6 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.VoteType.CAST;
 
@@ -46,6 +47,6 @@ public class PostVoteServiceImpl implements PostVoteService {
           .deleteByVoterSessionIdAndTextAndVoterDisplayName(postVoteRequest.getSessionId(),
               postVoteRequest.getText(), postVoteRequest.getVoterDisplayName());
     }
-    return broadcastTopicsService.broadcastTopics(postVoteRequest.getSessionId());
+    return broadcastTopicsService.broadcastTopics(postVoteRequest.getSessionId(), CREATION);
   }
 }
