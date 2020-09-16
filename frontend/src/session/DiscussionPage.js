@@ -14,39 +14,43 @@ class DiscussionPage extends React.Component {
   }
 
   componentDidMount() {
-    if(this.state.currentTopicSecondsRemaining === -1 && this.state.topics !== {}) {
-      let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
-      let nowSeconds = Math.round(new Date().getTime() / 1000);
-      this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
-    }
-    
-    
-    setInterval(() => {
-      let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
-      let nowSeconds = Math.round(new Date().getTime() / 1000);
-      if(Math.max(0, endSeconds - nowSeconds) !== 0) {
+    if(this.state.topics !== undefined) {
+      if(this.state.currentTopicSecondsRemaining === -1 && this.state.topics !== {}) {
+        let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
+        let nowSeconds = Math.round(new Date().getTime() / 1000);
         this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
-      } else if(this.state.finished === false) {
-        let body;
-        if(this.state.topics.discussionBacklogTopics.length !== 0) {
-          body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
-        } else {
-          body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, displayName: this.state.userDisplayName, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
-        }
-        Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
-          .then((response) => {
-            if(response.data.status !== "SUCCESS") {
-              if(response.data.error === "Mocked finish!") {
-                this.setState({finished: true})
-              }
-              alert(response.data.error);
+      }
+      
+      
+      setInterval(() => {
+        if(this.state.topics !== undefined) {
+          let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
+          let nowSeconds = Math.round(new Date().getTime() / 1000);
+          if(Math.max(0, endSeconds - nowSeconds) !== 0) {
+            this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
+          } else if(this.state.finished === false) {
+            let body;
+            if(this.state.topics.discussionBacklogTopics.length !== 0) {
+              body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
+            } else {
+              body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, displayName: this.state.userDisplayName, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
             }
-          })
-          .catch((error) => 
-            alert("Unable to submit vote\n" + error)
-          );
-        }
-    }, 500);
+            Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
+              .then((response) => {
+                if(response.data.status !== "SUCCESS") {
+                  if(response.data.error === "Mocked finish!") {
+                    this.setState({finished: true})
+                  }
+                  alert(response.data.error);
+                }
+              })
+              .catch((error) => 
+                alert("Unable to submit vote\n" + error)
+              );
+            }
+          }
+      }, 500);
+    }
   }
 
   componentDidUpdate(prevProps) {
