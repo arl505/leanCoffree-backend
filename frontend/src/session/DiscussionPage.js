@@ -1,4 +1,5 @@
 import React from 'react';
+import Axios from 'axios';
 
 class DiscussionPage extends React.Component {
 
@@ -8,41 +9,71 @@ class DiscussionPage extends React.Component {
       topics: props.topics,
       userDisplayName: props.userInfo.displayName,
       currentTopicSecondsRemaining: -1,
-      currentTopicEndTime: props.currentEndTime
+      finished: false
     }
   }
 
   componentDidMount() {
-    if(this.state.currentTopicSecondsRemaining === -1 && this.state.currentTopicEndTime !== '' && this.state.currentTopicEndTime !== null && this.state.currentTopicEndTime !== undefined) {
-      let endSeconds = Math.round(new Date(this.state.currentTopicEndTime).getTime() / 1000);
-      let nowSeconds = Math.round(new Date().getTime() / 1000);
-      this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
-    }
-    setInterval(() => {
-        let endSeconds = Math.round(new Date(this.state.currentTopicEndTime).getTime() / 1000);
+    if(this.state.topics !== undefined) {
+      if(this.state.currentTopicSecondsRemaining === -1 && this.state.topics !== {}) {
+        let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
         let nowSeconds = Math.round(new Date().getTime() / 1000);
         this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
-    }, 500);
+      }
+      
+      
+      setInterval(() => {
+        if(this.state.topics !== undefined) {
+          let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
+          let nowSeconds = Math.round(new Date().getTime() / 1000);
+          if(Math.max(0, endSeconds - nowSeconds) !== 0) {
+            this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
+          } else if(this.state.finished === false) {
+            let body;
+            if(this.state.topics.discussionBacklogTopics.length !== 0) {
+              body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
+            } else {
+              body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, displayName: this.state.userDisplayName, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
+            }
+            Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
+              .then((response) => {
+                if(response.data.status !== "SUCCESS") {
+                  if(response.data.error === "Mocked finish!") {
+                    this.setState({finished: true})
+                  }
+                  alert(response.data.error);
+                }
+              })
+              .catch((error) => 
+                alert("Unable to submit vote\n" + error)
+              );
+            }
+          }
+      }, 500);
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if(prevProps.topics !== this.props.topics) {
+      this.setState({topics: this.props.topics});
+    }
   }
 
   getAllTopicCards() {
     let topicsElements = [];
 
-    let allTopics = this.state.topics;
-    allTopics.sort((a,b) => {
-      let aLength = a.voters.length;
-      let bLength = b.voters.length;
-      return bLength - aLength;
-    });
-    for(let i = 1; i <= allTopics.length - 1; i++) {
-      let text = allTopics[i].text;
-      let votes = allTopics[i].voters.length;
-      topicsElements.push(
-        <div key={i.toString()} class="cardItem discussionCardItem" style={{gridRow: i}}>
-          <p class="topicsText">{text}</p>
-          <p class="votesText">Votes: {votes}</p>
-        </div>
-      );
+    let allTopics = this.state.topics.discussionBacklogTopics;
+    if(allTopics !== undefined) {
+      for(let i = 0; i < allTopics.length; i++) {
+        let text = allTopics[i].text;
+        let votes = allTopics[i].voters.length;
+        topicsElements.push(
+          <div key={i.toString()} class="cardItem discussionCardItem" style={{gridRow: i}}>
+            <p class="topicsText">{text}</p>
+            <p class="votesText">Votes: {votes}</p>
+          </div>
+        );
+      }
     }
     return topicsElements;
   }
@@ -58,6 +89,9 @@ class DiscussionPage extends React.Component {
       countdown = <h5 class="countdown">{minutesNum} : {secondsNum}</h5>
     }
     
+    let currentDiscussionItem = this.state.topics.currentDiscussionItem === undefined
+      ? null
+      : this.state.topics.currentDiscussionItem.text;
     return (
       <div class="session-grid-container">
         <div class="discussCards-grid-container">
@@ -65,7 +99,7 @@ class DiscussionPage extends React.Component {
         </div>
           <div class="currentDiscussionItem">
             <h5 class="currentTopicHeader">Current discussion item</h5>
-            <h2 class="currentTopicHeader">{this.state.topics[0].text}</h2>
+            <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
             {countdown}
           </div>
 

@@ -1,48 +1,41 @@
 package com.leancoffree.backend.domain.entity;
 
-import com.leancoffree.backend.domain.entity.VotesEntity.VotesId;
-import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @Entity
 @Table(name = "votes")
-@IdClass(VotesId.class)
 @NoArgsConstructor
 @AllArgsConstructor
 public class VotesEntity {
 
   @Id
-  @Column(name = "session_id")
-  private String sessionId;
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  private Long id;
 
-  @Id
   @Column(name = "topic_text")
   private String text;
 
-  @Id
-  @Column(name = "display_name")
-  private String displayName;
+  @Column(name = "voter_session_id")
+  private String voterSessionId;
 
-  @Data
-  @Builder
-  @AllArgsConstructor
-  @NoArgsConstructor
-  @EqualsAndHashCode
-  public static class VotesId implements Serializable {
+  @Column(name = "voter_display_name")
+  private String voterDisplayName;
 
-    private String sessionId;
-    private String text;
-    private String displayName;
-  }
+  @Column(name = "topic_author_session_id")
+  private String topicAuthorSessionId;
+
+  @Column(name = "topic_author_display_name")
+  private String topicAuthorDisplayName;
 }

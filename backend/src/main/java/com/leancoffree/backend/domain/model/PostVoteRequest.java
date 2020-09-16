@@ -27,6 +27,10 @@ public class PostVoteRequest {
   @NotBlank(message = "voterDisplayName should not be null")
   private String voterDisplayName;
 
+  @Size(min = 1, max = 20, message = "authorDisplayName should be between 1-20 chars")
+  @NotBlank(message = "authorDisplayName should not be null")
+  private String authorDisplayName;
+
   @NotNull(message = "command should not be null")
   private VoteType command;
 }

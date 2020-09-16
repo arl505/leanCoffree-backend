@@ -16,7 +16,7 @@ class Session extends React.Component {
       websocketUserId: "",
       usersInAttendance: [],
       cardSubmissionText: "",
-      topics: [],
+      topics: {},
       votesLeft: 3,
       currentTopicEndTime: ''
     }
@@ -72,10 +72,10 @@ class Session extends React.Component {
       (frame) => {
         stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
           (payload) => {
-            if(JSON.parse(payload.body).currentTopicEndTime === null) {
-              this.setState({topics: JSON.parse(payload.body).topics, currentTopicEndTime: JSON.parse(payload.body).currentTopicEndTime});
+            if(JSON.parse(payload.body).currentDiscussionItem.text === undefined) {
+              this.setState({topics: JSON.parse(payload.body)});
             } else {
-              this.setState({topics: JSON.parse(payload.body).topics, currentTopicEndTime: JSON.parse(payload.body).currentTopicEndTime}, () => this.setState({sessionStatus: "DISCUSSING"}));
+              this.setState({topics: JSON.parse(payload.body), currentTopicEndTime: JSON.parse(payload.body).currentDiscussionItem.endTime}, () => this.setState({sessionStatus: "DISCUSSING"}));
             }
           }
         );
@@ -130,7 +130,7 @@ class Session extends React.Component {
 
   submitCard() {
     if(this.state.cardSubmissionText !== "") {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/submit-topic", {submissionText: this.state.cardSubmissionText, sessionId: this.state.sessionId})
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/submit-topic", {submissionText: this.state.cardSubmissionText, sessionId: this.state.sessionId, displayName: this.state.userDisplayName})
         .then((response) => {
           if(response.data.status === "SUCCESS") {
             this.setState({cardSubmissionText: ""})
@@ -147,15 +147,15 @@ class Session extends React.Component {
   populateCards() {
     let topicsElements = [];
 
-    let allTopics = this.state.topics;
+    let allTopics = this.state.topics.discussionBacklogTopics;
     for(let i = 0; i < allTopics.length; i++) {
       let text = allTopics[i].text;
       let votes = allTopics[i].voters.length;
       let votingButton;
       if(allTopics[i].voters.includes(this.state.userDisplayName)) {
-        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'UNCAST')}>UnVote</button>;
+        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
       } else if(this.state.votesLeft !== 0) {
-        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST')}>Vote</button>;
+        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
       }
 
       // i + 1 because first square taken by compose card
@@ -186,7 +186,7 @@ class Session extends React.Component {
     )
   }
 
-  postVoteForTopic(topicText, commandType) {
+  postVoteForTopic(topicText, commandType, authorDisplayName) {
     if(commandType === "CAST") {
       let newVotesLeft = this.state.votesLeft - 1;
       this.setState({votesLeft: newVotesLeft})
@@ -195,7 +195,7 @@ class Session extends React.Component {
       this.setState({votesLeft: newVotesLeft})
     }
 
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/post-vote", {command: commandType, sessionId: this.state.sessionId, text: topicText, voterDisplayName: this.state.userDisplayName})
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/post-vote", {command: commandType, sessionId: this.state.sessionId, text: topicText, voterDisplayName: this.state.userDisplayName, authorDisplayName: authorDisplayName})
       .then((response) => {
         if(response.data.status !== "SUCCESS") {
           alert(response.data.error);
@@ -207,7 +207,7 @@ class Session extends React.Component {
   }
 
   transitionToDiscussion() {
-    if(this.state.topics.length >= 2) {
+    if(this.state.topics.discussionBacklogTopics.length >= 2) {
       Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId, {})
       .then((response) => {
         if(response.data.status !== "SUCCESS") {
@@ -232,7 +232,7 @@ class Session extends React.Component {
     }
 
     else if (this.state.sessionStatus === "STARTED") {
-      let nextSectionButton = this.state.topics.length >= 2
+      let nextSectionButton = this.state.topics.discussionBacklogTopics.length >= 2
         ? <div class="nextSectionButton">
             <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
           </div>
@@ -253,7 +253,7 @@ class Session extends React.Component {
 
     else if (this.state.sessionStatus === "DISCUSSING" && this.state.currentTopicEndTime !== null) {
       return (
-        <DiscussionPage getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} />
+        <DiscussionPage sessionId={this.state.sessionId} getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} />
       )
     }
 

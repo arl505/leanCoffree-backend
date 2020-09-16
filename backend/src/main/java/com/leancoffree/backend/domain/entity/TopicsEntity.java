@@ -1,10 +1,14 @@
 package com.leancoffree.backend.domain.entity;
 
+import static javax.persistence.EnumType.STRING;
+
 import com.leancoffree.backend.domain.entity.TopicsEntity.TopicsId;
+import com.leancoffree.backend.enums.TopicStatus;
 import java.io.Serializable;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
@@ -29,12 +33,20 @@ public class TopicsEntity {
   private String sessionId;
 
   @Id
-  @Column(name = "topic_text")
+  @Column(name = "text")
   private String text;
+
+  @Id
+  @Column(name = "display_name")
+  private String displayName;
 
   @CreationTimestamp
   @Column(name = "created_timestamp")
   private Instant createdTimestamp;
+
+  @Enumerated(STRING)
+  @Column(name = "status")
+  private TopicStatus topicStatus;
 
   @Data
   @Builder
@@ -45,5 +57,6 @@ public class TopicsEntity {
 
     private String sessionId;
     private String text;
+    private String displayName;
   }
 }

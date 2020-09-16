@@ -1,10 +1,13 @@
 package com.leancoffree.backend.repository;
 
 import com.leancoffree.backend.domain.entity.VotesEntity;
-import com.leancoffree.backend.domain.entity.VotesEntity.VotesId;
 import org.springframework.data.repository.CrudRepository;
 
-public interface VotesRepository extends CrudRepository<VotesEntity, VotesId> {
+public interface VotesRepository extends CrudRepository<VotesEntity, Long> {
 
-  Long countByDisplayNameAndSessionId(final String displayName, final String sessionId);
+  Long countByVoterDisplayNameAndVoterSessionId(final String displayName,
+      final String voterSessionId);
+
+  void deleteByVoterSessionIdAndTextAndVoterDisplayName(final String voterSessionId,
+      final String text, final String voterDisplayName);
 }
