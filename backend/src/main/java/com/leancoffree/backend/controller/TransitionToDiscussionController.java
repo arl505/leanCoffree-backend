@@ -22,7 +22,6 @@ public class TransitionToDiscussionController {
   @PostMapping("/transition-to-discussion/{sessionId}")
   public ResponseEntity<SuccessOrFailureAndErrorBody> transitionToDiscussionEndpoint(
       @PathVariable("sessionId") final String sessionId) {
-    return ResponseEntity
-        .ok(transitionToDiscussionService.transitionToDiscussion(sessionId));
+    return ResponseEntity.ok(transitionToDiscussionService.transitionToDiscussion(sessionId));
   }
 }
