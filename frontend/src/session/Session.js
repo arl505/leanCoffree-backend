@@ -208,7 +208,7 @@ class Session extends React.Component {
 
   transitionToDiscussion() {
     if(this.state.topics.discussionBacklogTopics.length >= 2) {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId + "/" + this.state.userDisplayName, {})
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId, {})
       .then((response) => {
         if(response.data.status !== "SUCCESS") {
           alert(response.data.error);

@@ -31,8 +31,7 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
     this.topicsRepository = topicsRepository;
   }
 
-  public SuccessOrFailureAndErrorBody transitionToDiscussion(final String sessionId,
-      final String displayName) {
+  public SuccessOrFailureAndErrorBody transitionToDiscussion(final String sessionId) {
     final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository.findById(sessionId);
     if (sessionsEntityOptional.isEmpty()) {
       return new SuccessOrFailureAndErrorBody(FAILURE, "Couldn't find session with that ID");
@@ -48,7 +47,7 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
         .sessionId(sessionId)
         .text((String) resultObjects.get(0)[0])
         .topicStatus(DISCUSSING)
-        .displayName(displayName)
+        .displayName((String) resultObjects.get(0)[3])
         .createdTimestamp(((Timestamp) resultObjects.get(0)[4]).toInstant())
         .build();
     topicsRepository.save(topicsEntity);
