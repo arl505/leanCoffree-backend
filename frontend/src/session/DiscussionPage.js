@@ -83,11 +83,11 @@ class DiscussionPage extends React.Component {
       for(let i = 0; i <= this.state.topics.discussedTopics.length; i++) {
         if(i === (this.state.topics.discussedTopics.length)) {
           allDiscussedTopicsElements.push(
-            <div class="finalSpacer row1" style={{gridColumn: i + 1}}/>
+            <div key={i.toString()} class="finalSpacer row1" style={{gridColumn: i + 1}}/>
           )
         } else {
           allDiscussedTopicsElements.push(
-            <div class="cardItem row1" style={{gridColumn: i + 1}}>
+            <div key={i.toString()} class="cardItem row1" style={{gridColumn: i + 1}}>
               <p class="topicText">{this.state.topics.discussedTopics[i].text}</p>
             </div>
           )
@@ -122,18 +122,18 @@ class DiscussionPage extends React.Component {
         <div class="discussCards-grid-container">
           {this.getAllTopicCards()}
         </div>
-          <div class="currentDiscussionItem">
-            <h5 class="currentTopicHeader">Current discussion item</h5>
-            <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
-            {countdown}
-          </div>
+        <div class="currentDiscussionItem">
+          <h5 class="currentTopicHeader">Current discussion item</h5>
+          <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
+          {countdown}
+        </div>
 
-          {this.getDiscussedCards()}
+        {this.getDiscussedCards()}
 
-          <div class="session-grid-item usersSection column3">
-            <div>All here:</div>
-            <div>{this.props.getAllHere()}</div>
-          </div>
+        <div class="session-grid-item usersSection column3">
+          <div>All here:</div>
+          <div>{this.props.getAllHere()}</div>
+        </div>
       </div>
     )
   }
