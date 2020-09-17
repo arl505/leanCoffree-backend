@@ -40,7 +40,7 @@ public class SubmitTopicServiceImpl implements SubmitTopicService {
           .topicStatus(QUEUED)
           .displayName(submitTopicRequest.getDisplayName())
           .build());
-      return broadcastTopicsService.broadcastTopics(sessionId, CREATION);
+      return broadcastTopicsService.broadcastTopics(sessionId, CREATION, false);
     } else {
       return new SuccessOrFailureAndErrorBody(FAILURE, "Topic already submitted");
     }

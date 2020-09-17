@@ -77,7 +77,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
 
         webSocketMessagingTemplate
             .convertAndSend("/topic/users/session/" + sessionId, websocketMessageString);
-        broadcastTopicsService.broadcastTopics(sessionId, sortTopicsBy);
+        broadcastTopicsService.broadcastTopics(sessionId, sortTopicsBy, false);
 
         return SessionStatusResponse.builder()
             .status(SUCCESS)

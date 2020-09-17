@@ -63,7 +63,7 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
         sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(5));
         sessionsRepository.save(sessionsEntity);
 
-        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), VOTES);
+        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), VOTES, false);
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       }
     } else if (FINISH.equals(refreshTopicsRequest.getCommand())) {

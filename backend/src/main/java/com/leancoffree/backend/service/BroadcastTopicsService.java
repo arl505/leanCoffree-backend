@@ -6,5 +6,5 @@ import com.leancoffree.backend.enums.SortTopicsBy;
 public interface BroadcastTopicsService {
 
   SuccessOrFailureAndErrorBody broadcastTopics(final String sessionId,
-      final SortTopicsBy sortTopicsBy);
+      final SortTopicsBy sortTopicsBy, final boolean shouldUpdateTopicStatus);
 }

@@ -47,6 +47,6 @@ public class PostVoteServiceImpl implements PostVoteService {
           .deleteByVoterSessionIdAndTextAndVoterDisplayName(postVoteRequest.getSessionId(),
               postVoteRequest.getText(), postVoteRequest.getVoterDisplayName());
     }
-    return broadcastTopicsService.broadcastTopics(postVoteRequest.getSessionId(), CREATION);
+    return broadcastTopicsService.broadcastTopics(postVoteRequest.getSessionId(), CREATION, false);
   }
 }
