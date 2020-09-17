@@ -32,7 +32,7 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
 
     final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
     sessionsEntity.setSessionStatus(SessionStatus.DISCUSSING);
-    sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(5));
+    sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(180));
     sessionsRepository.save(sessionsEntity);
 
     broadcastTopicsService.broadcastTopics(sessionId, VOTES, true);

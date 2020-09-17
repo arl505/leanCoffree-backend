@@ -68,6 +68,9 @@ class Session extends React.Component {
     var SockJS = require('sockjs-client')
     SockJS = new SockJS(process.env.REACT_APP_BACKEND_BASEURL + '/lean-coffree')
     stompClient = Stomp.over(SockJS);
+    if(process.env.REACT_APP_STOMP_CLIENT_DEBUG === 'false') {
+      stompClient.debug = null;
+    }
     stompClient.connect({}, 
       (frame) => {
         stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
