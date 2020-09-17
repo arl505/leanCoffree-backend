@@ -1,13 +1,23 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
+import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
+import static com.leancoffree.backend.enums.TopicStatus.DISCUSSING;
 
 import com.leancoffree.backend.domain.entity.SessionsEntity;
+import com.leancoffree.backend.domain.entity.TopicsEntity;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.enums.SortTopicsBy;
+import com.leancoffree.backend.enums.TopicStatus;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +28,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.data.util.Pair;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +48,8 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
-  public SuccessOrFailureAndErrorBody broadcastTopics(final String sessionId) {
+  public SuccessOrFailureAndErrorBody broadcastTopics(final String sessionId,
+      final SortTopicsBy sortTopicsBy, boolean shouldUpdateTopicStatus) {
 
     final List<Object[]> votesList = topicsRepository.findAllVotes(sessionId);
 
@@ -55,28 +65,54 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
         if (objects[1] != null) {
           voters.add((String) objects[1]);
         }
+
         topicsAndVotersMap
-            .put(text, new TopicDetails((String) objects[3], (String) objects[2], voters));
+            .put(text, new TopicDetails(text, (String) objects[3], (String) objects[2], voters,
+                ((Timestamp) objects[4]).toInstant()));
       }
 
+      final List<TopicDetails> topicDetailsList = new ArrayList<>();
+      for (final Map.Entry<String, TopicDetails> entry : topicsAndVotersMap.entrySet()) {
+        topicDetailsList.add(entry.getValue());
+      }
+
+      if (VOTES.equals(sortTopicsBy)) {
+        topicDetailsList.sort((a, b) -> b.getVoters().size() - a.getVoters().size());
+      } else if (CREATION.equals(sortTopicsBy)) {
+        topicDetailsList.sort(Comparator.comparing(TopicDetails::getCreationDate));
+      }
+
+      if(shouldUpdateTopicStatus) {
+        final TopicDetails currentDiscussionItem = topicDetailsList.get(0);
+        currentDiscussionItem.setTopicStatus(DISCUSSING.toString());
+        topicDetailsList.set(0, currentDiscussionItem);
+        final TopicsEntity topicsEntity = TopicsEntity.builder()
+            .sessionId(sessionId)
+            .text(currentDiscussionItem.getText())
+            .topicStatus(TopicStatus.valueOf(currentDiscussionItem.getTopicStatus()))
+            .displayName(currentDiscussionItem.getAuthorDisplayName())
+            .createdTimestamp(currentDiscussionItem.getCreationDate())
+            .build();
+        topicsRepository.save(topicsEntity);
+      }
+
+      final JSONObject currentDiscussionItem = new JSONObject();
       final JSONArray discussionBacklogTopicsJson = new JSONArray();
       final JSONArray discussedTopicsJson = new JSONArray();
-      final JSONObject currentDiscussionItem = new JSONObject();
-      for (final Map.Entry<String, TopicDetails> entry : topicsAndVotersMap
-          .entrySet()) {
-        if (entry.getValue().getTopicStatus().equals("QUEUED")) {
+      for (final TopicDetails topicDetails : topicDetailsList) {
+        if (topicDetails.getTopicStatus().equals("QUEUED")) {
           discussionBacklogTopicsJson.put(new JSONObject()
-              .put("text", entry.getKey())
-              .put("authorDisplayName", entry.getValue().getAuthorDisplayName())
-              .put("voters", new JSONArray(entry.getValue().getVoters())));
-        } else if (entry.getValue().getTopicStatus().equals("DISCUSSED")) {
+              .put("text", topicDetails.getText())
+              .put("authorDisplayName", topicDetails.getAuthorDisplayName())
+              .put("voters", new JSONArray(topicDetails.getVoters())));
+        } else if (topicDetails.getTopicStatus().equals("DISCUSSED")) {
           discussedTopicsJson.put(new JSONObject()
-              .put("text", entry.getKey())
-              .put("voters", new JSONArray(entry.getValue().getVoters())));
-        } else if (entry.getValue().getTopicStatus().equals("DISCUSSING")) {
-          currentDiscussionItem.put("text", entry.getKey())
-              .put("voters", new JSONArray(entry.getValue().getVoters()))
-              .put("authorDisplayName", entry.getValue().getAuthorDisplayName())
+              .put("text", topicDetails.getText())
+              .put("voters", new JSONArray(topicDetails.getVoters())));
+        } else if (topicDetails.getTopicStatus().equals("DISCUSSING")) {
+          currentDiscussionItem.put("text", topicDetails.getText())
+              .put("voters", new JSONArray(topicDetails.getVoters()))
+              .put("authorDisplayName", topicDetails.getAuthorDisplayName())
               .put("endTime", sessionsEntityOptional.get().getCurrentTopicEndTime() == null
                   ? JSONObject.NULL
                   : sessionsEntityOptional.get().getCurrentTopicEndTime());
@@ -102,8 +138,10 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
   @NoArgsConstructor
   private static class TopicDetails {
 
+    private String text;
     private String authorDisplayName;
     private String topicStatus;
     private List<String> voters;
+    private Instant creationDate;
   }
 }

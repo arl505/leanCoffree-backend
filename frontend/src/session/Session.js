@@ -68,6 +68,9 @@ class Session extends React.Component {
     var SockJS = require('sockjs-client')
     SockJS = new SockJS(process.env.REACT_APP_BACKEND_BASEURL + '/lean-coffree')
     stompClient = Stomp.over(SockJS);
+    if(process.env.REACT_APP_STOMP_CLIENT_DEBUG === 'false') {
+      stompClient.debug = null;
+    }
     stompClient.connect({}, 
       (frame) => {
         stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
@@ -75,7 +78,11 @@ class Session extends React.Component {
             if(JSON.parse(payload.body).currentDiscussionItem.text === undefined) {
               this.setState({topics: JSON.parse(payload.body)});
             } else {
-              this.setState({topics: JSON.parse(payload.body), currentTopicEndTime: JSON.parse(payload.body).currentDiscussionItem.endTime}, () => this.setState({sessionStatus: "DISCUSSING"}));
+              this.setState({topics: JSON.parse(payload.body), currentTopicEndTime: JSON.parse(payload.body).currentDiscussionItem.endTime}, () => {
+                if(this.state.sessionStatus !== "" && this.state.sessionStatus !== "ASK_FOR_USERNAME") {
+                  this.setState({sessionStatus: "DISCUSSING"});
+                }
+              });
             }
           }
         );

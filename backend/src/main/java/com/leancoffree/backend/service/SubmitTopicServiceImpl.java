@@ -1,5 +1,6 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.TopicStatus.QUEUED;
 
@@ -7,7 +8,6 @@ import com.leancoffree.backend.domain.entity.TopicsEntity;
 import com.leancoffree.backend.domain.entity.TopicsEntity.TopicsId;
 import com.leancoffree.backend.domain.model.SubmitTopicRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
-import com.leancoffree.backend.enums.TopicStatus;
 import com.leancoffree.backend.repository.TopicsRepository;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,7 @@ public class SubmitTopicServiceImpl implements SubmitTopicService {
           .topicStatus(QUEUED)
           .displayName(submitTopicRequest.getDisplayName())
           .build());
-      return broadcastTopicsService.broadcastTopics(sessionId);
+      return broadcastTopicsService.broadcastTopics(sessionId, CREATION, false);
     } else {
       return new SuccessOrFailureAndErrorBody(FAILURE, "Topic already submitted");
     }

@@ -2,6 +2,7 @@ package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.FINISH;
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.NEXT;
+import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import static com.leancoffree.backend.enums.TopicStatus.DISCUSSED;
@@ -12,6 +13,7 @@ import com.leancoffree.backend.domain.entity.TopicsEntity;
 import com.leancoffree.backend.domain.entity.TopicsEntity.TopicsId;
 import com.leancoffree.backend.domain.model.RefreshTopicsRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.enums.SortTopicsBy;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
 import java.time.Instant;
@@ -58,10 +60,10 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
         topicsRepository.save(nextTopicsEntity);
 
         final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
-        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(5));
+        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(180));
         sessionsRepository.save(sessionsEntity);
 
-        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId());
+        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), VOTES, false);
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       }
     } else if (FINISH.equals(refreshTopicsRequest.getCommand())) {
