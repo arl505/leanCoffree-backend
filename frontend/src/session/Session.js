@@ -75,7 +75,11 @@ class Session extends React.Component {
             if(JSON.parse(payload.body).currentDiscussionItem.text === undefined) {
               this.setState({topics: JSON.parse(payload.body)});
             } else {
-              this.setState({topics: JSON.parse(payload.body), currentTopicEndTime: JSON.parse(payload.body).currentDiscussionItem.endTime}, () => this.setState({sessionStatus: "DISCUSSING"}));
+              this.setState({topics: JSON.parse(payload.body), currentTopicEndTime: JSON.parse(payload.body).currentDiscussionItem.endTime}, () => {
+                if(this.state.sessionStatus !== "" && this.state.sessionStatus !== "ASK_FOR_USERNAME") {
+                  this.setState({sessionStatus: "DISCUSSING"});
+                }
+              });
             }
           }
         );
