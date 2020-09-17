@@ -21,7 +21,6 @@ class DiscussionPage extends React.Component {
         this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
       }
       
-      
       setInterval(() => {
         if(this.state.topics !== undefined) {
           let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
@@ -69,13 +68,38 @@ class DiscussionPage extends React.Component {
         let votes = allTopics[i].voters.length;
         topicsElements.push(
           <div key={i.toString()} class="cardItem discussionCardItem" style={{gridRow: i + 1}}>
-            <p class="topicsText">{text}</p>
+            <p class="topicText">{text}</p>
             <p class="votesText">Votes: {votes}</p>
           </div>
         );
       }
     }
     return topicsElements;
+  }
+
+  getDiscussedCards() {
+    if(this.state.topics.discussedTopics !== undefined && this.state.topics.discussedTopics.length !== 0) {
+      let allDiscussedTopicsElements = [];
+      for(let i = 0; i <= this.state.topics.discussedTopics.length; i++) {
+        if(i === (this.state.topics.discussedTopics.length)) {
+          allDiscussedTopicsElements.push(
+            <div key={i.toString()} class="finalSpacer row1" style={{gridColumn: i + 1}}/>
+          )
+        } else {
+          allDiscussedTopicsElements.push(
+            <div key={i.toString()} class="cardItem row1" style={{gridColumn: i + 1}}>
+              <p class="topicText">{this.state.topics.discussedTopics[i].text}</p>
+            </div>
+          )
+        }
+      }
+
+      return (
+        <div class="disccussedItemsSection">
+          {allDiscussedTopicsElements}
+        </div>
+      )
+    }
   }
 
   render() {  
@@ -92,21 +116,24 @@ class DiscussionPage extends React.Component {
     let currentDiscussionItem = this.state.topics.currentDiscussionItem === undefined
       ? null
       : this.state.topics.currentDiscussionItem.text;
+      
     return (
       <div class="session-grid-container">
         <div class="discussCards-grid-container">
           {this.getAllTopicCards()}
         </div>
-          <div class="currentDiscussionItem">
-            <h5 class="currentTopicHeader">Current discussion item</h5>
-            <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
-            {countdown}
-          </div>
+        <div class="currentDiscussionItem">
+          <h5 class="currentTopicHeader">Current discussion item</h5>
+          <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
+          {countdown}
+        </div>
 
-          <div class="session-grid-item usersSection column3">
-            <div>All here:</div>
-            <div>{this.props.getAllHere()}</div>
-          </div>
+        {this.getDiscussedCards()}
+
+        <div class="session-grid-item usersSection column3">
+          <div>All here:</div>
+          <div>{this.props.getAllHere()}</div>
+        </div>
       </div>
     )
   }

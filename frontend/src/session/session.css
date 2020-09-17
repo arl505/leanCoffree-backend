@@ -18,7 +18,7 @@
   max-height: 100vh;
   border-right: solid black 1px;
   overflow: scroll;
-  grid-row: 1;
+  grid-row: 1 / span 2;
   grid-column: 1;
 }
 
@@ -105,11 +105,13 @@
   grid-row: 1;
   grid-column: 2;
   width: 65vw;
+  height: 60vh;
   position: relative;
 }
 
 .column3 {
   grid-column: 3;
+  grid-row: 1 / span 2;
 }
 
 .discussionCardItem {
@@ -128,4 +130,22 @@
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+.disccussedItemsSection {
+  grid-row: 2;
+  grid-column: 2;
+  border-top: solid black 1px;
+  max-height: 40vh;
+  width: 65vw;
+  overflow: scroll;
+  display: grid;
+}
+
+.row1{
+  grid-row: 1;
+}
+
+.finalSpacer {
+  width: .01vw;
 }
