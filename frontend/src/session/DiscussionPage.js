@@ -68,7 +68,7 @@ class DiscussionPage extends React.Component {
         let text = allTopics[i].text;
         let votes = allTopics[i].voters.length;
         topicsElements.push(
-          <div key={i.toString()} class="cardItem discussionCardItem" style={{gridRow: i}}>
+          <div key={i.toString()} class="cardItem discussionCardItem" style={{gridRow: i + 1}}>
             <p class="topicsText">{text}</p>
             <p class="votesText">Votes: {votes}</p>
           </div>

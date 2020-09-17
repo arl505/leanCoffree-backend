@@ -84,12 +84,11 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
             .error(null)
             .sessionStatus(sessionsEntityOptional.get().getSessionStatus())
             .build();
-      } else {
-        return SessionStatusResponse.builder()
-            .status(FAILURE)
-            .error("How'd that happen? Please try again")
-            .build();
       }
+      return SessionStatusResponse.builder()
+          .status(FAILURE)
+          .error("How'd that happen? Please try again")
+          .build();
     } else {
       return SessionStatusResponse.builder()
           .status(FAILURE)
