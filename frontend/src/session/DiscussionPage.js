@@ -83,8 +83,7 @@ class DiscussionPage extends React.Component {
       for(let i = 0; i <= this.state.topics.discussedTopics.length; i++) {
         if(i === (this.state.topics.discussedTopics.length)) {
           allDiscussedTopicsElements.push(
-            <div class="finalSpacer row1" style={{gridColumn: i + 1}}>
-            </div>
+            <div class="finalSpacer row1" style={{gridColumn: i + 1}}/>
           )
         } else {
           allDiscussedTopicsElements.push(
