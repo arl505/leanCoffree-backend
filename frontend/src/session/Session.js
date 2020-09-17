@@ -152,45 +152,47 @@ class Session extends React.Component {
   }
 
   populateCards() {
-    let topicsElements = [];
+    if(this.state.topics.discussionBacklogTopics !== undefined) {
+      let topicsElements = [];
 
-    let allTopics = this.state.topics.discussionBacklogTopics;
-    for(let i = 0; i < allTopics.length; i++) {
-      let text = allTopics[i].text;
-      let votes = allTopics[i].voters.length;
-      let votingButton;
-      if(allTopics[i].voters.includes(this.state.userDisplayName)) {
-        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
-      } else if(this.state.votesLeft !== 0) {
-        votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
+      let allTopics = this.state.topics.discussionBacklogTopics;
+      for(let i = 0; i < allTopics.length; i++) {
+        let text = allTopics[i].text;
+        let votes = allTopics[i].voters.length;
+        let votingButton;
+        if(allTopics[i].voters.includes(this.state.userDisplayName)) {
+          votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
+        } else if(this.state.votesLeft !== 0) {
+          votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
+        }
+
+        // i + 1 because first square taken by compose card
+        // mod by 5 to get column number, count is 1 based so add 1 to result
+        let columnNum = ((i + 1) % 5) + 1;
+
+        // i + 1 because first square taken by compose card
+        // divide by 5 to get row number, count is 1 based so add 1 to result
+        let rowNum = Math.floor((i + 1) / 5) + 1;
+        topicsElements.push(
+          <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
+            <p id="topicText">{text}</p>
+            <p id="votesText">Votes: {votes}</p>
+            {votingButton}
+          </div>
+        );
       }
 
-      // i + 1 because first square taken by compose card
-      // mod by 5 to get column number, count is 1 based so add 1 to result
-      let columnNum = ((i + 1) % 5) + 1;
+      return (
+        <div class="cards-grid-container">
+          <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
+            <textarea id="composeTextArea" value={this.state.cardSubmissionText} onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"/>
+            <button id="cardButton" onClick={this.submitCard}>Submit</button>
+          </div>
 
-      // i + 1 because first square taken by compose card
-      // divide by 5 to get row number, count is 1 based so add 1 to result
-      let rowNum = Math.floor((i + 1) / 5) + 1;
-      topicsElements.push(
-        <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
-          <p id="topicText">{text}</p>
-          <p id="votesText">Votes: {votes}</p>
-          {votingButton}
+          {topicsElements}
         </div>
-      );
+      )
     }
-
-    return (
-      <div class="cards-grid-container">
-        <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
-          <textarea id="composeTextArea" value={this.state.cardSubmissionText} onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"/>
-          <button id="cardButton" onClick={this.submitCard}>Submit</button>
-        </div>
-
-        {topicsElements}
-      </div>
-    )
   }
 
   postVoteForTopic(topicText, commandType, authorDisplayName) {
@@ -239,7 +241,7 @@ class Session extends React.Component {
     }
 
     else if (this.state.sessionStatus === "STARTED") {
-      let nextSectionButton = this.state.topics.discussionBacklogTopics.length >= 2
+      let nextSectionButton = this.state.topics.discussionBacklogTopics !== undefined && this.state.topics.discussionBacklogTopics.length >= 2
         ? <div class="nextSectionButton">
             <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
           </div>
