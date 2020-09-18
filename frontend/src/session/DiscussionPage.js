@@ -123,11 +123,11 @@ class DiscussionPage extends React.Component {
       }
     }
 
-    let currentDiscussionItemHeader = this.state.topics.currentDiscussionItem.text === undefined
+    let currentDiscussionItemHeader = this.state.topics.currentDiscussionItem === undefined || this.state.topics.currentDiscussionItem.text === undefined
       ? null
       : "Current discussion item";
     
-    let currentDiscussionItem = this.state.topics.currentDiscussionItem.text === undefined
+    let currentDiscussionItem = this.state.topics.currentDiscussionItem === undefined || this.state.topics.currentDiscussionItem.text === undefined
       ? "Session completed!"
       : this.state.topics.currentDiscussionItem.text;
 
