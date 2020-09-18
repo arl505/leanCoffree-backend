@@ -32,7 +32,7 @@ class JoinSessionModal extends React.Component {
 
   isVerificationResponseValid(response, sessionGuid) {
     return response.data.verificationStatus === "VERIFICATION_SUCCESS" && response.data.sessionDetails.sessionId === sessionGuid &&
-    response.data.sessionDetails.sessionStatus === "STARTED";
+    response.data.sessionDetails.sessionStatus !== "WAITING_TO_START";
   }
 
   getSessionGuidFromUrlOrReturnNullIfInvalid(sessionUrl) {
