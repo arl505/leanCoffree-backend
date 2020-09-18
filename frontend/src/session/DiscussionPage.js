@@ -77,7 +77,7 @@ class DiscussionPage extends React.Component {
     return topicsElements;
   }
 
-  getDiscussedCards() {
+  getDiscussedCards(isFinished) {
     if(this.state.topics.discussedTopics !== undefined && this.state.topics.discussedTopics.length !== 0) {
       let allDiscussedTopicsElements = [];
       for(let i = 0; i <= this.state.topics.discussedTopics.length; i++) {
@@ -94,11 +94,19 @@ class DiscussionPage extends React.Component {
         }
       }
 
-      return (
-        <div class="disccussedItemsSection">
-          {allDiscussedTopicsElements}
-        </div>
-      )
+      if(!isFinished) {
+        return (
+          <div class="discussedItemsSection">
+            {allDiscussedTopicsElements}
+          </div>
+        )
+      } else {
+        return (
+          <div class="discussedItemsSection column1">
+            {allDiscussedTopicsElements}
+          </div>
+        )
+      }
     }
   }
 
@@ -122,19 +130,29 @@ class DiscussionPage extends React.Component {
     let currentDiscussionItem = this.state.topics.currentDiscussionItem.text === undefined
       ? "Session completed!"
       : this.state.topics.currentDiscussionItem.text;
-      
-    return (
-      <div class="session-grid-container">
-        <div class="discussCards-grid-container">
-          {this.getAllTopicCards()}
-        </div>
-        <div class="currentDiscussionItem">
+
+    let allTopicCards = this.getAllTopicCards();
+    let allTopicCardsContainer = allTopicCards.length === 0
+      ? null
+      : <div class="discussCards-grid-container">{allTopicCards}</div>;
+
+    let currentDiscussionItemContainer = allTopicCardsContainer === null 
+      ? <div class="currentDiscussionItem column1">
           <h5 class="currentTopicHeader">{currentDiscussionItemHeader}</h5>
           <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
           {countdown}
         </div>
-
-        {this.getDiscussedCards()}
+      : <div class="currentDiscussionItem">
+          <h5 class="currentTopicHeader">{currentDiscussionItemHeader}</h5>
+          <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
+          {countdown}
+        </div>;
+      
+    return (
+      <div class="session-grid-container">
+        {allTopicCardsContainer}
+        {currentDiscussionItemContainer}
+        {this.getDiscussedCards(allTopicCardsContainer === null)}
 
         <div class="session-grid-item usersSection column3">
           <div>All here:</div>
