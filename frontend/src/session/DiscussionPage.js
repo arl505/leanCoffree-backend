@@ -32,7 +32,7 @@ class DiscussionPage extends React.Component {
             if(this.state.topics.discussionBacklogTopics.length !== 0) {
               body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
             } else {
-              body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, displayName: this.state.userDisplayName, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
+              body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
             }
             Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
               .then((response) => {
@@ -107,14 +107,20 @@ class DiscussionPage extends React.Component {
     if(this.state.currentTopicSecondsRemaining !== -1) {
       let minutesNum = Math.floor(this.state.currentTopicSecondsRemaining / 60);
       let secondsNum = this.state.currentTopicSecondsRemaining % 60;
-      if(secondsNum < 10) {
-        secondsNum = ("0" + secondsNum).slice(-2);
+      if(!isNaN(minutesNum) && !isNaN(secondsNum)) {
+        if(secondsNum < 10) {
+          secondsNum = ("0" + secondsNum).slice(-2);
+        }
+        countdown = <h5 class="countdown">{minutesNum} : {secondsNum}</h5>
       }
-      countdown = <h5 class="countdown">{minutesNum} : {secondsNum}</h5>
     }
-    
-    let currentDiscussionItem = this.state.topics.currentDiscussionItem === undefined
+
+    let currentDiscussionItemHeader = this.state.topics.currentDiscussionItem.text === undefined
       ? null
+      : "Current discussion item";
+    
+    let currentDiscussionItem = this.state.topics.currentDiscussionItem.text === undefined
+      ? "Session completed!"
       : this.state.topics.currentDiscussionItem.text;
       
     return (
@@ -123,7 +129,7 @@ class DiscussionPage extends React.Component {
           {this.getAllTopicCards()}
         </div>
         <div class="currentDiscussionItem">
-          <h5 class="currentTopicHeader">Current discussion item</h5>
+          <h5 class="currentTopicHeader">{currentDiscussionItemHeader}</h5>
           <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
           {countdown}
         </div>

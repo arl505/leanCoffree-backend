@@ -9,15 +9,13 @@ import static com.leancoffree.backend.enums.TopicStatus.DISCUSSED;
 import static com.leancoffree.backend.enums.TopicStatus.DISCUSSING;
 
 import com.leancoffree.backend.domain.entity.SessionsEntity;
-import com.leancoffree.backend.domain.entity.TopicsEntity;
-import com.leancoffree.backend.domain.entity.TopicsEntity.TopicsId;
 import com.leancoffree.backend.domain.model.RefreshTopicsRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
-import com.leancoffree.backend.enums.SortTopicsBy;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
 import java.time.Instant;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,29 +33,22 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
     this.sessionsRepository = sessionsRepository;
   }
 
+  @Transactional
   public SuccessOrFailureAndErrorBody refreshTopics(
       final RefreshTopicsRequest refreshTopicsRequest) {
 
     if (NEXT.equals(refreshTopicsRequest.getCommand())) {
-
-      final Optional<TopicsEntity> currentTopicsEntityOptional = topicsRepository
-          .findById(new TopicsId(refreshTopicsRequest.getSessionId(),
-              refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getCurrentTopicAuthorDisplayName()));
-      final Optional<TopicsEntity> nextTopicsEntityOptional = topicsRepository
-          .findById(new TopicsId(refreshTopicsRequest.getSessionId(),
-              refreshTopicsRequest.getNextTopicText(), refreshTopicsRequest.getNextTopicAuthorDisplayName()));
       final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository
           .findById(refreshTopicsRequest.getSessionId());
 
-      if (currentTopicsEntityOptional.isPresent() && nextTopicsEntityOptional.isPresent()
-          && sessionsEntityOptional.isPresent()) {
-        final TopicsEntity currentTopicsEntity = currentTopicsEntityOptional.get();
-        currentTopicsEntity.setTopicStatus(DISCUSSED);
-        topicsRepository.save(currentTopicsEntity);
+      if (sessionsEntityOptional.isPresent()) {
+        topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
+            refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
+            refreshTopicsRequest.getCurrentTopicAuthorDisplayName());
 
-        final TopicsEntity nextTopicsEntity = nextTopicsEntityOptional.get();
-        nextTopicsEntity.setTopicStatus(DISCUSSING);
-        topicsRepository.save(nextTopicsEntity);
+        topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSING.toString(),
+            refreshTopicsRequest.getNextTopicText(), refreshTopicsRequest.getSessionId(),
+            refreshTopicsRequest.getNextTopicAuthorDisplayName());
 
         final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
         sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(5));
@@ -67,7 +58,11 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       }
     } else if (FINISH.equals(refreshTopicsRequest.getCommand())) {
-      return new SuccessOrFailureAndErrorBody(FAILURE, "Mocked finish!");
+      topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
+          refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
+          refreshTopicsRequest.getCurrentTopicAuthorDisplayName());
+      broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), VOTES, false);
+      return new SuccessOrFailureAndErrorBody(SUCCESS, null);
     }
     return new SuccessOrFailureAndErrorBody(FAILURE, "Command or topic/session invalid");
   }
