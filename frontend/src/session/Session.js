@@ -42,7 +42,7 @@ class Session extends React.Component {
     var self = this;  
     Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/verify-session/' + sessionIdFromAddress, null)
       .then((response) => {
-        if(self.isVerificationResponseValid(response, sessionIdFromAddress[0]) && (response.data.sessionDetails.sessionStatus === "STARTED" || response.data.sessionDetails.sessionStatus === "DISCUSSING")) {
+        if(self.isVerificationResponseValid(response, sessionIdFromAddress[0])) {
           self.connectToWebSocketServer();
           self.setState({
             isSessionVerified: true,
@@ -60,7 +60,8 @@ class Session extends React.Component {
   }
 
   isVerificationResponseValid(response, sessionIdFromAddress) {
-    return response.data.verificationStatus === "VERIFICATION_SUCCESS" && response.data.sessionDetails.sessionId === sessionIdFromAddress;
+    return response.data.verificationStatus === "VERIFICATION_SUCCESS" && response.data.sessionDetails.sessionId === sessionIdFromAddress 
+      && (response.data.sessionDetails.sessionStatus === "WAITING_TO_START" ||response.data.sessionDetails.sessionStatus === "STARTED" || response.data.sessionDetails.sessionStatus === "DISCUSSING");
   }
 
   connectToWebSocketServer() {
@@ -89,7 +90,7 @@ class Session extends React.Component {
         stompClient.subscribe('/topic/users/session/' + this.state.sessionId, 
           (payload) => {
             let updateUsersBody = JSON.parse(payload.body);
-            this.setState({usersInAttendance: updateUsersBody.displayNames});
+            this.setState({usersInAttendance: updateUsersBody});
           }
         );
         this.setState({websocketUserId: frame.headers['user-name']})
@@ -113,19 +114,26 @@ class Session extends React.Component {
       })
       .catch((error) => {
         alert("Error while adding displayname to backend\n" + error)
-      });
-      
+      }); 
     }
   }
 
   getAllHere() {
     let allHereListItems = [];
-    for(let i = 0; i < this.state.usersInAttendance.length; i++) {
-      let username = this.state.usersInAttendance[i];
+    for(let i = 0; i < this.state.usersInAttendance.displayNames.length; i++) {
+      let username = this.state.usersInAttendance.displayNames[i];
       if(username === this.state.userDisplayName) {
-        allHereListItems.push(<li key={i.toString()} class="usernameList"><b>{this.state.usersInAttendance[i]}</b></li>);
+        if(username === this.state.usersInAttendance.moderator) {
+          allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList"><b>{username}</b></li>);
+        } else {
+          allHereListItems.push(<li key={i.toString()} class="usernameList"><b>{username}</b></li>);
+        }
       } else {
-        allHereListItems.push(<li key={i.toString()} class="usernameList">{this.state.usersInAttendance[i]}</li>);
+        if(username === this.state.usersInAttendance.moderator) {
+          allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList">{username}</li>);
+        } else {
+          allHereListItems.push(<li key={i.toString()} class="usernameList">{username}</li>);
+        }
       }
     }
     return (
