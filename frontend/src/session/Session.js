@@ -2,6 +2,7 @@ import React from 'react';
 import Axios from 'axios';
 import DiscussionPage from './DiscussionPage';
 import './session.css'
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 let stompClient = null;
 class Session extends React.Component {
@@ -18,7 +19,8 @@ class Session extends React.Component {
       cardSubmissionText: "",
       topics: {},
       votesLeft: 3,
-      currentTopicEndTime: ''
+      currentTopicEndTime: '',
+      isNameModalOpen: true,
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.submitDisplayName = this.submitDisplayName.bind(this);
@@ -93,6 +95,7 @@ class Session extends React.Component {
             this.setState({usersInAttendance: updateUsersBody});
           }
         );
+        Axios.get(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users/" + this.state.sessionId);
         this.setState({websocketUserId: frame.headers['user-name']})
       }, 
       (error) => {
@@ -107,7 +110,7 @@ class Session extends React.Component {
       Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "ADD", websocketUserId: self.state.websocketUserId})
       .then((response) => {
         if(response.data.status === "SUCCESS") {
-          self.setState({sessionStatus: response.data.sessionStatus});
+          self.setState({sessionStatus: response.data.sessionStatus, isNameModalOpen: false});
         } else {
           alert(response.data.error);
         }
@@ -120,19 +123,21 @@ class Session extends React.Component {
 
   getAllHere() {
     let allHereListItems = [];
-    for(let i = 0; i < this.state.usersInAttendance.displayNames.length; i++) {
-      let username = this.state.usersInAttendance.displayNames[i];
-      if(username === this.state.userDisplayName) {
-        if(username === this.state.usersInAttendance.moderator) {
-          allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList"><b>{username}</b></li>);
+    if(this.state.usersInAttendance.displayNames !== undefined) {
+      for(let i = 0; i < this.state.usersInAttendance.displayNames.length; i++) {
+        let username = this.state.usersInAttendance.displayNames[i];
+        if(username === this.state.userDisplayName) {
+          if(username === this.state.usersInAttendance.moderator) {
+            allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList"><b>{username}</b></li>);
+          } else {
+            allHereListItems.push(<li key={i.toString()} class="usernameList"><b>{username}</b></li>);
+          }
         } else {
-          allHereListItems.push(<li key={i.toString()} class="usernameList"><b>{username}</b></li>);
-        }
-      } else {
-        if(username === this.state.usersInAttendance.moderator) {
-          allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList">{username}</li>);
-        } else {
-          allHereListItems.push(<li key={i.toString()} class="usernameList">{username}</li>);
+          if(username === this.state.usersInAttendance.moderator) {
+            allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList">{username}</li>);
+          } else {
+            allHereListItems.push(<li key={i.toString()} class="usernameList">{username}</li>);
+          }
         }
       }
     }
@@ -160,10 +165,10 @@ class Session extends React.Component {
   }
 
   populateCards() {
-    if(this.state.topics.discussionBacklogTopics !== undefined) {
-      let topicsElements = [];
+    let topicsElements = [];
 
-      let allTopics = this.state.topics.discussionBacklogTopics;
+    let allTopics = this.state.topics.discussionBacklogTopics;
+    if(allTopics !== undefined) {
       for(let i = 0; i < allTopics.length; i++) {
         let text = allTopics[i].text;
         let votes = allTopics[i].voters.length;
@@ -189,18 +194,18 @@ class Session extends React.Component {
           </div>
         );
       }
-
-      return (
-        <div class="cards-grid-container">
-          <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
-            <textarea id="composeTextArea" value={this.state.cardSubmissionText} onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"/>
-            <button id="cardButton" onClick={this.submitCard}>Submit</button>
-          </div>
-
-          {topicsElements}
-        </div>
-      )
     }
+
+    return (
+      <div class="cards-grid-container">
+        <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
+          <textarea id="composeTextArea" value={this.state.cardSubmissionText} onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"/>
+          <button id="cardButton" onClick={this.submitCard}>Submit</button>
+        </div>
+
+        {topicsElements}
+      </div>
+    )    
   }
 
   postVoteForTopic(topicText, commandType, authorDisplayName) {
@@ -238,31 +243,32 @@ class Session extends React.Component {
   }
 
   render() {
-    if(this.state.sessionStatus === "ASK_FOR_USERNAME") {
-      return (
-        <div>
-          Enter your display name
-          <input name="displayName" placeholder="Johnny C." onChange={(event) => {this.setState({userDisplayName: event.target.value});}}></input>
-          <button onClick={this.submitDisplayName}>Submit</button>
-        </div>
-      )
-    }
-
-    else if (this.state.sessionStatus === "STARTED") {
+    if((this.state.sessionStatus === "ASK_FOR_USERNAME" || this.state.sessionStatus === 'STARTED')) {
       let nextSectionButton = this.state.topics.discussionBacklogTopics !== undefined && this.state.topics.discussionBacklogTopics.length >= 2
         ? <div class="nextSectionButton">
             <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
           </div>
         : null;
       return (
-        <div class="session-grid-container">
-          <div class="session-grid-item cardsSection">
-            {this.populateCards()}
-          </div>
-          <div class="session-grid-item usersSection">
-            <div>All here:</div>
-            <div>{this.getAllHere()}</div>
-            {nextSectionButton}
+        <div>
+          <Modal isOpen={this.state.isNameModalOpen}>
+            <ModalHeader>Enter your name</ModalHeader>
+            <ModalBody>
+              <input name="displayName" placeholder="Johnny C." onChange={(event) => {this.setState({userDisplayName: event.target.value});}}></input>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" onClick={this.submitDisplayName}>Submit</Button>
+            </ModalFooter>
+          </Modal> 
+          <div class="session-grid-container">
+            <div class="session-grid-item cardsSection">
+              {this.populateCards()}
+            </div>
+            <div class="session-grid-item usersSection">
+              <div>All here:</div>
+              <div>{this.getAllHere()}</div>
+              {nextSectionButton}
+            </div>
           </div>
         </div>
       )

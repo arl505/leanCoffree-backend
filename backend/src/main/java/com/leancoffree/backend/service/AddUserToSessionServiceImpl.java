@@ -53,12 +53,16 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     final long usersInSessionCount = usersRepository.countBySessionId(sessionId);
 
     if (usersEntityOptional.isEmpty() || !usersEntityOptional.get().getIsOnline()) {
+      boolean wasAlreadyModerator = false;
+      if(usersEntityOptional.isPresent()) {
+        wasAlreadyModerator = usersEntityOptional.get().getIsModerator();
+      }
       usersRepository.save(UsersEntity.builder()
           .displayName(displayName)
           .sessionId(sessionId)
           .websocketUserId(refreshUsersRequest.getWebsocketUserId())
           .isOnline(true)
-          .isModerator(usersInSessionCount == 0)
+          .isModerator(usersInSessionCount == 0 || wasAlreadyModerator  )
           .build());
 
       final Optional<List<UsersEntity>> optionalUsersEntityList = usersRepository
