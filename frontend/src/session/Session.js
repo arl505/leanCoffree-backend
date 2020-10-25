@@ -185,6 +185,9 @@ class Session extends React.Component {
         } else if(this.state.votesLeft !== 0) {
           votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
         }
+        let deleteButton = this.state.userDisplayName === this.state.usersInAttendance.moderator && !this.state.sessionStatus.includes("ASK_FOR_USERNAME")
+          ? <button style={{height: '10%', fontSize: '10%', position: "absolute", bottom: '2.5%', right: '25%'}}>Delete</button>
+          : null;
 
         // i + 1 because first square taken by compose card
         // mod by 5 to get column number, count is 1 based so add 1 to result
@@ -197,6 +200,7 @@ class Session extends React.Component {
           <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
             <p id="topicText">{text}</p>
             <p id="votesText">Votes: {votes}</p>
+            {deleteButton}
             {votingButton}
           </div>
         );
