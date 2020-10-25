@@ -38,6 +38,10 @@ public class UsersEntity {
   @Type(type = "org.hibernate.type.NumericBooleanType")
   private Boolean isOnline;
 
+  @Column(name = "is_moderator")
+  @Type(type = "org.hibernate.type.NumericBooleanType")
+  private Boolean isModerator;
+
   @Data
   @Builder
   @AllArgsConstructor

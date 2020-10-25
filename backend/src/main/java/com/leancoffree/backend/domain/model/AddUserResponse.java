@@ -12,14 +12,16 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SessionStatusResponse extends SuccessOrFailureAndErrorBody {
+public class AddUserResponse extends SuccessOrFailureAndErrorBody {
 
   private SessionStatus sessionStatus;
+  private Boolean showShareableLink;
 
   @Builder
-  public SessionStatusResponse(final SessionStatus sessionStatus, final SuccessOrFailure status,
-      final String error) {
+  public AddUserResponse(final Boolean showShareableLink, final SessionStatus sessionStatus,
+      final SuccessOrFailure status, final String error) {
     super(status, error);
     this.sessionStatus = sessionStatus;
+    this.showShareableLink = showShareableLink;
   }
 }
