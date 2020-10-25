@@ -146,6 +146,7 @@ class Session extends React.Component {
           }
         }
       }
+      allHereListItems.push(<button onClick={this.toggleShareableLink}>Invite more</button>);
     }
     return (
       <ul class="usernameList">
