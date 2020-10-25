@@ -1,6 +1,6 @@
 package com.leancoffree.backend.service;
 
-import static com.leancoffree.backend.enums.SessionStatus.WAITING_TO_START;
+import static com.leancoffree.backend.enums.SessionStatus.STARTED;
 
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.model.CreateSessionResponse;
@@ -29,7 +29,7 @@ public class CreateSessionServiceImpl implements CreateSessionService {
 
     sessionsRepository.save(SessionsEntity.builder()
         .id(sessionId)
-        .sessionStatus(WAITING_TO_START)
+        .sessionStatus(STARTED)
         .build());
 
     return CreateSessionResponse.builder()
