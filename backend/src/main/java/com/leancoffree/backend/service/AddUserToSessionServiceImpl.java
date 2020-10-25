@@ -54,7 +54,10 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
         .findById(refreshUsersRequest.getSessionId());
 
     if (usersEntityOptional.isEmpty() || !usersEntityOptional.get().getIsOnline()) {
-      final boolean isModerator = isModerator(usersEntityOptional, sessionId);
+      final boolean wasAlreadyModerator = wasAlreadyModerator(usersEntityOptional);
+      final boolean isModerator =
+          usersRepository.countBySessionId(sessionId) == 0 || wasAlreadyModerator;
+
       usersRepository.save(UsersEntity.builder()
           .displayName(displayName)
           .sessionId(sessionId)
@@ -86,7 +89,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
         broadcastTopicsService.broadcastTopics(sessionId, sortTopicsBy, false);
 
         return AddUserResponse.builder()
-            .showShareableLink(true)
+            .showShareableLink(isModerator && !wasAlreadyModerator)
             .status(SUCCESS)
             .error(null)
             .sessionStatus(sessionsEntityOptional.get().getSessionStatus())
@@ -106,13 +109,12 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     }
   }
 
-  private boolean isModerator(final Optional<UsersEntity> usersEntityOptional,
-      final String sessionId) {
+  private boolean wasAlreadyModerator(final Optional<UsersEntity> usersEntityOptional) {
     boolean wasAlreadyModerator = false;
     if (usersEntityOptional.isPresent()) {
       wasAlreadyModerator = usersEntityOptional.get().getIsModerator();
     }
-    return usersRepository.countBySessionId(sessionId) == 0 || wasAlreadyModerator;
+    return wasAlreadyModerator;
   }
 
   private Map.Entry<List<String>, String> getDisplayNamesAndModeratorName(String moderatorName,
