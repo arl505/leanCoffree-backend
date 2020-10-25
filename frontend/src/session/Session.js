@@ -46,10 +46,13 @@ class Session extends React.Component {
       .then((response) => {
         if(self.isVerificationResponseValid(response, sessionIdFromAddress[0])) {
           self.connectToWebSocketServer();
+          let status = response.data.sessionDetails.sessionStatus === "STARTED"
+            ? "ASK_FOR_USERNAME_STARTED"
+            : "ASK_FOR_USERNAME_DISCUSSING";
           self.setState({
             isSessionVerified: true,
             sessionId: response.data.sessionDetails.sessionId,
-            sessionStatus: "ASK_FOR_USERNAME",
+            sessionStatus: status,
           })
         } else {
           return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
@@ -63,7 +66,7 @@ class Session extends React.Component {
 
   isVerificationResponseValid(response, sessionIdFromAddress) {
     return response.data.verificationStatus === "VERIFICATION_SUCCESS" && response.data.sessionDetails.sessionId === sessionIdFromAddress 
-      && (response.data.sessionDetails.sessionStatus === "WAITING_TO_START" ||response.data.sessionDetails.sessionStatus === "STARTED" || response.data.sessionDetails.sessionStatus === "DISCUSSING");
+      && (response.data.sessionDetails.sessionStatus === "STARTED" || response.data.sessionDetails.sessionStatus === "DISCUSSING");
   }
 
   connectToWebSocketServer() {
@@ -82,7 +85,7 @@ class Session extends React.Component {
               this.setState({topics: JSON.parse(payload.body)});
             } else {
               this.setState({topics: JSON.parse(payload.body), currentTopicEndTime: JSON.parse(payload.body).currentDiscussionItem.endTime}, () => {
-                if(this.state.sessionStatus !== "" && this.state.sessionStatus !== "ASK_FOR_USERNAME") {
+                if(this.state.sessionStatus !== "" && !this.state.sessionStatus.includes("ASK_FOR_USERNAME")) {
                   this.setState({sessionStatus: "DISCUSSING"});
                 }
               });
@@ -243,7 +246,19 @@ class Session extends React.Component {
   }
 
   render() {
-    if((this.state.sessionStatus === "ASK_FOR_USERNAME" || this.state.sessionStatus === 'STARTED')) {
+    let usernameModal = !this.state.sessionStatus.includes("ASK_FOR_USERNAME")
+      ? null
+      : <Modal isOpen={this.state.isNameModalOpen}>
+          <ModalHeader>Enter your name</ModalHeader>
+          <ModalBody>
+            <input name="displayName" placeholder="Johnny C." onChange={(event) => {this.setState({userDisplayName: event.target.value});}}></input>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" onClick={this.submitDisplayName}>Submit</Button>
+          </ModalFooter>
+        </Modal>
+
+    if((this.state.sessionStatus.includes("STARTED"))) {
       let nextSectionButton = this.state.topics.discussionBacklogTopics !== undefined && this.state.topics.discussionBacklogTopics.length >= 2
         ? <div class="nextSectionButton">
             <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
@@ -251,15 +266,7 @@ class Session extends React.Component {
         : null;
       return (
         <div>
-          <Modal isOpen={this.state.isNameModalOpen}>
-            <ModalHeader>Enter your name</ModalHeader>
-            <ModalBody>
-              <input name="displayName" placeholder="Johnny C." onChange={(event) => {this.setState({userDisplayName: event.target.value});}}></input>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="primary" onClick={this.submitDisplayName}>Submit</Button>
-            </ModalFooter>
-          </Modal> 
+          {usernameModal}
           <div class="session-grid-container">
             <div class="session-grid-item cardsSection">
               {this.populateCards()}
@@ -274,9 +281,12 @@ class Session extends React.Component {
       )
     }
 
-    else if (this.state.sessionStatus === "DISCUSSING" && this.state.currentTopicEndTime !== null) {
+    else if (this.state.sessionStatus.includes("DISCUSSING") && this.state.currentTopicEndTime !== null) {
       return (
-        <DiscussionPage sessionId={this.state.sessionId} getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} />
+        <div>
+          {usernameModal}
+          <DiscussionPage sessionId={this.state.sessionId} getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} />
+        </div>
       )
     }
 

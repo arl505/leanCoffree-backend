@@ -15,14 +15,14 @@ class DiscussionPage extends React.Component {
 
   componentDidMount() {
     if(this.state.topics !== undefined) {
-      if(this.state.currentTopicSecondsRemaining === -1 && this.state.topics !== {}) {
+      if(this.state.currentTopicSecondsRemaining === -1 && this.state.topics !== {} && this.state.topics.currentDiscussionItem !== undefined) {
         let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
         let nowSeconds = Math.round(new Date().getTime() / 1000);
         this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
       }
       
       setInterval(() => {
-        if(this.state.topics !== undefined) {
+        if(this.state.topics !== undefined && this.state.topics.currentDiscussionItem !== undefined) {
           let endSeconds = Math.round(new Date(this.state.topics.currentDiscussionItem.endTime).getTime() / 1000);
           let nowSeconds = Math.round(new Date().getTime() / 1000);
           if(Math.max(0, endSeconds - nowSeconds) !== 0) {
