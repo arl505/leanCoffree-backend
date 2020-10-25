@@ -47,7 +47,7 @@ public class RefreshUsersServiceImpl implements RefreshUsersService {
     this.usersRepository = usersRepository;
   }
 
-  public SessionStatusResponse refreshUsers(final RefreshUsersRequest refreshUsersRequest) {
+  public SuccessOrFailureAndErrorBody refreshUsers(final RefreshUsersRequest refreshUsersRequest) {
     if (ADD.equals(refreshUsersRequest.getCommand())) {
       return addUserToSessionService.addUserToSessionAndReturnAllUsers(refreshUsersRequest);
     } else {

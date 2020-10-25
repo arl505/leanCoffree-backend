@@ -9,8 +9,8 @@ import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity.UsersId;
+import com.leancoffree.backend.domain.model.AddUserResponse;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
-import com.leancoffree.backend.domain.model.SessionStatusResponse;
 import com.leancoffree.backend.enums.SortTopicsBy;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.UsersRepository;
@@ -41,7 +41,7 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     this.sessionsRepository = sessionsRepository;
   }
 
-  public SessionStatusResponse addUserToSessionAndReturnAllUsers(
+  public AddUserResponse addUserToSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest) {
 
     final String displayName = refreshUsersRequest.getDisplayName();
@@ -85,18 +85,21 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
             .convertAndSend("/topic/users/session/" + sessionId, websocketMessageString);
         broadcastTopicsService.broadcastTopics(sessionId, sortTopicsBy, false);
 
-        return SessionStatusResponse.builder()
+        return AddUserResponse.builder()
+            .showShareableLink(true)
             .status(SUCCESS)
             .error(null)
             .sessionStatus(sessionsEntityOptional.get().getSessionStatus())
             .build();
       }
-      return SessionStatusResponse.builder()
+      return AddUserResponse.builder()
+          .showShareableLink(false)
           .status(FAILURE)
           .error("How'd that happen? Please try again")
           .build();
     } else {
-      return SessionStatusResponse.builder()
+      return AddUserResponse.builder()
+          .showShareableLink(false)
           .status(FAILURE)
           .error("Display name already in use in session")
           .build();

@@ -30,7 +30,7 @@ public class RefreshUsersController {
 
   @CrossOrigin
   @PostMapping("/refresh-users")
-  public ResponseEntity<SessionStatusResponse> addOrDropUserEndpoint(
+  public ResponseEntity<SuccessOrFailureAndErrorBody> addOrDropUserEndpoint(
       @Valid @RequestBody final RefreshUsersRequest refreshUsersRequest, final Errors errors) {
 
     if (errors.hasErrors()) {
@@ -46,7 +46,7 @@ public class RefreshUsersController {
     return ResponseEntity.ok(refreshUsersService.quickRefresh(sessionId));
   }
 
-  private ResponseEntity<SessionStatusResponse> buildValidationErrorsResponse(
+  private ResponseEntity<SuccessOrFailureAndErrorBody> buildValidationErrorsResponse(
       final Errors errors) {
     final List<String> errorsList = new ArrayList<>();
     for (final ObjectError error : errors.getAllErrors()) {
