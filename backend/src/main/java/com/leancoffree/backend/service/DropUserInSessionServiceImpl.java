@@ -2,6 +2,7 @@ package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
+import static org.json.JSONObject.NULL;
 
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity;
@@ -49,11 +50,16 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
           .findBySessionIdAndIsOnlineTrue(usersEntity.getSessionId());
 
       if (optionalUsersEntityList.isPresent()) {
+        String moderatorName = null;
         for (final UsersEntity user : optionalUsersEntityList.get()) {
           displayNames.add(user.getDisplayName());
+          if(user.getIsModerator()) {
+            moderatorName = user.getDisplayName();
+          }
         }
         final String websocketMessageString = new JSONObject()
-            .put("displayNames", new JSONArray(displayNames)).toString();
+            .put("displayNames", new JSONArray(displayNames))
+            .put("moderator", moderatorName == null ? NULL : moderatorName).toString();
         webSocketMessagingTemplate
             .convertAndSend("/topic/users/session/" + usersEntity.getSessionId(),
                 websocketMessageString);
