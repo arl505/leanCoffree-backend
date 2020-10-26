@@ -181,12 +181,12 @@ class Session extends React.Component {
         let votes = allTopics[i].voters.length;
         let votingButton;
         if(allTopics[i].voters.includes(this.state.userDisplayName)) {
-          votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
+          votingButton = <button onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
         } else if(this.state.votesLeft !== 0) {
-          votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
+          votingButton = <button style={{maxHeight: '100%'}} onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
         }
         let deleteButton = this.state.userDisplayName === this.state.usersInAttendance.moderator && !this.state.sessionStatus.includes("ASK_FOR_USERNAME")
-          ? <button style={{height: '10%', fontSize: '10%', position: "absolute", bottom: '2.5%', right: '25%'}}>Delete</button>
+          ? <button style={{maxHeight: '100%'}}>Delete</button>
           : null;
 
         // i + 1 because first square taken by compose card
@@ -200,8 +200,11 @@ class Session extends React.Component {
           <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
             <p id="topicText">{text}</p>
             <p id="votesText">Votes: {votes}</p>
-            {deleteButton}
-            {votingButton}
+            <div style={{fontSize: '50%', height: '10%', position: "absolute", bottom: '2.5%', right: '2.5%'}}>
+              {deleteButton}
+              <text> </text>
+              {votingButton}
+            </div>
           </div>
         );
       }
