@@ -10,4 +10,6 @@ public interface VotesRepository extends CrudRepository<VotesEntity, Long> {
 
   void deleteByVoterSessionIdAndTextAndVoterDisplayName(final String voterSessionId,
       final String text, final String voterDisplayName);
+
+  void deleteByVoterSessionIdAndText(final String sessionId, final String text);
 }

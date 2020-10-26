@@ -171,6 +171,18 @@ class Session extends React.Component {
     }
   }
 
+  deleteTopic(topic) {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.state.sessionId, topicText: topic.text, authorName: topic.authorDisplayName})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        }
+      })
+      .catch((error) => 
+        alert("Unable to delete topic\n" + error)
+      );
+  }
+
   populateCards() {
     let topicsElements = [];
 
@@ -186,7 +198,7 @@ class Session extends React.Component {
           votingButton = <button style={{maxHeight: '100%'}} onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
         }
         let deleteButton = this.state.userDisplayName === this.state.usersInAttendance.moderator && !this.state.sessionStatus.includes("ASK_FOR_USERNAME")
-          ? <button style={{maxHeight: '100%'}}>Delete</button>
+          ? <button onClick={() => this.deleteTopic(allTopics[i])} style={{maxHeight: '100%'}}>Delete</button>
           : null;
 
         // i + 1 because first square taken by compose card
