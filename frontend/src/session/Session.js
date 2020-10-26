@@ -171,6 +171,18 @@ class Session extends React.Component {
     }
   }
 
+  deleteTopic(topic) {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.state.sessionId, topicText: topic.text, authorName: topic.authorDisplayName})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        }
+      })
+      .catch((error) => 
+        alert("Unable to delete topic\n" + error)
+      );
+  }
+
   populateCards() {
     let topicsElements = [];
 
@@ -181,10 +193,13 @@ class Session extends React.Component {
         let votes = allTopics[i].voters.length;
         let votingButton;
         if(allTopics[i].voters.includes(this.state.userDisplayName)) {
-          votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
+          votingButton = <button onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
         } else if(this.state.votesLeft !== 0) {
-          votingButton = <button id="cardButton" onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
+          votingButton = <button style={{maxHeight: '100%'}} onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
         }
+        let deleteButton = this.state.userDisplayName === this.state.usersInAttendance.moderator && !this.state.sessionStatus.includes("ASK_FOR_USERNAME")
+          ? <button onClick={() => this.deleteTopic(allTopics[i])} style={{maxHeight: '100%'}}>Delete</button>
+          : null;
 
         // i + 1 because first square taken by compose card
         // mod by 5 to get column number, count is 1 based so add 1 to result
@@ -197,7 +212,11 @@ class Session extends React.Component {
           <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
             <p id="topicText">{text}</p>
             <p id="votesText">Votes: {votes}</p>
-            {votingButton}
+            <div style={{fontSize: '50%', height: '10%', position: "absolute", bottom: '2.5%', right: '2.5%'}}>
+              {deleteButton}
+              <text> </text>
+              {votingButton}
+            </div>
           </div>
         );
       }
