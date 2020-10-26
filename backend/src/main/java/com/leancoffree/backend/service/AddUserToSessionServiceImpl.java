@@ -126,6 +126,9 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
         moderatorName = usersEntity.getDisplayName();
       }
     }
+    if(moderatorName == null) {
+      moderatorName = "";
+    }
     return Map.entry(displayNames, moderatorName);
   }
 }
