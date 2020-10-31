@@ -172,15 +172,17 @@ class Session extends React.Component {
   }
 
   deleteTopic(topic) {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.state.sessionId, topicText: topic.text, authorName: topic.authorDisplayName})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(response.data.error);
-        }
-      })
-      .catch((error) => 
-        alert("Unable to delete topic\n" + error)
-      );
+    if(window.confirm("Confirm if you'd like to delete the following topic: " + topic.text)) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.state.sessionId, topicText: topic.text, authorName: topic.authorDisplayName})
+        .then((response) => {
+          if(response.data.status !== "SUCCESS") {
+            alert(response.data.error);
+          }
+        })
+        .catch((error) => 
+          alert("Unable to delete topic\n" + error)
+        );
+    }
   }
 
   populateCards() {

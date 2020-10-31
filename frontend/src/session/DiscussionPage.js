@@ -58,7 +58,7 @@ class DiscussionPage extends React.Component {
                 }
               })
               .catch((error) => 
-                alert("Unable to submit vote\n" + error)
+                alert("Unable to refresh topics\n" + error)
               );
             }
           }
@@ -100,15 +100,32 @@ class DiscussionPage extends React.Component {
   }
 
   deleteTopic(topicText, author) {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.props.sessionId, topicText: topicText, authorName: author})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(response.data.error);
-        }
-      })
-      .catch((error) => 
-        alert("Unable to delete topic\n" + error)
-      );
+    if(window.confirm("Confirm if you'd like to delete the following topic: " + topicText)) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.props.sessionId, topicText: topicText, authorName: author})
+        .then((response) => {
+          if(response.data.status !== "SUCCESS") {
+            alert(response.data.error);
+          }
+        })
+        .catch((error) => 
+          alert("Unable to delete topic\n" + error)
+        );
+    }
+  }
+
+  pullNewDiscussionTopic(text, author) {
+    let body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: author};
+    if (window.confirm('Pulling this topic for discussion will conclude the current discussion topic, proceed?')) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
+        .then((response) => {
+          if(response.data.status !== "SUCCESS") {
+            alert(response.data.error);
+          }
+        })
+        .catch((error) => 
+          alert("Unable to pull topic for discussion\n" + error)
+        );
+    } 
   }
 
   getAllTopicCards() {
@@ -122,14 +139,11 @@ class DiscussionPage extends React.Component {
         topics.push({votes: votes, text: text, author: author});
       }
 
-      if(this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false) {
-        let dragAndDropPrompt = this.state.topics.discussionBacklogTopics.length > 1
-          ? <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
-          : null;
+      if(this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false && this.state.topics.discussionBacklogTopics.length > 1) {
         return topics.length === 0
         ? null
         : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
-            {dragAndDropPrompt}
+            <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
             <DragDropContext onDragEnd={this.onDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided, snapshot) => (
@@ -140,6 +154,7 @@ class DiscussionPage extends React.Component {
                           <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                             <p class="topicText">{item.text}</p>
                             <p class="votesText">Votes: {item.votes}</p>
+                            <button  onClick={() => this.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
                             <button onClick={() => this.deleteTopic(item.text, item.author)}>Delete</button>
                           </Container>
                         )}
@@ -151,6 +166,21 @@ class DiscussionPage extends React.Component {
               </Droppable>
             </DragDropContext>
           </div>;
+      } else if(this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false) {
+        return topics.length === 0
+        ? null
+        : (
+          <div class="discussCards-container" style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'scroll'}}>
+            {topics.map((item, index) => (
+              <div key={index.toString()} class="cardItem discussionCardItem" style={{gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
+                <p class="topicText">{item.text}</p>
+                <p class="votesText">Votes: {item.votes}</p>
+                <button  onClick={() => this.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
+                <button onClick={() => this.deleteTopic(item.text, item.author)}>Delete</button>
+              </div>
+            ))}
+          </div>
+        );
       } else {
         return topics.length === 0
         ? null
