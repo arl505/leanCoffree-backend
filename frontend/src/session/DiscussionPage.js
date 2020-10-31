@@ -109,37 +109,47 @@ class DiscussionPage extends React.Component {
         topics.push({votes: votes, text: text});
       }
 
-      let dragAndDropPrompt = this.props.userInfo.displayName === this.props.moderatorName && this.state.topics.discussionBacklogTopics.length > 1 && this.props.isUsernameModalOpen === false
-      ? <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
-      : null;
-
-      return topics.length === 0
-       ? null
-       : <div style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
-         {dragAndDropPrompt}
-          <DragDropContext onDragEnd={this.onDragEnd}>
-            <Droppable droppableId="droppable">
-              {(provided, snapshot) => (
-                <div {...provided.droppableProps} class="discussCards-container" style={{paddingBottom: this.props.userInfo.displayName === this.props.moderatorName ? '7.5vw' : '0'}} ref={provided.innerRef}>
-                  {topics.map((item, index) => (
-                    <Draggable key={index.toString()}  draggableId={'draggable' + index} index={index}>
-                      {(provided) => (
-                        <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                          <p class="topicText">{item.text}</p>
-                          <p class="votesText">Votes: {item.votes}</p>
-                        </Container>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        </div>;
-    } else {
-      return null;
+      if(this.props.userInfo.displayName === this.props.moderatorName && this.state.topics.discussionBacklogTopics.length > 1 && this.props.isUsernameModalOpen === false) {
+        return topics.length === 0
+        ? null
+        : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
+            <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
+            <DragDropContext onDragEnd={this.onDragEnd}>
+              <Droppable droppableId="droppable">
+                {(provided, snapshot) => (
+                  <div {...provided.droppableProps} class="discussCards-container" style={{paddingBottom: '7.5vw'}} ref={provided.innerRef}>
+                    {topics.map((item, index) => (
+                      <Draggable key={index.toString()}  draggableId={'draggable' + index} index={index}>
+                        {(provided) => (
+                          <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                            <p class="topicText">{item.text}</p>
+                            <p class="votesText">Votes: {item.votes}</p>
+                          </Container>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </div>;
+      } else {
+        return topics.length === 0
+        ? null
+        : (
+          <div class="discussCards-container" style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'scroll'}}>
+            {topics.map((item, index) => (
+              <div key={index.toString()} class="cardItem discussionCardItem" style={{gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
+                <p class="topicText">{item.text}</p>
+                <p class="votesText">Votes: {item.votes}</p>
+              </div>
+            ))}
+          </div>
+        );
+      }
     }
+    return null;
   }
 
   getDiscussedCards(isFinished) {
