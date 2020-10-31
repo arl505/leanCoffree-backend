@@ -303,7 +303,7 @@ class Session extends React.Component {
       </div>
 
     if((this.state.sessionStatus.includes("STARTED"))) {
-      let nextSectionButton = this.state.topics.discussionBacklogTopics !== undefined && this.state.topics.discussionBacklogTopics.length >= 2
+      let nextSectionButton = this.state.topics.discussionBacklogTopics !== undefined && this.state.topics.discussionBacklogTopics.length >= 2 && this.state.userDisplayName === this.state.usersInAttendance.moderator && this.state.isNameModalOpen === false
         ? <div class="nextSectionButton">
             <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
           </div>
