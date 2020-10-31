@@ -99,6 +99,18 @@ class DiscussionPage extends React.Component {
       );
   }
 
+  deleteTopic(topicText, author) {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.props.sessionId, topicText: topicText, authorName: author})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        }
+      })
+      .catch((error) => 
+        alert("Unable to delete topic\n" + error)
+      );
+  }
+
   getAllTopicCards() {
     let allTopics = this.state.topics.discussionBacklogTopics;
     if(allTopics !== undefined) {
@@ -106,14 +118,18 @@ class DiscussionPage extends React.Component {
       for(let i = 0; i < allTopics.length; i++) {
         let text = allTopics[i].text;
         let votes = allTopics[i].voters.length;
-        topics.push({votes: votes, text: text});
+        let author = allTopics[i].authorDisplayName
+        topics.push({votes: votes, text: text, author: author});
       }
 
-      if(this.props.userInfo.displayName === this.props.moderatorName && this.state.topics.discussionBacklogTopics.length > 1 && this.props.isUsernameModalOpen === false) {
+      if(this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false) {
+        let dragAndDropPrompt = this.state.topics.discussionBacklogTopics.length > 1
+          ? <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
+          : null;
         return topics.length === 0
         ? null
         : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
-            <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
+            {dragAndDropPrompt}
             <DragDropContext onDragEnd={this.onDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided, snapshot) => (
@@ -124,6 +140,7 @@ class DiscussionPage extends React.Component {
                           <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                             <p class="topicText">{item.text}</p>
                             <p class="votesText">Votes: {item.votes}</p>
+                            <button onClick={() => this.deleteTopic(item.text, item.author)}>Delete</button>
                           </Container>
                         )}
                       </Draggable>
