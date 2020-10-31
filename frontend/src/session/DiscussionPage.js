@@ -1,5 +1,18 @@
 import React from 'react';
 import Axios from 'axios';
+import styled from "styled-components";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+
+const Container = styled.div`
+grid-column: 1;
+margin: 1vw;
+margin-left: 2.5vw;
+margin-right: 2.5vw;
+overflow: scroll;
+border: solid black 1px;
+width: 15vw;
+height: 15vw;
+position: relative;`;
 
 class DiscussionPage extends React.Component {
 
@@ -11,6 +24,7 @@ class DiscussionPage extends React.Component {
       currentTopicSecondsRemaining: -1,
       finished: false
     }
+    this.onDragEnd = this.onDragEnd.bind(this);
   }
 
   componentDidMount() {
@@ -58,23 +72,57 @@ class DiscussionPage extends React.Component {
     }
   }
 
-  getAllTopicCards() {
-    let topicsElements = [];
+  onDragEnd(result) {
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
 
+    let topics = this.state.topics.discussionBacklogTopics;
+
+    let topic = topics[result.source.index];
+    topics.splice(result.source.index, 1);
+    topics.splice(result.destination.index, 0, topic);
+
+    let allTopics = this.state.topics;
+    allTopics.discussionBacklogTopics = topics;
+    this.setState({topics: allTopics});
+  }
+
+  getAllTopicCards() {
     let allTopics = this.state.topics.discussionBacklogTopics;
     if(allTopics !== undefined) {
+      let topics = [];
       for(let i = 0; i < allTopics.length; i++) {
         let text = allTopics[i].text;
         let votes = allTopics[i].voters.length;
-        topicsElements.push(
-          <div key={i.toString()} class="cardItem discussionCardItem" style={{gridRow: i + 1}}>
-            <p class="topicText">{text}</p>
-            <p class="votesText">Votes: {votes}</p>
-          </div>
-        );
+        topics.push({votes: votes, text: text});
       }
+
+      return topics.length === 0
+       ? null
+       : <DragDropContext onDragEnd={this.onDragEnd}>
+          <Droppable droppableId="droppable">
+            {(provided, snapshot) => (
+              <div {...provided.droppableProps} class="discussCards-container" ref={provided.innerRef}>
+                {topics.map((item, index) => (
+                  <Draggable key={index.toString()}  draggableId={'draggable' + index} index={index}>
+                    {(provided) => (
+                      <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                        <p class="topicText">{item.text}</p>
+                        <p class="votesText">Votes: {item.votes}</p>
+                      </Container>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>; 
+    } else {
+      return null;
     }
-    return topicsElements;
   }
 
   getDiscussedCards(isFinished) {
@@ -132,9 +180,9 @@ class DiscussionPage extends React.Component {
       : this.state.topics.currentDiscussionItem.text;
 
     let allTopicCards = this.getAllTopicCards();
-    let allTopicCardsContainer = allTopicCards.length === 0
+    let allTopicCardsContainer = allTopicCards === null
       ? null
-      : <div class="discussCards-grid-container">{allTopicCards}</div>;
+      : allTopicCards;
 
     let currentDiscussionItemContainer = allTopicCardsContainer === null 
       ? <div class="currentDiscussionItem column1">
