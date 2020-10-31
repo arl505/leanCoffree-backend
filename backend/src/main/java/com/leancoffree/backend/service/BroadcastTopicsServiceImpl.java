@@ -91,7 +91,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
             .topicStatus(TopicStatus.valueOf(currentDiscussionItem.getTopicStatus()))
             .displayName(currentDiscussionItem.getAuthorDisplayName())
             .createdTimestamp(currentDiscussionItem.getCreationDate())
-            .yIndex(0)
+            .verticalIndex(999)
             .build();
         topicsRepository.save(topicsEntity);
       }

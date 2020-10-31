@@ -22,7 +22,7 @@ public interface TopicsRepository extends CrudRepository<TopicsEntity, TopicsId>
 
   @Modifying
   @Query(value = "UPDATE topics " +
-      "SET status = :command " +
+      "SET status = :command, y_index = 999 " +
       "WHERE text = :text and session_id = :sessionId and display_name = :displayName",
       nativeQuery = true)
   void updateStatusByTextAndSessionIdAndDisplayName(@Param("command") final String command,
@@ -39,4 +39,6 @@ public interface TopicsRepository extends CrudRepository<TopicsEntity, TopicsId>
       @Param("text") final String text, @Param("sessionId") final String sessionId);
 
   List<TopicsEntity> findAllBySessionIdOrderByText(final String sessionId);
+
+  List<TopicsEntity> findAllBySessionIdOrderByVerticalIndex(final String sessionId);
 }

@@ -49,7 +49,7 @@ public class TopicsEntity {
   private TopicStatus topicStatus;
 
   @Column(name = "y_index")
-  private Integer yIndex;
+  private Integer verticalIndex;
 
   @Data
   @Builder

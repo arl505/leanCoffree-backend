@@ -87,6 +87,16 @@ class DiscussionPage extends React.Component {
     let allTopics = this.state.topics;
     allTopics.discussionBacklogTopics = topics;
     this.setState({topics: allTopics});
+    
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/reorder', {sessionId: this.props.sessionId, text: topic.text, newIndex: result.destination.index})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        }
+      })
+      .catch((error) => 
+        alert("Unable to reorder topic\n" + error)
+      );
   }
 
   getAllTopicCards() {

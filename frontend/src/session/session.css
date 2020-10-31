@@ -12,7 +12,6 @@
 }
 
 .discussCards-container {
-  display: grid;
   width: 20vw;
   min-height: 100vh;
   max-height: 100vh;
