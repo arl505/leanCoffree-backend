@@ -13,12 +13,8 @@
 
 .discussCards-container {
   width: 20vw;
-  min-height: 100vh;
   max-height: 100vh;
-  border-right: solid black 1px;
   overflow: scroll;
-  grid-row: 1 / span 2;
-  grid-column: 1;
 }
 
 .cardsSection {

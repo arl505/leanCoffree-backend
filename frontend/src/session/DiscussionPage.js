@@ -109,27 +109,34 @@ class DiscussionPage extends React.Component {
         topics.push({votes: votes, text: text});
       }
 
+      let dragAndDropPrompt = this.props.userInfo.displayName === this.props.moderatorName && this.state.topics.discussionBacklogTopics.length > 1 && this.props.isUsernameModalOpen === false
+      ? <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
+      : null;
+
       return topics.length === 0
        ? null
-       : <DragDropContext onDragEnd={this.onDragEnd}>
-          <Droppable droppableId="droppable">
-            {(provided, snapshot) => (
-              <div {...provided.droppableProps} class="discussCards-container" ref={provided.innerRef}>
-                {topics.map((item, index) => (
-                  <Draggable key={index.toString()}  draggableId={'draggable' + index} index={index}>
-                    {(provided) => (
-                      <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                        <p class="topicText">{item.text}</p>
-                        <p class="votesText">Votes: {item.votes}</p>
-                      </Container>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>; 
+       : <div style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
+         {dragAndDropPrompt}
+          <DragDropContext onDragEnd={this.onDragEnd}>
+            <Droppable droppableId="droppable">
+              {(provided, snapshot) => (
+                <div {...provided.droppableProps} class="discussCards-container" style={{paddingBottom: this.props.userInfo.displayName === this.props.moderatorName ? '7.5vw' : '0'}} ref={provided.innerRef}>
+                  {topics.map((item, index) => (
+                    <Draggable key={index.toString()}  draggableId={'draggable' + index} index={index}>
+                      {(provided) => (
+                        <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                          <p class="topicText">{item.text}</p>
+                          <p class="votesText">Votes: {item.votes}</p>
+                        </Container>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </div>;
     } else {
       return null;
     }
@@ -189,10 +196,7 @@ class DiscussionPage extends React.Component {
       ? "Session completed!"
       : this.state.topics.currentDiscussionItem.text;
 
-    let allTopicCards = this.getAllTopicCards();
-    let allTopicCardsContainer = allTopicCards === null
-      ? null
-      : allTopicCards;
+    let allTopicCardsContainer = this.getAllTopicCards();
 
     let currentDiscussionItemContainer = allTopicCardsContainer === null 
       ? <div class="currentDiscussionItem column1">
