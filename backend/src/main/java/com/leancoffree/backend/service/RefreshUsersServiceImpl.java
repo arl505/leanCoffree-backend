@@ -3,7 +3,7 @@ package com.leancoffree.backend.service;
 import static com.leancoffree.backend.enums.RefreshUsersCommand.ADD;
 import static com.leancoffree.backend.enums.SessionStatus.DISCUSSING;
 import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
-import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
+import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
@@ -88,7 +88,7 @@ public class RefreshUsersServiceImpl implements RefreshUsersService {
           .put("moderator", moderatorName).toString();
       final SortTopicsBy sortTopicsBy =
           sessionsEntityOptional.get().getSessionStatus().equals(DISCUSSING)
-              ? VOTES
+              ? Y_INDEX
               : CREATION;
 
       webSocketMessagingTemplate

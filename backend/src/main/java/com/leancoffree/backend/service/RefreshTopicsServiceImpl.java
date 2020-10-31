@@ -2,7 +2,7 @@ package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.FINISH;
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.NEXT;
-import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
+import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import static com.leancoffree.backend.enums.TopicStatus.DISCUSSED;
@@ -54,14 +54,14 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
         sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(180));
         sessionsRepository.save(sessionsEntity);
 
-        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), VOTES, false);
+        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       }
     } else if (FINISH.equals(refreshTopicsRequest.getCommand())) {
       topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
           refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
           refreshTopicsRequest.getCurrentTopicAuthorDisplayName());
-      broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), VOTES, false);
+      broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
       return new SuccessOrFailureAndErrorBody(SUCCESS, null);
     }
     return new SuccessOrFailureAndErrorBody(FAILURE, "Command or topic/session invalid");

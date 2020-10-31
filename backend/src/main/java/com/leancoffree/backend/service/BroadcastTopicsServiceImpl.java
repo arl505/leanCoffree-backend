@@ -1,7 +1,7 @@
 package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
-import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
+import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import static com.leancoffree.backend.enums.TopicStatus.DISCUSSING;
@@ -16,7 +16,6 @@ import com.leancoffree.backend.repository.TopicsRepository;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -76,7 +75,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
         topicDetailsList.add(entry.getValue());
       }
 
-      if (VOTES.equals(sortTopicsBy)) {
+      if (Y_INDEX.equals(sortTopicsBy)) {
         topicDetailsList.sort((a, b) -> b.getVoters().size() - a.getVoters().size());
       } else if (CREATION.equals(sortTopicsBy)) {
         topicDetailsList.sort(Comparator.comparing(TopicDetails::getCreationDate));
