@@ -16,10 +16,14 @@ import com.leancoffree.backend.repository.TopicsRepository;
 import java.time.Instant;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RefreshTopicsServiceImpl implements RefreshTopicsService {
+
+  @Value("${defaultTopicTime}")
+  private Integer defaultTopicTime;
 
   private final TopicsRepository topicsRepository;
   private final BroadcastTopicsService broadcastTopicsService;
@@ -51,7 +55,7 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
             refreshTopicsRequest.getNextTopicAuthorDisplayName());
 
         final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
-        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(180));
+        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(defaultTopicTime));
         sessionsRepository.save(sessionsEntity);
 
         broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);

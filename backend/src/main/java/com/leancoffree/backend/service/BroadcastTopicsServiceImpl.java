@@ -67,7 +67,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
 
         topicsAndVotersMap
             .put(text, new TopicDetails(text, (String) objects[3], (String) objects[2], voters,
-                ((Timestamp) objects[4]).toInstant()));
+                ((Timestamp) objects[4]).toInstant(), (Integer) objects[5]));
       }
 
       final List<TopicDetails> topicDetailsList = new ArrayList<>();
@@ -76,7 +76,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
       }
 
       if (Y_INDEX.equals(sortTopicsBy)) {
-        topicDetailsList.sort((a, b) -> b.getVoters().size() - a.getVoters().size());
+        topicDetailsList.sort(Comparator.comparing(TopicDetails::getYIndex));
       } else if (CREATION.equals(sortTopicsBy)) {
         topicDetailsList.sort(Comparator.comparing(TopicDetails::getCreationDate));
       }
@@ -91,6 +91,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
             .topicStatus(TopicStatus.valueOf(currentDiscussionItem.getTopicStatus()))
             .displayName(currentDiscussionItem.getAuthorDisplayName())
             .createdTimestamp(currentDiscussionItem.getCreationDate())
+            .yIndex(0)
             .build();
         topicsRepository.save(topicsEntity);
       }
@@ -142,5 +143,6 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
     private String topicStatus;
     private List<String> voters;
     private Instant creationDate;
+    private Integer yIndex;
   }
 }

@@ -48,6 +48,9 @@ public class TopicsEntity {
   @Column(name = "status")
   private TopicStatus topicStatus;
 
+  @Column(name = "y_index")
+  private Integer yIndex;
+
   @Data
   @Builder
   @AllArgsConstructor

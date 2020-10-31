@@ -5,27 +5,39 @@ import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
 import com.leancoffree.backend.domain.entity.SessionsEntity;
+import com.leancoffree.backend.domain.entity.TopicsEntity;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.enums.SessionStatus;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
+import com.leancoffree.backend.repository.VotesRepository;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TransitionToDiscussionServiceImpl implements TransitionToDiscussionService {
 
+  @Value("${defaultTopicTime}")
+  private Integer defaultTopicTime;
+
   private final SessionsRepository sessionsRepository;
   private final TopicsRepository topicsRepository;
+  private final VotesRepository votesRepository;
   private final BroadcastTopicsService broadcastTopicsService;
 
   public TransitionToDiscussionServiceImpl(final SessionsRepository sessionsRepository,
-      final BroadcastTopicsService broadcastTopicsService,
-      final TopicsRepository topicsRepository) {
+      final TopicsRepository topicsRepository,
+      final VotesRepository votesRepository,
+      final BroadcastTopicsService broadcastTopicsService) {
     this.sessionsRepository = sessionsRepository;
-    this.broadcastTopicsService = broadcastTopicsService;
     this.topicsRepository = topicsRepository;
+    this.votesRepository = votesRepository;
+    this.broadcastTopicsService = broadcastTopicsService;
   }
 
   public SuccessOrFailureAndErrorBody transitionToDiscussion(final String sessionId) {
@@ -36,11 +48,25 @@ public class TransitionToDiscussionServiceImpl implements TransitionToDiscussion
 
     final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
     sessionsEntity.setSessionStatus(SessionStatus.DISCUSSING);
-    sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(180));
+    sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(defaultTopicTime));
     sessionsRepository.save(sessionsEntity);
 
-    // assign y value to topics by most votes, fallback on creation date?
+    int y = 0;
+    final Map<String, Boolean> topicsWithVotes = new HashMap<>();
+    final List<Object[]> objects = votesRepository.findVotesInOrder(sessionId);
+    for (; y < objects.size(); y++) {
+      topicsWithVotes.put((String) objects.get(y)[0], true);
+      topicsRepository.updateYIndexByTextAndSessionId(y, (String) objects.get(y)[0], sessionId);
+    }
 
+    final List<TopicsEntity> topics = topicsRepository
+        .findAllBySessionIdOrderByText(sessionId);
+    for(final TopicsEntity topicsEntity : topics) {
+      if(topicsWithVotes.get(topicsEntity.getText()) == null) {
+        topicsRepository.updateYIndexByTextAndSessionId(y, topicsEntity.getText(), sessionId);
+        y++;
+      }
+    }
 
     broadcastTopicsService.broadcastTopics(sessionId, Y_INDEX, true);
 
