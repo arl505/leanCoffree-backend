@@ -1,7 +1,7 @@
 package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
-import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
+import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
@@ -58,7 +58,7 @@ public class DeleteTopicServiceImpl implements DeleteTopicService {
     final SortTopicsBy sortTopicsBy =
         sessionsEntityOptional.get().getSessionStatus() == SessionStatus.STARTED
             ? CREATION
-            : VOTES;
+            : Y_INDEX;
 
     broadcastTopicsService.broadcastTopics(deleteTopicRequest.getSessionId(), sortTopicsBy, false);
     return new SuccessOrFailureAndErrorBody(SUCCESS, null);

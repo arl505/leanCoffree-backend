@@ -2,7 +2,7 @@ package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.FINISH;
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.NEXT;
-import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
+import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import static com.leancoffree.backend.enums.TopicStatus.DISCUSSED;
@@ -13,13 +13,18 @@ import com.leancoffree.backend.domain.model.RefreshTopicsRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RefreshTopicsServiceImpl implements RefreshTopicsService {
+
+  @Value("${defaultTopicTime:180}")
+  private Integer defaultTopicTime;
 
   private final TopicsRepository topicsRepository;
   private final BroadcastTopicsService broadcastTopicsService;
@@ -44,24 +49,24 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
       if (sessionsEntityOptional.isPresent()) {
         topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
             refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
-            refreshTopicsRequest.getCurrentTopicAuthorDisplayName());
+            refreshTopicsRequest.getCurrentTopicAuthorDisplayName(), Timestamp.from(Instant.now()));
 
         topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSING.toString(),
             refreshTopicsRequest.getNextTopicText(), refreshTopicsRequest.getSessionId(),
-            refreshTopicsRequest.getNextTopicAuthorDisplayName());
+            refreshTopicsRequest.getNextTopicAuthorDisplayName(), null);
 
         final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
-        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(5));
+        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(defaultTopicTime));
         sessionsRepository.save(sessionsEntity);
 
-        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), VOTES, false);
+        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
         return new SuccessOrFailureAndErrorBody(SUCCESS, null);
       }
     } else if (FINISH.equals(refreshTopicsRequest.getCommand())) {
       topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
           refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
-          refreshTopicsRequest.getCurrentTopicAuthorDisplayName());
-      broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), VOTES, false);
+          refreshTopicsRequest.getCurrentTopicAuthorDisplayName(), Timestamp.from(Instant.now()));
+      broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
       return new SuccessOrFailureAndErrorBody(SUCCESS, null);
     }
     return new SuccessOrFailureAndErrorBody(FAILURE, "Command or topic/session invalid");

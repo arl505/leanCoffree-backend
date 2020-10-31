@@ -1,7 +1,7 @@
 package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
-import static com.leancoffree.backend.enums.SortTopicsBy.VOTES;
+import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import static com.leancoffree.backend.enums.TopicStatus.DISCUSSING;
@@ -16,7 +16,6 @@ import com.leancoffree.backend.repository.TopicsRepository;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,7 +67,8 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
 
         topicsAndVotersMap
             .put(text, new TopicDetails(text, (String) objects[3], (String) objects[2], voters,
-                ((Timestamp) objects[4]).toInstant()));
+                ((Timestamp) objects[4]).toInstant(), (Integer) objects[5],
+                (Timestamp) objects[6]));
       }
 
       final List<TopicDetails> topicDetailsList = new ArrayList<>();
@@ -76,13 +76,13 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
         topicDetailsList.add(entry.getValue());
       }
 
-      if (VOTES.equals(sortTopicsBy)) {
-        topicDetailsList.sort((a, b) -> b.getVoters().size() - a.getVoters().size());
+      if (Y_INDEX.equals(sortTopicsBy)) {
+        topicDetailsList.sort(Comparator.comparing(TopicDetails::getYIndex));
       } else if (CREATION.equals(sortTopicsBy)) {
         topicDetailsList.sort(Comparator.comparing(TopicDetails::getCreationDate));
       }
 
-      if(shouldUpdateTopicStatus) {
+      if (shouldUpdateTopicStatus) {
         final TopicDetails currentDiscussionItem = topicDetailsList.get(0);
         currentDiscussionItem.setTopicStatus(DISCUSSING.toString());
         topicDetailsList.set(0, currentDiscussionItem);
@@ -92,13 +92,14 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
             .topicStatus(TopicStatus.valueOf(currentDiscussionItem.getTopicStatus()))
             .displayName(currentDiscussionItem.getAuthorDisplayName())
             .createdTimestamp(currentDiscussionItem.getCreationDate())
+            .verticalIndex(999)
             .build();
         topicsRepository.save(topicsEntity);
       }
 
       final JSONObject currentDiscussionItem = new JSONObject();
       final JSONArray discussionBacklogTopicsJson = new JSONArray();
-      final JSONArray discussedTopicsJson = new JSONArray();
+      final List<JSONObject> discussedTopicsList = new ArrayList<>();
       for (final TopicDetails topicDetails : topicDetailsList) {
         if (topicDetails.getTopicStatus().equals("QUEUED")) {
           discussionBacklogTopicsJson.put(new JSONObject()
@@ -106,9 +107,10 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
               .put("authorDisplayName", topicDetails.getAuthorDisplayName())
               .put("voters", new JSONArray(topicDetails.getVoters())));
         } else if (topicDetails.getTopicStatus().equals("DISCUSSED")) {
-          discussedTopicsJson.put(new JSONObject()
+          discussedTopicsList.add(new JSONObject()
               .put("text", topicDetails.getText())
-              .put("voters", new JSONArray(topicDetails.getVoters())));
+              .put("voters", new JSONArray(topicDetails.getVoters()))
+              .put("finishedAt", topicDetails.getFinishedAt()));
         } else if (topicDetails.getTopicStatus().equals("DISCUSSING")) {
           currentDiscussionItem.put("text", topicDetails.getText())
               .put("voters", new JSONArray(topicDetails.getVoters()))
@@ -118,6 +120,10 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
                   : sessionsEntityOptional.get().getCurrentTopicEndTime());
         }
       }
+
+      discussedTopicsList.sort(Comparator.comparing(x -> ((Timestamp) x.get("finishedAt"))));
+
+      final JSONArray discussedTopicsJson = new JSONArray(discussedTopicsList);
 
       final JSONObject messageJson = new JSONObject()
           .put("currentDiscussionItem", currentDiscussionItem)
@@ -143,5 +149,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
     private String topicStatus;
     private List<String> voters;
     private Instant creationDate;
+    private Integer yIndex;
+    private Timestamp finishedAt;
   }
 }

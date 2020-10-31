@@ -1,5 +1,18 @@
 import React from 'react';
 import Axios from 'axios';
+import styled from "styled-components";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+
+const Container = styled.div`
+grid-column: 1;
+margin: 1vw;
+margin-left: 2.5vw;
+margin-right: 2.5vw;
+overflow: scroll;
+border: solid black 1px;
+width: 15vw;
+height: 15vw;
+position: relative;`;
 
 class DiscussionPage extends React.Component {
 
@@ -11,6 +24,7 @@ class DiscussionPage extends React.Component {
       currentTopicSecondsRemaining: -1,
       finished: false
     }
+    this.onDragEnd = this.onDragEnd.bind(this);
   }
 
   componentDidMount() {
@@ -58,37 +72,99 @@ class DiscussionPage extends React.Component {
     }
   }
 
-  getAllTopicCards() {
-    let topicsElements = [];
+  onDragEnd(result) {
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
 
+    let topics = this.state.topics.discussionBacklogTopics;
+
+    let topic = topics[result.source.index];
+    topics.splice(result.source.index, 1);
+    topics.splice(result.destination.index, 0, topic);
+
+    let allTopics = this.state.topics;
+    allTopics.discussionBacklogTopics = topics;
+    this.setState({topics: allTopics});
+    
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/reorder', {sessionId: this.props.sessionId, text: topic.text, newIndex: result.destination.index})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        }
+      })
+      .catch((error) => 
+        alert("Unable to reorder topic\n" + error)
+      );
+  }
+
+  getAllTopicCards() {
     let allTopics = this.state.topics.discussionBacklogTopics;
     if(allTopics !== undefined) {
+      let topics = [];
       for(let i = 0; i < allTopics.length; i++) {
         let text = allTopics[i].text;
         let votes = allTopics[i].voters.length;
-        topicsElements.push(
-          <div key={i.toString()} class="cardItem discussionCardItem" style={{gridRow: i + 1}}>
-            <p class="topicText">{text}</p>
-            <p class="votesText">Votes: {votes}</p>
+        topics.push({votes: votes, text: text});
+      }
+
+      if(this.props.userInfo.displayName === this.props.moderatorName && this.state.topics.discussionBacklogTopics.length > 1 && this.props.isUsernameModalOpen === false) {
+        return topics.length === 0
+        ? null
+        : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
+            <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
+            <DragDropContext onDragEnd={this.onDragEnd}>
+              <Droppable droppableId="droppable">
+                {(provided, snapshot) => (
+                  <div {...provided.droppableProps} class="discussCards-container" style={{paddingBottom: '7.5vw'}} ref={provided.innerRef}>
+                    {topics.map((item, index) => (
+                      <Draggable key={index.toString()}  draggableId={'draggable' + index} index={index}>
+                        {(provided) => (
+                          <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                            <p class="topicText">{item.text}</p>
+                            <p class="votesText">Votes: {item.votes}</p>
+                          </Container>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </div>;
+      } else {
+        return topics.length === 0
+        ? null
+        : (
+          <div class="discussCards-container" style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'scroll'}}>
+            {topics.map((item, index) => (
+              <div key={index.toString()} class="cardItem discussionCardItem" style={{gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
+                <p class="topicText">{item.text}</p>
+                <p class="votesText">Votes: {item.votes}</p>
+              </div>
+            ))}
           </div>
         );
       }
     }
-    return topicsElements;
+    return null;
   }
 
   getDiscussedCards(isFinished) {
     if(this.state.topics.discussedTopics !== undefined && this.state.topics.discussedTopics.length !== 0) {
+      let topics = this.state.topics.discussedTopics;
       let allDiscussedTopicsElements = [];
-      for(let i = 0; i <= this.state.topics.discussedTopics.length; i++) {
-        if(i === (this.state.topics.discussedTopics.length)) {
+      for(let i = 0; i <= topics.length; i++) {
+        if(i === (topics.length)) {
           allDiscussedTopicsElements.push(
             <div key={i.toString()} class="finalSpacer row1" style={{gridColumn: i + 1}}/>
           )
         } else {
           allDiscussedTopicsElements.push(
             <div key={i.toString()} class="cardItem row1" style={{gridColumn: i + 1}}>
-              <p class="topicText">{this.state.topics.discussedTopics[i].text}</p>
+              <p class="topicText">{topics[i].text}</p>
             </div>
           )
         }
@@ -131,10 +207,7 @@ class DiscussionPage extends React.Component {
       ? "Session completed!"
       : this.state.topics.currentDiscussionItem.text;
 
-    let allTopicCards = this.getAllTopicCards();
-    let allTopicCardsContainer = allTopicCards.length === 0
-      ? null
-      : <div class="discussCards-grid-container">{allTopicCards}</div>;
+    let allTopicCardsContainer = this.getAllTopicCards();
 
     let currentDiscussionItemContainer = allTopicCardsContainer === null 
       ? <div class="currentDiscussionItem column1">

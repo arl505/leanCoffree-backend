@@ -331,7 +331,7 @@ class Session extends React.Component {
         <div>
           {usernameModal}
           {shareableLinkModal}
-          <DiscussionPage sessionId={this.state.sessionId} getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} />
+          <DiscussionPage isUsernameModalOpen={usernameModal !== null} sessionId={this.state.sessionId} getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} moderatorName={this.state.usersInAttendance.moderator} />
         </div>
       )
     }
