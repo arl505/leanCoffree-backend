@@ -13,6 +13,7 @@ import com.leancoffree.backend.domain.model.RefreshTopicsRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 import javax.transaction.Transactional;
@@ -48,11 +49,11 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
       if (sessionsEntityOptional.isPresent()) {
         topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
             refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
-            refreshTopicsRequest.getCurrentTopicAuthorDisplayName());
+            refreshTopicsRequest.getCurrentTopicAuthorDisplayName(), Timestamp.from(Instant.now()));
 
         topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSING.toString(),
             refreshTopicsRequest.getNextTopicText(), refreshTopicsRequest.getSessionId(),
-            refreshTopicsRequest.getNextTopicAuthorDisplayName());
+            refreshTopicsRequest.getNextTopicAuthorDisplayName(), null);
 
         final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
         sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(defaultTopicTime));
@@ -64,7 +65,7 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
     } else if (FINISH.equals(refreshTopicsRequest.getCommand())) {
       topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
           refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
-          refreshTopicsRequest.getCurrentTopicAuthorDisplayName());
+          refreshTopicsRequest.getCurrentTopicAuthorDisplayName(), Timestamp.from(Instant.now()));
       broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
       return new SuccessOrFailureAndErrorBody(SUCCESS, null);
     }

@@ -154,16 +154,17 @@ class DiscussionPage extends React.Component {
 
   getDiscussedCards(isFinished) {
     if(this.state.topics.discussedTopics !== undefined && this.state.topics.discussedTopics.length !== 0) {
+      let topics = this.state.topics.discussedTopics;
       let allDiscussedTopicsElements = [];
-      for(let i = 0; i <= this.state.topics.discussedTopics.length; i++) {
-        if(i === (this.state.topics.discussedTopics.length)) {
+      for(let i = 0; i <= topics.length; i++) {
+        if(i === (topics.length)) {
           allDiscussedTopicsElements.push(
             <div key={i.toString()} class="finalSpacer row1" style={{gridColumn: i + 1}}/>
           )
         } else {
           allDiscussedTopicsElements.push(
             <div key={i.toString()} class="cardItem row1" style={{gridColumn: i + 1}}>
-              <p class="topicText">{this.state.topics.discussedTopics[i].text}</p>
+              <p class="topicText">{topics[i].text}</p>
             </div>
           )
         }
