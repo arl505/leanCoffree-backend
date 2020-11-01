@@ -1,5 +1,7 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.DiscussionVoteType.MORE_TIME;
+import static com.leancoffree.backend.enums.DiscussionVoteType.FINISH_TOPIC;
 import static com.leancoffree.backend.enums.RefreshUsersCommand.ADD;
 import static com.leancoffree.backend.enums.SessionStatus.DISCUSSING;
 import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
@@ -7,12 +9,14 @@ import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
+import com.leancoffree.backend.domain.entity.DiscussionVotesEntity;
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity;
 import com.leancoffree.backend.domain.model.RefreshUsersRequest;
 import com.leancoffree.backend.domain.model.SessionStatusResponse;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
 import com.leancoffree.backend.enums.SortTopicsBy;
+import com.leancoffree.backend.repository.DiscussionVotesRepository;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
@@ -32,19 +36,22 @@ public class RefreshUsersServiceImpl implements RefreshUsersService {
   private final SimpMessagingTemplate webSocketMessagingTemplate;
   private final SessionsRepository sessionsRepository;
   private final UsersRepository usersRepository;
+  private final DiscussionVotesRepository discussionVotesRepository;
 
   public RefreshUsersServiceImpl(final AddUserToSessionService addUserToSessionService,
       final DropUserInSessionService dropUserInSessionService,
       final BroadcastTopicsService broadcastTopicsService,
       final SimpMessagingTemplate webSocketMessagingTemplate,
       final SessionsRepository sessionsRepository,
-      final UsersRepository usersRepository) {
+      final UsersRepository usersRepository,
+      final DiscussionVotesRepository discussionVotesRepository) {
     this.addUserToSessionService = addUserToSessionService;
     this.dropUserInSessionService = dropUserInSessionService;
     this.broadcastTopicsService = broadcastTopicsService;
     this.webSocketMessagingTemplate = webSocketMessagingTemplate;
     this.sessionsRepository = sessionsRepository;
     this.usersRepository = usersRepository;
+    this.discussionVotesRepository = discussionVotesRepository;
   }
 
   public SuccessOrFailureAndErrorBody refreshUsers(final RefreshUsersRequest refreshUsersRequest) {
@@ -94,6 +101,19 @@ public class RefreshUsersServiceImpl implements RefreshUsersService {
       webSocketMessagingTemplate
           .convertAndSend("/topic/users/session/" + sessionId, websocketMessageString);
       broadcastTopicsService.broadcastTopics(sessionId, sortTopicsBy, false);
+
+      final List<DiscussionVotesEntity> nextTopicVotes = discussionVotesRepository
+          .findAllBySessionIdAndVoteType(sessionId, FINISH_TOPIC);
+      final List<DiscussionVotesEntity> moreTimeVotes = discussionVotesRepository
+          .findAllBySessionIdAndVoteType(sessionId, MORE_TIME);
+
+      final JSONObject messageJson = new JSONObject()
+          .put("moreTimeVotesCount", moreTimeVotes.size())
+          .put("finishTopicVotesCount", nextTopicVotes.size());
+
+      webSocketMessagingTemplate
+          .convertAndSend("/topic/discussion-votes/session/" + sessionId, messageJson.toString());
+
       return SessionStatusResponse.builder()
           .sessionStatus(sessionsEntityOptional.get().getSessionStatus())
           .status(SUCCESS)

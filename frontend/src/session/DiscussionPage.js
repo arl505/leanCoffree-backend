@@ -1,5 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
+import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
@@ -21,10 +22,15 @@ class DiscussionPage extends React.Component {
     this.state = {
       topics: props.topics,
       userDisplayName: props.userInfo.displayName,
+      votes: props.discussionVotes,
       currentTopicSecondsRemaining: -1,
-      finished: false
+      finished: false,
+      isVotingModalOpen: false,
+      moreTimeValue: '1m',
     }
     this.onDragEnd = this.onDragEnd.bind(this);
+    this.loadNextTopic = this.loadNextTopic.bind(this);
+    this.addTime = this.addTime.bind(this);
   }
 
   componentDidMount() {
@@ -41,27 +47,10 @@ class DiscussionPage extends React.Component {
           let nowSeconds = Math.round(new Date().getTime() / 1000);
           if(Math.max(0, endSeconds - nowSeconds) !== 0) {
             this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
-          } else if(this.state.finished === false) {
-            let body;
-            if(this.state.topics.discussionBacklogTopics.length !== 0) {
-              body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
-            } else {
-              body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
-            }
-            Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
-              .then((response) => {
-                if(response.data.status !== "SUCCESS") {
-                  if(response.data.error === "Mocked finish!") {
-                    this.setState({finished: true})
-                  }
-                  alert(response.data.error);
-                }
-              })
-              .catch((error) => 
-                alert("Unable to refresh topics\n" + error)
-              );
-            }
+          } else if(this.state.finished === false && this.state.isVotingModalOpen !== true) {
+            this.setState({isVotingModalOpen: true})
           }
+        }
       }, 500);
     }
   }
@@ -248,6 +237,59 @@ class DiscussionPage extends React.Component {
     }
   }
 
+  loadNextTopic() {
+    let body;
+    if(this.state.topics.discussionBacklogTopics.length !== 0) {
+      body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
+    } else {
+      body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
+    }
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          if(response.data.error === "Mocked finish!") {
+            this.setState({finished: true})
+          }
+          alert(response.data.error);
+        } else {
+          this.setState({isVotingModalOpen: false})
+        }
+      })
+      .catch((error) => 
+        alert("Unable to refresh topics\n" + error)
+      );
+  }
+
+  castVote(voteType) {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/discussion-vote", {voteType: voteType, sessionId: this.props.sessionId, userDisplayName: this.props.userInfo.displayName})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(JSON.stringify(response.data));
+        }
+      })
+      .catch((error) => 
+        alert("Unable to refresh topics\n" + error)
+      );
+  }
+
+  addTime() {
+    let increment = this.state.moreTimeValue.toUpperCase();
+    let suffix = increment[increment.length - 1]
+    increment = increment.slice(0, increment.length - 1);
+    increment = suffix + increment;
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/add-time', {increment: increment, sessionId: this.props.sessionId})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(JSON.stringify(response.data));
+        } else {
+          this.setState({isVotingModalOpen: false})
+        }
+      })
+      .catch((error) => 
+        alert("Unable to refresh topics\n" + error)
+      );
+  }
+
   render() {  
     let countdown;
     if(this.state.currentTopicSecondsRemaining !== -1) {
@@ -282,9 +324,61 @@ class DiscussionPage extends React.Component {
           <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
           {countdown}
         </div>;
+
+    let modalFooter = this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false
+      ? (
+        <div>
+          <br/>
+          <hr/>
+          <p style={{textAlign: 'center'}}><b>Moderator final say</b></p>
+          <div style={{textAlign: 'center'}}>
+            <select value={this.state.moreTimeValue} onChange={(event) => this.setState({moreTimeValue: event.target.value})}>
+              <option value="30s">30s</option>
+              <option selected="selected" value="1m">1m</option>
+              <option value="3m">3m</option>
+              <option value="5m">5m</option>
+              <option value="10m">10m</option>
+              <option value="15m">15m</option>
+              <option value="30m">30m</option>
+              <option value="1h">1h</option>
+            </select>
+            <text> </text>
+            <Button color="success" onClick={this.addTime}>Add {this.state.moreTimeValue} More time</Button>
+            <text> </text>
+            <Button color="primary" onClick={this.loadNextTopic}>Finish Topic</Button>
+          </div>
+        </div>
+      )
+      : null;
+
+  let moreTimeVoteCount = this.props.discussionVotes.moreTimeVotesCount === undefined
+      ? 0
+      : this.props.discussionVotes.moreTimeVotesCount;
+
+    let finishTopicVoteCount = this.props.discussionVotes.finishTopicVotesCount === undefined
+    ? 0
+    : this.props.discussionVotes.finishTopicVotesCount;
+
+    let votingModal = (
+      <Modal isOpen={this.state.currentTopicSecondsRemaining < 2 && this.props.isUsernameModalOpen === false && this.state.isVotingModalOpen} toggle={this.props.toggle}>
+          <ModalHeader>Vote: More Time or Finish Topic</ModalHeader>
+          <ModalBody>
+            <div style={{marginBottom: '5vh'}}>
+              More Time Votes: {moreTimeVoteCount}
+              <Button style={{display: 'inline-block', float: 'right'}} color="success" onClick={() => this.castVote('MORE_TIME')}>More time</Button>
+            </div>
+            <div>
+              Finish Topic Votes: {finishTopicVoteCount}
+              <Button style={{display: 'inline-block', float: 'right'}} color="primary" onClick={() => this.castVote('FINISH_TOPIC')}>Finish Topic</Button>
+            </div>
+            {modalFooter}
+          </ModalBody>
+        </Modal>
+      );
       
     return (
       <div class="session-grid-container">
+        {votingModal}
         {allTopicCardsContainer}
         {currentDiscussionItemContainer}
         {this.getDiscussedCards(allTopicCardsContainer === null)}

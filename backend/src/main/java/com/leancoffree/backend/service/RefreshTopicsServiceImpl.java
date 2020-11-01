@@ -12,13 +12,16 @@ import static com.leancoffree.backend.enums.TopicStatus.DISCUSSING;
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.model.RefreshTopicsRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.repository.DiscussionVotesRepository;
 import com.leancoffree.backend.repository.SessionsRepository;
 import com.leancoffree.backend.repository.TopicsRepository;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,13 +33,19 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
   private final TopicsRepository topicsRepository;
   private final BroadcastTopicsService broadcastTopicsService;
   private final SessionsRepository sessionsRepository;
+  private final DiscussionVotesRepository discussionVotesRepository;
+  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
   public RefreshTopicsServiceImpl(final TopicsRepository topicsRepository,
       final BroadcastTopicsService broadcastTopicsService,
-      final SessionsRepository sessionsRepository) {
+      final SessionsRepository sessionsRepository,
+      final DiscussionVotesRepository discussionVotesRepository,
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.topicsRepository = topicsRepository;
     this.broadcastTopicsService = broadcastTopicsService;
     this.sessionsRepository = sessionsRepository;
+    this.discussionVotesRepository = discussionVotesRepository;
+    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
   @Transactional
@@ -48,6 +57,15 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
             .equals(refreshTopicsRequest.getCommand())
             ? sessionsRepository.findById(refreshTopicsRequest.getSessionId())
             : Optional.empty();
+
+    discussionVotesRepository.deleteBySessionId(refreshTopicsRequest.getSessionId());
+    final JSONObject messageJson = new JSONObject()
+        .put("moreTimeVotesCount", 0)
+        .put("finishTopicVotesCount", 0);
+
+    webSocketMessagingTemplate
+        .convertAndSend("/topic/discussion-votes/session/" + refreshTopicsRequest.getSessionId(),
+            messageJson.toString());
 
     if (NEXT.equals(refreshTopicsRequest.getCommand()) && sessionsEntityOptional.isPresent()) {
       topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
