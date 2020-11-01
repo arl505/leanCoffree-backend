@@ -1,7 +1,7 @@
 package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.DiscussionVoteType.MORE_TIME;
-import static com.leancoffree.backend.enums.DiscussionVoteType.NEXT_TOPIC;
+import static com.leancoffree.backend.enums.DiscussionVoteType.FINISH_TOPIC;
 import static com.leancoffree.backend.enums.RefreshUsersCommand.ADD;
 import static com.leancoffree.backend.enums.SessionStatus.DISCUSSING;
 import static com.leancoffree.backend.enums.SortTopicsBy.CREATION;
@@ -103,13 +103,13 @@ public class RefreshUsersServiceImpl implements RefreshUsersService {
       broadcastTopicsService.broadcastTopics(sessionId, sortTopicsBy, false);
 
       final List<DiscussionVotesEntity> nextTopicVotes = discussionVotesRepository
-          .findAllBySessionIdAndVoteType(sessionId, NEXT_TOPIC);
+          .findAllBySessionIdAndVoteType(sessionId, FINISH_TOPIC);
       final List<DiscussionVotesEntity> moreTimeVotes = discussionVotesRepository
           .findAllBySessionIdAndVoteType(sessionId, MORE_TIME);
 
       final JSONObject messageJson = new JSONObject()
           .put("moreTimeVotesCount", moreTimeVotes.size())
-          .put("nextTopicVotesCount", nextTopicVotes.size());
+          .put("finishTopicVotesCount", nextTopicVotes.size());
 
       webSocketMessagingTemplate
           .convertAndSend("/topic/discussion-votes/session/" + sessionId, messageJson.toString());

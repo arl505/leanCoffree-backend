@@ -1,7 +1,7 @@
 package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.DiscussionVoteType.MORE_TIME;
-import static com.leancoffree.backend.enums.DiscussionVoteType.NEXT_TOPIC;
+import static com.leancoffree.backend.enums.DiscussionVoteType.FINISH_TOPIC;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 
 import com.leancoffree.backend.domain.entity.DiscussionVotesEntity;
@@ -44,13 +44,13 @@ public class PostDiscussionVoteServiceImpl implements PostDiscussionVoteService 
 
 
     final List<DiscussionVotesEntity> nextTopicVotes = discussionVotesRepository
-        .findAllBySessionIdAndVoteType(sessionId, NEXT_TOPIC);
+        .findAllBySessionIdAndVoteType(sessionId, FINISH_TOPIC);
     final List<DiscussionVotesEntity> moreTimeVotes = discussionVotesRepository
         .findAllBySessionIdAndVoteType(sessionId, MORE_TIME);
 
     final JSONObject messageJson = new JSONObject()
         .put("moreTimeVotesCount", moreTimeVotes.size())
-        .put("nextTopicVotesCount", nextTopicVotes.size());
+        .put("finishTopicVotesCount", nextTopicVotes.size());
 
     webSocketMessagingTemplate
         .convertAndSend(websocketDestination + sessionId, messageJson.toString());

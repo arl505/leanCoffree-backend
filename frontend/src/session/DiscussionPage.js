@@ -30,6 +30,7 @@ class DiscussionPage extends React.Component {
     }
     this.onDragEnd = this.onDragEnd.bind(this);
     this.loadNextTopic = this.loadNextTopic.bind(this);
+    this.addTime = this.addTime.bind(this);
   }
 
   componentDidMount() {
@@ -47,11 +48,7 @@ class DiscussionPage extends React.Component {
           if(Math.max(0, endSeconds - nowSeconds) !== 0) {
             this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
           } else if(this.state.finished === false && this.state.isVotingModalOpen !== true) {
-            if(this.state.topics.discussionBacklogTopics.length === 0) {
-              this.loadNextTopic();
-            } else {
-              this.setState({isVotingModalOpen: true})
-            }
+            this.setState({isVotingModalOpen: true})
           }
         }
       }, 500);
@@ -268,7 +265,24 @@ class DiscussionPage extends React.Component {
       .then((response) => {
         if(response.data.status !== "SUCCESS") {
           alert(JSON.stringify(response.data));
-          return;
+        }
+      })
+      .catch((error) => 
+        alert("Unable to refresh topics\n" + error)
+      );
+  }
+
+  addTime() {
+    let increment = this.state.moreTimeValue.toUpperCase();
+    let suffix = increment[increment.length - 1]
+    increment = increment.slice(0, increment.length - 1);
+    increment = suffix + increment;
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/add-time', {increment: increment, sessionId: this.props.sessionId})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(JSON.stringify(response.data));
+        } else {
+          this.setState({isVotingModalOpen: false})
         }
       })
       .catch((error) => 
@@ -326,28 +340,36 @@ class DiscussionPage extends React.Component {
               <option value="10m">10m</option>
               <option value="15m">15m</option>
               <option value="30m">30m</option>
-              <option value="1h ">1h</option>
+              <option value="1h">1h</option>
             </select>
             <text> </text>
-            <Button color="success">Add {this.state.moreTimeValue} More time</Button>
+            <Button color="success" onClick={this.addTime}>Add {this.state.moreTimeValue} More time</Button>
             <text> </text>
-            <Button color="primary" onClick={this.loadNextTopic}>Next Topic</Button>
+            <Button color="primary" onClick={this.loadNextTopic}>Finish Topic</Button>
           </div>
         </div>
       )
       : null;
 
+  let moreTimeVoteCount = this.props.discussionVotes.moreTimeVotesCount === undefined
+      ? 0
+      : this.props.discussionVotes.moreTimeVotesCount;
+
+    let finishTopicVoteCount = this.props.discussionVotes.finishTopicVotesCount === undefined
+    ? 0
+    : this.props.discussionVotes.finishTopicVotesCount;
+
     let votingModal = (
       <Modal isOpen={this.props.isUsernameModalOpen === false && this.state.isVotingModalOpen} toggle={this.props.toggle}>
-          <ModalHeader>Vote: More Time or Next Topic</ModalHeader>
+          <ModalHeader>Vote: More Time or Finish Topic</ModalHeader>
           <ModalBody>
             <div style={{marginBottom: '5vh'}}>
-              More Time Votes: {this.props.discussionVotes.moreTimeVotesCount}
+              More Time Votes: {moreTimeVoteCount}
               <Button style={{display: 'inline-block', float: 'right'}} color="success" onClick={() => this.castVote('MORE_TIME')}>More time</Button>
             </div>
             <div>
-              Next Topic Votes: {this.props.discussionVotes.nextTopicVotesCount}
-              <Button style={{display: 'inline-block', float: 'right'}} color="primary" onClick={() => this.castVote('NEXT_TOPIC')}>Next Topic</Button>
+              Finish Topic Votes: {finishTopicVoteCount}
+              <Button style={{display: 'inline-block', float: 'right'}} color="primary" onClick={() => this.castVote('FINISH_TOPIC')}>Finish Topic</Button>
             </div>
             {modalFooter}
           </ModalBody>
