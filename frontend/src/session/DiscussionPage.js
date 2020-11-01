@@ -1,6 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
@@ -26,6 +26,7 @@ class DiscussionPage extends React.Component {
       currentTopicSecondsRemaining: -1,
       finished: false,
       isVotingModalOpen: false,
+      moreTimeValue: '1m',
     }
     this.onDragEnd = this.onDragEnd.bind(this);
     this.loadNextTopic = this.loadNextTopic.bind(this);
@@ -46,7 +47,11 @@ class DiscussionPage extends React.Component {
           if(Math.max(0, endSeconds - nowSeconds) !== 0) {
             this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
           } else if(this.state.finished === false && this.state.isVotingModalOpen !== true) {
-            this.setState({isVotingModalOpen: true})
+            if(this.state.topics.discussionBacklogTopics.length === 0) {
+              this.loadNextTopic();
+            } else {
+              this.setState({isVotingModalOpen: true})
+            }
           }
         }
       }, 500);
@@ -306,19 +311,46 @@ class DiscussionPage extends React.Component {
           {countdown}
         </div>;
 
+    let modalFooter = this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false
+      ? (
+        <div>
+          <br/>
+          <hr/>
+          <p style={{textAlign: 'center'}}><b>Moderator final say</b></p>
+          <div style={{textAlign: 'center'}}>
+            <select value={this.state.moreTimeValue} onChange={(event) => this.setState({moreTimeValue: event.target.value})}>
+              <option value="30s">30s</option>
+              <option selected="selected" value="1m">1m</option>
+              <option value="3m">3m</option>
+              <option value="5m">5m</option>
+              <option value="10m">10m</option>
+              <option value="15m">15m</option>
+              <option value="30m">30m</option>
+              <option value="1h ">1h</option>
+            </select>
+            <text> </text>
+            <Button color="success">Add {this.state.moreTimeValue} More time</Button>
+            <text> </text>
+            <Button color="primary" onClick={this.loadNextTopic}>Next Topic</Button>
+          </div>
+        </div>
+      )
+      : null;
+
     let votingModal = (
       <Modal isOpen={this.props.isUsernameModalOpen === false && this.state.isVotingModalOpen} toggle={this.props.toggle}>
-          <ModalHeader>More Time or Next Topic</ModalHeader>
+          <ModalHeader>Vote: More Time or Next Topic</ModalHeader>
           <ModalBody>
-            More Time Votes: {this.props.discussionVotes.moreTimeVotesCount}
-            <br/>
-            Next Topic Votes: {this.props.discussionVotes.nextTopicVotesCount}
+            <div style={{marginBottom: '5vh'}}>
+              More Time Votes: {this.props.discussionVotes.moreTimeVotesCount}
+              <Button style={{display: 'inline-block', float: 'right'}} color="success" onClick={() => this.castVote('MORE_TIME')}>More time</Button>
+            </div>
+            <div>
+              Next Topic Votes: {this.props.discussionVotes.nextTopicVotesCount}
+              <Button style={{display: 'inline-block', float: 'right'}} color="primary" onClick={() => this.castVote('NEXT_TOPIC')}>Next Topic</Button>
+            </div>
+            {modalFooter}
           </ModalBody>
-          <ModalFooter>
-            Cast vote:
-            <Button color="success" onClick={() => this.castVote('MORE_TIME')}>More time</Button>
-            <Button color="primary" onClick={() => this.castVote('NEXT_TOPIC')}>Next Topic</Button>
-          </ModalFooter>
         </Modal>
       );
       
