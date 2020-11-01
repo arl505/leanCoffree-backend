@@ -290,6 +290,25 @@ class DiscussionPage extends React.Component {
       );
   }
 
+  getButtons() {
+    if(this.props.userInfo.displayName !== this.props.moderatorName || this.props.isUsernameModalOpen !== false) {
+      return null;
+    }
+
+    let finishTopicButton = this.state.topics.currentDiscussionItem !== undefined && this.state.topics.currentDiscussionItem.text !== undefined
+      ? <button onClick={() => {if(window.confirm("Confirm you'd like to finish the current topic below\n" + this.state.topics.currentDiscussionItem.text)) this.loadNextTopic()}}>Finish Topic</button>
+      : null;
+
+    return (
+      <div style={{gridColumn: 3, gridRow: 2, position: 'relative'}}>
+        <div style={{textAlign: 'center', position: 'absolute', bottom: 0, left: 0, right: 0}}>
+          {finishTopicButton}
+          <button style={{marginTop: '1vh', marginBottom: '1vh'}}>End Session</button>
+        </div>
+      </div>
+    );
+  }
+
   render() {  
     let countdown;
     if(this.state.currentTopicSecondsRemaining !== -1) {
@@ -375,6 +394,8 @@ class DiscussionPage extends React.Component {
           </ModalBody>
         </Modal>
       );
+
+    let sessionControlButtons = this.getButtons();
       
     return (
       <div class="session-grid-container">
@@ -387,6 +408,7 @@ class DiscussionPage extends React.Component {
           <div>All here:</div>
           <div>{this.props.getAllHere()}</div>
         </div>
+        {sessionControlButtons}
       </div>
     )
   }
