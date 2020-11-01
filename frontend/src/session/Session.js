@@ -172,15 +172,17 @@ class Session extends React.Component {
   }
 
   deleteTopic(topic) {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.state.sessionId, topicText: topic.text, authorName: topic.authorDisplayName})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(response.data.error);
-        }
-      })
-      .catch((error) => 
-        alert("Unable to delete topic\n" + error)
-      );
+    if(window.confirm("Confirm if you'd like to delete the following topic: " + topic.text)) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.state.sessionId, topicText: topic.text, authorName: topic.authorDisplayName})
+        .then((response) => {
+          if(response.data.status !== "SUCCESS") {
+            alert(response.data.error);
+          }
+        })
+        .catch((error) => 
+          alert("Unable to delete topic\n" + error)
+        );
+    }
   }
 
   populateCards() {
@@ -303,7 +305,7 @@ class Session extends React.Component {
       </div>
 
     if((this.state.sessionStatus.includes("STARTED"))) {
-      let nextSectionButton = this.state.topics.discussionBacklogTopics !== undefined && this.state.topics.discussionBacklogTopics.length >= 2
+      let nextSectionButton = this.state.topics.discussionBacklogTopics !== undefined && this.state.topics.discussionBacklogTopics.length >= 2 && this.state.userDisplayName === this.state.usersInAttendance.moderator && this.state.isNameModalOpen === false
         ? <div class="nextSectionButton">
             <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
           </div>

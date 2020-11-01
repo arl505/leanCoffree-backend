@@ -58,7 +58,7 @@ class DiscussionPage extends React.Component {
                 }
               })
               .catch((error) => 
-                alert("Unable to submit vote\n" + error)
+                alert("Unable to refresh topics\n" + error)
               );
             }
           }
@@ -99,6 +99,43 @@ class DiscussionPage extends React.Component {
       );
   }
 
+  deleteTopic(topicText, author) {
+    if(window.confirm("Confirm if you'd like to delete the following topic: " + topicText)) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.props.sessionId, topicText: topicText, authorName: author})
+        .then((response) => {
+          if(response.data.status !== "SUCCESS") {
+            alert(response.data.error);
+          }
+        })
+        .catch((error) => 
+          alert("Unable to delete topic\n" + error)
+        );
+    }
+  }
+
+  pullNewDiscussionTopic(text, author) {
+    let body;
+    let confirmationMessage;
+    if(this.state.topics.currentDiscussionItem.text === undefined) {
+      body = {command: "REVERT_TO_DISCUSSION", sessionId: this.props.sessionId, nextTopicText: text, nextTopicAuthorDisplayName: author};
+      confirmationMessage = "Confirm you'd like to pull the following topic for discussion: " + text;
+    } else {
+      body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: author};
+      confirmationMessage = "Pulling this topic for discussion will conclude the current discussion topic, proceed?"
+    }
+    if (window.confirm(confirmationMessage)) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
+        .then((response) => {
+          if(response.data.status !== "SUCCESS") {
+            alert(response.data.error);
+          }
+        })
+        .catch((error) => 
+          alert("Unable to pull topic for discussion\n" + error)
+        );
+    } 
+  }
+
   getAllTopicCards() {
     let allTopics = this.state.topics.discussionBacklogTopics;
     if(allTopics !== undefined) {
@@ -106,10 +143,11 @@ class DiscussionPage extends React.Component {
       for(let i = 0; i < allTopics.length; i++) {
         let text = allTopics[i].text;
         let votes = allTopics[i].voters.length;
-        topics.push({votes: votes, text: text});
+        let author = allTopics[i].authorDisplayName
+        topics.push({votes: votes, text: text, author: author});
       }
 
-      if(this.props.userInfo.displayName === this.props.moderatorName && this.state.topics.discussionBacklogTopics.length > 1 && this.props.isUsernameModalOpen === false) {
+      if(this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false && this.state.topics.discussionBacklogTopics.length > 1) {
         return topics.length === 0
         ? null
         : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
@@ -124,6 +162,8 @@ class DiscussionPage extends React.Component {
                           <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                             <p class="topicText">{item.text}</p>
                             <p class="votesText">Votes: {item.votes}</p>
+                            <button  onClick={() => this.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
+                            <button onClick={() => this.deleteTopic(item.text, item.author)}>Delete</button>
                           </Container>
                         )}
                       </Draggable>
@@ -134,6 +174,21 @@ class DiscussionPage extends React.Component {
               </Droppable>
             </DragDropContext>
           </div>;
+      } else if(this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false) {
+        return topics.length === 0
+        ? null
+        : (
+          <div class="discussCards-container" style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'scroll'}}>
+            {topics.map((item, index) => (
+              <div key={index.toString()} class="cardItem discussionCardItem" style={{gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
+                <p class="topicText">{item.text}</p>
+                <p class="votesText">Votes: {item.votes}</p>
+                <button  onClick={() => this.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
+                <button onClick={() => this.deleteTopic(item.text, item.author)}>Delete</button>
+              </div>
+            ))}
+          </div>
+        );
       } else {
         return topics.length === 0
         ? null
@@ -157,6 +212,12 @@ class DiscussionPage extends React.Component {
       let topics = this.state.topics.discussedTopics;
       let allDiscussedTopicsElements = [];
       for(let i = 0; i <= topics.length; i++) {
+        let buttons = this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false
+          ? <div>
+              <button  onClick={() => this.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
+              <button onClick={() => this.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
+            </div>
+          : null;
         if(i === (topics.length)) {
           allDiscussedTopicsElements.push(
             <div key={i.toString()} class="finalSpacer row1" style={{gridColumn: i + 1}}/>
@@ -165,6 +226,7 @@ class DiscussionPage extends React.Component {
           allDiscussedTopicsElements.push(
             <div key={i.toString()} class="cardItem row1" style={{gridColumn: i + 1}}>
               <p class="topicText">{topics[i].text}</p>
+              {buttons}
             </div>
           )
         }

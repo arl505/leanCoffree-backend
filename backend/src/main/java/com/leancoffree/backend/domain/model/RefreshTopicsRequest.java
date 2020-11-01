@@ -22,12 +22,8 @@ public class RefreshTopicsRequest {
   @NotBlank(message = "sessionId should not be blank")
   private String sessionId;
 
-  @Size(min = 1, max = 500, message = "currentTopicText should be between 1-500 chars")
-  @NotBlank(message = "currentTopicText should not be blank")
   private String currentTopicText;
 
-  @Size(min = 1, max = 20, message = "currentTopicAuthorDisplayName should be between 1-20 chars")
-  @NotBlank(message = "currentTopicAuthorDisplayName should not be blank")
   private String currentTopicAuthorDisplayName;
 
   private String nextTopicAuthorDisplayName;
