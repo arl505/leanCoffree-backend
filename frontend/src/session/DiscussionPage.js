@@ -360,7 +360,7 @@ class DiscussionPage extends React.Component {
     : this.props.discussionVotes.finishTopicVotesCount;
 
     let votingModal = (
-      <Modal isOpen={this.props.isUsernameModalOpen === false && this.state.isVotingModalOpen} toggle={this.props.toggle}>
+      <Modal isOpen={this.state.currentTopicSecondsRemaining < 2 && this.props.isUsernameModalOpen === false && this.state.isVotingModalOpen} toggle={this.props.toggle}>
           <ModalHeader>Vote: More Time or Finish Topic</ModalHeader>
           <ModalBody>
             <div style={{marginBottom: '5vh'}}>
