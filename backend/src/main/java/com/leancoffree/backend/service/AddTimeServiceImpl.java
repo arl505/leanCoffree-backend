@@ -7,9 +7,13 @@ import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.model.AddTimeRequest;
 import com.leancoffree.backend.domain.model.SuccessOrFailureAndErrorBody;
+import com.leancoffree.backend.repository.DiscussionVotesRepository;
 import com.leancoffree.backend.repository.SessionsRepository;
 import java.time.Instant;
 import java.util.Optional;
+import javax.transaction.Transactional;
+import org.json.JSONObject;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,13 +21,20 @@ public class AddTimeServiceImpl implements AddTimeService {
 
   private final SessionsRepository sessionsRepository;
   private final BroadcastTopicsService broadcastTopicsService;
+  private final DiscussionVotesRepository discussionVotesRepository;
+  private final SimpMessagingTemplate webSocketMessagingTemplate;
 
   public AddTimeServiceImpl(final SessionsRepository sessionsRepository,
-      final BroadcastTopicsService broadcastTopicsService) {
+      final BroadcastTopicsService broadcastTopicsService,
+      final DiscussionVotesRepository discussionVotesRepository,
+      final SimpMessagingTemplate webSocketMessagingTemplate) {
     this.sessionsRepository = sessionsRepository;
     this.broadcastTopicsService = broadcastTopicsService;
+    this.discussionVotesRepository = discussionVotesRepository;
+    this.webSocketMessagingTemplate = webSocketMessagingTemplate;
   }
 
+  @Transactional
   public SuccessOrFailureAndErrorBody addTime(final AddTimeRequest addTimeRequest) {
     final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository
         .findById(addTimeRequest.getSessionId());
@@ -64,6 +75,16 @@ public class AddTimeServiceImpl implements AddTimeService {
       sessionsRepository.save(sessionsEntity);
 
       broadcastTopicsService.broadcastTopics(addTimeRequest.getSessionId(), Y_INDEX, false);
+
+      discussionVotesRepository.deleteBySessionId(addTimeRequest.getSessionId());
+      final JSONObject messageJson = new JSONObject()
+          .put("moreTimeVotesCount", 0)
+          .put("finishTopicVotesCount", 0);
+
+      webSocketMessagingTemplate
+          .convertAndSend("/topic/discussion-votes/session/" + addTimeRequest.getSessionId(),
+              messageJson.toString());
+
       return new SuccessOrFailureAndErrorBody(SUCCESS, null);
     }
     return new SuccessOrFailureAndErrorBody(FAILURE, "Couldn't find session");

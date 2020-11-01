@@ -11,4 +11,6 @@ public interface DiscussionVotesRepository extends
 
   List<DiscussionVotesEntity> findAllBySessionIdAndVoteType(final String sessionId,
       final DiscussionVoteType voteType);
+
+  void deleteBySessionId(final String sessionId);
 }
