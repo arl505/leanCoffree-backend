@@ -1,5 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
@@ -21,10 +22,13 @@ class DiscussionPage extends React.Component {
     this.state = {
       topics: props.topics,
       userDisplayName: props.userInfo.displayName,
+      votes: props.discussionVotes,
       currentTopicSecondsRemaining: -1,
-      finished: false
+      finished: false,
+      isVotingModalOpen: false,
     }
     this.onDragEnd = this.onDragEnd.bind(this);
+    this.loadNextTopic = this.loadNextTopic.bind(this);
   }
 
   componentDidMount() {
@@ -41,27 +45,10 @@ class DiscussionPage extends React.Component {
           let nowSeconds = Math.round(new Date().getTime() / 1000);
           if(Math.max(0, endSeconds - nowSeconds) !== 0) {
             this.setState({currentTopicSecondsRemaining: Math.max(0, endSeconds - nowSeconds)})
-          } else if(this.state.finished === false) {
-            let body;
-            if(this.state.topics.discussionBacklogTopics.length !== 0) {
-              body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
-            } else {
-              body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
-            }
-            Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
-              .then((response) => {
-                if(response.data.status !== "SUCCESS") {
-                  if(response.data.error === "Mocked finish!") {
-                    this.setState({finished: true})
-                  }
-                  alert(response.data.error);
-                }
-              })
-              .catch((error) => 
-                alert("Unable to refresh topics\n" + error)
-              );
-            }
+          } else if(this.state.finished === false && this.state.isVotingModalOpen !== true) {
+            this.setState({isVotingModalOpen: true})
           }
+        }
       }, 500);
     }
   }
@@ -248,6 +235,42 @@ class DiscussionPage extends React.Component {
     }
   }
 
+  loadNextTopic() {
+    let body;
+    if(this.state.topics.discussionBacklogTopics.length !== 0) {
+      body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: this.state.topics.discussionBacklogTopics[0].text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: this.state.topics.discussionBacklogTopics[0].authorDisplayName};
+    } else {
+      body = {command: "FINISH", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName};
+    }
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          if(response.data.error === "Mocked finish!") {
+            this.setState({finished: true})
+          }
+          alert(response.data.error);
+        } else {
+          this.setState({isVotingModalOpen: false})
+        }
+      })
+      .catch((error) => 
+        alert("Unable to refresh topics\n" + error)
+      );
+  }
+
+  castVote(voteType) {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/discussion-vote", {voteType: voteType, sessionId: this.props.sessionId, userDisplayName: this.props.userInfo.displayName})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(JSON.stringify(response.data));
+          return;
+        }
+      })
+      .catch((error) => 
+        alert("Unable to refresh topics\n" + error)
+      );
+  }
+
   render() {  
     let countdown;
     if(this.state.currentTopicSecondsRemaining !== -1) {
@@ -282,9 +305,26 @@ class DiscussionPage extends React.Component {
           <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
           {countdown}
         </div>;
+
+    let votingModal = (
+      <Modal isOpen={this.props.isUsernameModalOpen === false && this.state.isVotingModalOpen} toggle={this.props.toggle}>
+          <ModalHeader>More Time or Next Topic</ModalHeader>
+          <ModalBody>
+            More Time Votes: {this.props.discussionVotes.moreTimeVotesCount}
+            <br/>
+            Next Topic Votes: {this.props.discussionVotes.nextTopicVotesCount}
+          </ModalBody>
+          <ModalFooter>
+            Cast vote:
+            <Button color="success" onClick={() => this.castVote('MORE_TIME')}>More time</Button>
+            <Button color="primary" onClick={() => this.castVote('NEXT_TOPIC')}>Next Topic</Button>
+          </ModalFooter>
+        </Modal>
+      );
       
     return (
       <div class="session-grid-container">
+        {votingModal}
         {allTopicCardsContainer}
         {currentDiscussionItemContainer}
         {this.getDiscussedCards(allTopicCardsContainer === null)}

@@ -23,6 +23,7 @@ class Session extends React.Component {
       currentTopicEndTime: '',
       isNameModalOpen: true,
       showShareableLink: false,
+      discussionVotes: {},
     }
     this.componentDidMount = this.componentDidMount.bind(this);
     this.submitDisplayName = this.submitDisplayName.bind(this);
@@ -99,6 +100,12 @@ class Session extends React.Component {
           (payload) => {
             let updateUsersBody = JSON.parse(payload.body);
             this.setState({usersInAttendance: updateUsersBody});
+          }
+        );
+        stompClient.subscribe('/topic/discussion-votes/session/' + this.state.sessionId,
+          (payload) => {
+            this.setState({discussionVotes: JSON.parse(payload.body)});
+
           }
         );
         Axios.get(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users/" + this.state.sessionId);
@@ -333,7 +340,7 @@ class Session extends React.Component {
         <div>
           {usernameModal}
           {shareableLinkModal}
-          <DiscussionPage isUsernameModalOpen={usernameModal !== null} sessionId={this.state.sessionId} getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} moderatorName={this.state.usersInAttendance.moderator} />
+          <DiscussionPage discussionVotes={this.state.discussionVotes} isUsernameModalOpen={usernameModal !== null} sessionId={this.state.sessionId} getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} moderatorName={this.state.usersInAttendance.moderator} />
         </div>
       )
     }
