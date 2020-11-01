@@ -2,6 +2,7 @@ package com.leancoffree.backend.service;
 
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.FINISH;
 import static com.leancoffree.backend.enums.RefreshTopicsCommand.NEXT;
+import static com.leancoffree.backend.enums.RefreshTopicsCommand.REVERT_TO_DISCUSSION;
 import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
@@ -42,30 +43,42 @@ public class RefreshTopicsServiceImpl implements RefreshTopicsService {
   public SuccessOrFailureAndErrorBody refreshTopics(
       final RefreshTopicsRequest refreshTopicsRequest) {
 
-    if (NEXT.equals(refreshTopicsRequest.getCommand())) {
-      final Optional<SessionsEntity> sessionsEntityOptional = sessionsRepository
-          .findById(refreshTopicsRequest.getSessionId());
+    final Optional<SessionsEntity> sessionsEntityOptional =
+        NEXT.equals(refreshTopicsRequest.getCommand()) || REVERT_TO_DISCUSSION
+            .equals(refreshTopicsRequest.getCommand())
+            ? sessionsRepository.findById(refreshTopicsRequest.getSessionId())
+            : Optional.empty();
 
-      if (sessionsEntityOptional.isPresent()) {
-        topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
-            refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
-            refreshTopicsRequest.getCurrentTopicAuthorDisplayName(), Timestamp.from(Instant.now()));
+    if (NEXT.equals(refreshTopicsRequest.getCommand()) && sessionsEntityOptional.isPresent()) {
+      topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
+          refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
+          refreshTopicsRequest.getCurrentTopicAuthorDisplayName(), Timestamp.from(Instant.now()));
 
-        topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSING.toString(),
-            refreshTopicsRequest.getNextTopicText(), refreshTopicsRequest.getSessionId(),
-            refreshTopicsRequest.getNextTopicAuthorDisplayName(), null);
+      topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSING.toString(),
+          refreshTopicsRequest.getNextTopicText(), refreshTopicsRequest.getSessionId(),
+          refreshTopicsRequest.getNextTopicAuthorDisplayName(), null);
 
-        final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
-        sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(defaultTopicTime));
-        sessionsRepository.save(sessionsEntity);
+      final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
+      sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(defaultTopicTime));
+      sessionsRepository.save(sessionsEntity);
 
-        broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
-        return new SuccessOrFailureAndErrorBody(SUCCESS, null);
-      }
+      broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
+      return new SuccessOrFailureAndErrorBody(SUCCESS, null);
     } else if (FINISH.equals(refreshTopicsRequest.getCommand())) {
       topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSED.toString(),
           refreshTopicsRequest.getCurrentTopicText(), refreshTopicsRequest.getSessionId(),
           refreshTopicsRequest.getCurrentTopicAuthorDisplayName(), Timestamp.from(Instant.now()));
+      broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
+      return new SuccessOrFailureAndErrorBody(SUCCESS, null);
+    } else if (REVERT_TO_DISCUSSION.equals(refreshTopicsRequest.getCommand()) && sessionsEntityOptional.isPresent()) {
+      topicsRepository.updateStatusByTextAndSessionIdAndDisplayName(DISCUSSING.toString(),
+          refreshTopicsRequest.getNextTopicText(), refreshTopicsRequest.getSessionId(),
+          refreshTopicsRequest.getNextTopicAuthorDisplayName(), null);
+
+      final SessionsEntity sessionsEntity = sessionsEntityOptional.get();
+      sessionsEntity.setCurrentTopicEndTime(Instant.now().plusSeconds(defaultTopicTime));
+      sessionsRepository.save(sessionsEntity);
+
       broadcastTopicsService.broadcastTopics(refreshTopicsRequest.getSessionId(), Y_INDEX, false);
       return new SuccessOrFailureAndErrorBody(SUCCESS, null);
     }

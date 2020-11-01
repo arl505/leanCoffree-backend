@@ -114,8 +114,16 @@ class DiscussionPage extends React.Component {
   }
 
   pullNewDiscussionTopic(text, author) {
-    let body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: author};
-    if (window.confirm('Pulling this topic for discussion will conclude the current discussion topic, proceed?')) {
+    let body;
+    let confirmationMessage;
+    if(this.state.topics.currentDiscussionItem.text === undefined) {
+      body = {command: "REVERT_TO_DISCUSSION", sessionId: this.props.sessionId, nextTopicText: text, nextTopicAuthorDisplayName: author};
+      confirmationMessage = "Confirm you'd like to pull the following topic for discussion: " + text;
+    } else {
+      body = {command: "NEXT", sessionId: this.props.sessionId, currentTopicText: this.state.topics.currentDiscussionItem.text, nextTopicText: text, currentTopicAuthorDisplayName: this.state.topics.currentDiscussionItem.authorDisplayName, nextTopicAuthorDisplayName: author};
+      confirmationMessage = "Pulling this topic for discussion will conclude the current discussion topic, proceed?"
+    }
+    if (window.confirm(confirmationMessage)) {
       Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-topics", body)
         .then((response) => {
           if(response.data.status !== "SUCCESS") {
@@ -204,6 +212,12 @@ class DiscussionPage extends React.Component {
       let topics = this.state.topics.discussedTopics;
       let allDiscussedTopicsElements = [];
       for(let i = 0; i <= topics.length; i++) {
+        let buttons = this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false
+          ? <div>
+              <button  onClick={() => this.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
+              <button onClick={() => this.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
+            </div>
+          : null;
         if(i === (topics.length)) {
           allDiscussedTopicsElements.push(
             <div key={i.toString()} class="finalSpacer row1" style={{gridColumn: i + 1}}/>
@@ -212,6 +226,7 @@ class DiscussionPage extends React.Component {
           allDiscussedTopicsElements.push(
             <div key={i.toString()} class="cardItem row1" style={{gridColumn: i + 1}}>
               <p class="topicText">{topics[i].text}</p>
+              {buttons}
             </div>
           )
         }

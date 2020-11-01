@@ -110,6 +110,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
           discussedTopicsList.add(new JSONObject()
               .put("text", topicDetails.getText())
               .put("voters", new JSONArray(topicDetails.getVoters()))
+              .put("authorDisplayName", topicDetails.getAuthorDisplayName())
               .put("finishedAt", topicDetails.getFinishedAt()));
         } else if (topicDetails.getTopicStatus().equals("DISCUSSING")) {
           currentDiscussionItem.put("text", topicDetails.getText())
