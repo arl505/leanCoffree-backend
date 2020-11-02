@@ -292,17 +292,19 @@ class DiscussionPage extends React.Component {
   }
 
   endSession() {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/end-session/' + this.props.sessionId, {})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(response.data.error);
-        } else {
-          return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
-        }
-      })
-      .catch((error) => 
-        alert("Unable to end session\n" + error)
-      );
+    if(window.confirm("Confirm you'd like to end session. All session data will be immediately deleted")) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/end-session/' + this.props.sessionId, {})
+        .then((response) => {
+          if(response.data.status !== "SUCCESS") {
+            alert(response.data.error);
+          } else {
+            return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
+          }
+        })
+        .catch((error) => 
+          alert("Unable to end session\n" + error)
+        );
+    }
   }
 
   getButtons() {
