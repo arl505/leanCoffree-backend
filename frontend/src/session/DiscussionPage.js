@@ -31,6 +31,7 @@ class DiscussionPage extends React.Component {
     this.onDragEnd = this.onDragEnd.bind(this);
     this.loadNextTopic = this.loadNextTopic.bind(this);
     this.addTime = this.addTime.bind(this);
+    this.endSession = this.endSession.bind(this);
   }
 
   componentDidMount() {
@@ -290,6 +291,41 @@ class DiscussionPage extends React.Component {
       );
   }
 
+  endSession() {
+    if(window.confirm("Confirm you'd like to end session. All session data will be immediately deleted")) {
+      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/end-session/' + this.props.sessionId, {})
+        .then((response) => {
+          if(response.data.status !== "SUCCESS") {
+            alert(response.data.error);
+          } else {
+            return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
+          }
+        })
+        .catch((error) => 
+          alert("Unable to end session\n" + error)
+        );
+    }
+  }
+
+  getButtons() {
+    if(this.props.userInfo.displayName !== this.props.moderatorName || this.props.isUsernameModalOpen !== false) {
+      return null;
+    }
+
+    let finishTopicButton = this.state.topics.currentDiscussionItem !== undefined && this.state.topics.currentDiscussionItem.text !== undefined
+      ? <button onClick={() => {if(window.confirm("Confirm you'd like to finish the current topic below\n" + this.state.topics.currentDiscussionItem.text)) this.loadNextTopic()}}>Finish Topic</button>
+      : null;
+
+    return (
+      <div style={{gridColumn: 3, gridRow: 2, position: 'relative'}}>
+        <div style={{textAlign: 'center', position: 'absolute', bottom: 0, left: 0, right: 0}}>
+          {finishTopicButton}
+          <button style={{marginTop: '1vh', marginBottom: '1vh'}} onClick={this.endSession}>End Session</button>
+        </div>
+      </div>
+    );
+  }
+
   render() {  
     let countdown;
     if(this.state.currentTopicSecondsRemaining !== -1) {
@@ -375,6 +411,8 @@ class DiscussionPage extends React.Component {
           </ModalBody>
         </Modal>
       );
+
+    let sessionControlButtons = this.getButtons();
       
     return (
       <div class="session-grid-container">
@@ -387,6 +425,7 @@ class DiscussionPage extends React.Component {
           <div>All here:</div>
           <div>{this.props.getAllHere()}</div>
         </div>
+        {sessionControlButtons}
       </div>
     )
   }

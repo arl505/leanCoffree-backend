@@ -12,4 +12,5 @@ public interface UsersRepository extends CrudRepository<UsersEntity, UsersId> {
   Optional<UsersEntity> findBySessionIdAndIsModeratorTrue(final String sessionId);
   Optional<UsersEntity> findByWebsocketUserId(final String websocketUserId);
   long countBySessionId(final String sessionId);
+  void deleteBySessionId(final String sessionId);
 }

@@ -43,4 +43,6 @@ public interface TopicsRepository extends CrudRepository<TopicsEntity, TopicsId>
   List<TopicsEntity> findAllBySessionIdOrderByText(final String sessionId);
 
   List<TopicsEntity> findAllBySessionIdOrderByVerticalIndex(final String sessionId);
+
+  void deleteBySessionId(final String sessionId);
 }

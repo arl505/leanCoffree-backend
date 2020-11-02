@@ -85,6 +85,9 @@ class Session extends React.Component {
       (frame) => {
         stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
           (payload) => {
+            if(payload.body === "") {
+              return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
+            }
             if(JSON.parse(payload.body).currentDiscussionItem.text === undefined) {
               this.setState({topics: JSON.parse(payload.body)});
             } else {

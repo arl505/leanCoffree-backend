@@ -16,6 +16,8 @@ public interface VotesRepository extends CrudRepository<VotesEntity, Long> {
 
   void deleteByVoterSessionIdAndText(final String sessionId, final String text);
 
+  void deleteByVoterSessionId(final String sessionId);
+
   @Query(value = "SELECT topic_text, count(*) " +
       "FROM votes " +
       "WHERE voter_session_id = :sessionId " +
