@@ -31,6 +31,7 @@ class DiscussionPage extends React.Component {
     this.onDragEnd = this.onDragEnd.bind(this);
     this.loadNextTopic = this.loadNextTopic.bind(this);
     this.addTime = this.addTime.bind(this);
+    this.endSession = this.endSession.bind(this);
   }
 
   componentDidMount() {
@@ -290,6 +291,20 @@ class DiscussionPage extends React.Component {
       );
   }
 
+  endSession() {
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/end-session/' + this.props.sessionId, {})
+      .then((response) => {
+        if(response.data.status !== "SUCCESS") {
+          alert(response.data.error);
+        } else {
+          return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
+        }
+      })
+      .catch((error) => 
+        alert("Unable to end session\n" + error)
+      );
+  }
+
   getButtons() {
     if(this.props.userInfo.displayName !== this.props.moderatorName || this.props.isUsernameModalOpen !== false) {
       return null;
@@ -303,7 +318,7 @@ class DiscussionPage extends React.Component {
       <div style={{gridColumn: 3, gridRow: 2, position: 'relative'}}>
         <div style={{textAlign: 'center', position: 'absolute', bottom: 0, left: 0, right: 0}}>
           {finishTopicButton}
-          <button style={{marginTop: '1vh', marginBottom: '1vh'}}>End Session</button>
+          <button style={{marginTop: '1vh', marginBottom: '1vh'}} onClick={this.endSession}>End Session</button>
         </div>
       </div>
     );
