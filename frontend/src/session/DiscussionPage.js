@@ -1,9 +1,9 @@
 import React from 'react';
 import Axios from 'axios';
-import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import AllUsersList from './AllUsersList';
+import DiscussionVotingModal from './DiscussionVotingModal'
 
 const Container = styled.div`
 grid-column: 1;
@@ -27,11 +27,10 @@ class DiscussionPage extends React.Component {
       currentTopicSecondsRemaining: -1,
       finished: false,
       isVotingModalOpen: false,
-      moreTimeValue: '1m',
     }
     this.onDragEnd = this.onDragEnd.bind(this);
     this.loadNextTopic = this.loadNextTopic.bind(this);
-    this.addTime = this.addTime.bind(this);
+    this.toggleVotingModal = this.toggleVotingModal.bind(this);
     this.endSession = this.endSession.bind(this);
   }
 
@@ -262,36 +261,6 @@ class DiscussionPage extends React.Component {
       );
   }
 
-  castVote(voteType) {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/discussion-vote", {voteType: voteType, sessionId: this.props.sessionId, userDisplayName: this.props.userDisplayName})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(JSON.stringify(response.data));
-        }
-      })
-      .catch((error) => 
-        alert("Unable to refresh topics\n" + error)
-      );
-  }
-
-  addTime() {
-    let increment = this.state.moreTimeValue.toUpperCase();
-    let suffix = increment[increment.length - 1]
-    increment = increment.slice(0, increment.length - 1);
-    increment = suffix + increment;
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/add-time', {increment: increment, sessionId: this.props.sessionId})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(JSON.stringify(response.data));
-        } else {
-          this.setState({isVotingModalOpen: false})
-        }
-      })
-      .catch((error) => 
-        alert("Unable to refresh topics\n" + error)
-      );
-  }
-
   endSession() {
     if(window.confirm("Confirm you'd like to end session. All session data will be immediately deleted")) {
       Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/end-session/' + this.props.sessionId, {})
@@ -325,6 +294,11 @@ class DiscussionPage extends React.Component {
         </div>
       </div>
     );
+  }
+
+  toggleVotingModal() {
+    let isModalOpen = !this.state.isVotingModalOpen;
+    this.setState({isVotingModalOpen: isModalOpen});
   }
 
   render() {  
@@ -362,62 +336,11 @@ class DiscussionPage extends React.Component {
           {countdown}
         </div>;
 
-    let modalFooter = this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false
-      ? (
-        <div>
-          <br/>
-          <hr/>
-          <p style={{textAlign: 'center'}}><b>Moderator final say</b></p>
-          <div style={{textAlign: 'center'}}>
-            <select value={this.state.moreTimeValue} onChange={(event) => this.setState({moreTimeValue: event.target.value})}>
-              <option value="30s">30s</option>
-              <option selected="selected" value="1m">1m</option>
-              <option value="3m">3m</option>
-              <option value="5m">5m</option>
-              <option value="10m">10m</option>
-              <option value="15m">15m</option>
-              <option value="30m">30m</option>
-              <option value="1h">1h</option>
-            </select>
-            <text> </text>
-            <Button color="success" onClick={this.addTime}>Add {this.state.moreTimeValue} More time</Button>
-            <text> </text>
-            <Button color="primary" onClick={this.loadNextTopic}>Finish Topic</Button>
-          </div>
-        </div>
-      )
-      : null;
-
-  let moreTimeVoteCount = this.props.discussionVotes.moreTimeVotesCount === undefined
-      ? 0
-      : this.props.discussionVotes.moreTimeVotesCount;
-
-    let finishTopicVoteCount = this.props.discussionVotes.finishTopicVotesCount === undefined
-    ? 0
-    : this.props.discussionVotes.finishTopicVotesCount;
-
-    let votingModal = (
-      <Modal isOpen={this.state.currentTopicSecondsRemaining < 2 && this.props.isUsernameModalOpen === false && this.state.isVotingModalOpen} toggle={this.props.toggle}>
-          <ModalHeader>Vote: More Time or Finish Topic</ModalHeader>
-          <ModalBody>
-            <div style={{marginBottom: '5vh'}}>
-              More Time Votes: {moreTimeVoteCount}
-              <Button style={{display: 'inline-block', float: 'right'}} color="success" onClick={() => this.castVote('MORE_TIME')}>More time</Button>
-            </div>
-            <div>
-              Finish Topic Votes: {finishTopicVoteCount}
-              <Button style={{display: 'inline-block', float: 'right'}} color="primary" onClick={() => this.castVote('FINISH_TOPIC')}>Finish Topic</Button>
-            </div>
-            {modalFooter}
-          </ModalBody>
-        </Modal>
-      );
-
     let sessionControlButtons = this.getButtons();
       
     return (
       <div class="session-grid-container">
-        {votingModal}
+        <DiscussionVotingModal loadNextTopic={this.loadNextTopic} toggleVotingModal={this.toggleVotingModal} sessionId={this.props.sessionId} userDisplayName={this.props.userDisplayName} discussionVotes={this.props.discussionVotes} currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} isUsernameModalOpen={this.props.isUsernameModalOpen} isVotingModalOpen={this.state.isVotingModalOpen} usersInAttendance={this.props.usersInAttendance}/>
         {allTopicCardsContainer}
         {currentDiscussionItemContainer}
         {this.getDiscussedCards(allTopicCardsContainer === null)}
