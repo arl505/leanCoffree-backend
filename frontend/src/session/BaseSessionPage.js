@@ -6,7 +6,6 @@ import ShareableLinkModal from './ShareableLinkModal';
 import Axios from 'axios';
 import './session.css'
 
-
 let stompClient = null;
 class BaseSessionPage extends React.Component {
 
