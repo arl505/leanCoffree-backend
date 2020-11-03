@@ -3,6 +3,7 @@ import Axios from 'axios';
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import AllUsersList from './AllUsersList';
 
 const Container = styled.div`
 grid-column: 1;
@@ -21,7 +22,7 @@ class DiscussionPage extends React.Component {
     super(props);
     this.state = {
       topics: props.topics,
-      userDisplayName: props.userInfo.displayName,
+      userDisplayName: props.userDisplayName,
       votes: props.discussionVotes,
       currentTopicSecondsRemaining: -1,
       finished: false,
@@ -137,7 +138,7 @@ class DiscussionPage extends React.Component {
         topics.push({votes: votes, text: text, author: author});
       }
 
-      if(this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false && this.state.topics.discussionBacklogTopics.length > 1) {
+      if(this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false && this.state.topics.discussionBacklogTopics.length > 1) {
         return topics.length === 0
         ? null
         : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
@@ -164,7 +165,7 @@ class DiscussionPage extends React.Component {
               </Droppable>
             </DragDropContext>
           </div>;
-      } else if(this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false) {
+      } else if(this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false) {
         return topics.length === 0
         ? null
         : (
@@ -202,7 +203,7 @@ class DiscussionPage extends React.Component {
       let topics = this.state.topics.discussedTopics;
       let allDiscussedTopicsElements = [];
       for(let i = 0; i <= topics.length; i++) {
-        let buttons = this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false
+        let buttons = this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false
           ? <div>
               <button  onClick={() => this.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
               <button onClick={() => this.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
@@ -262,7 +263,7 @@ class DiscussionPage extends React.Component {
   }
 
   castVote(voteType) {
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/discussion-vote", {voteType: voteType, sessionId: this.props.sessionId, userDisplayName: this.props.userInfo.displayName})
+    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/discussion-vote", {voteType: voteType, sessionId: this.props.sessionId, userDisplayName: this.props.userDisplayName})
       .then((response) => {
         if(response.data.status !== "SUCCESS") {
           alert(JSON.stringify(response.data));
@@ -308,7 +309,7 @@ class DiscussionPage extends React.Component {
   }
 
   getButtons() {
-    if(this.props.userInfo.displayName !== this.props.moderatorName || this.props.isUsernameModalOpen !== false) {
+    if(this.props.userDisplayName !== this.props.usersInAttendance.moderator || this.props.isUsernameModalOpen !== false) {
       return null;
     }
 
@@ -361,7 +362,7 @@ class DiscussionPage extends React.Component {
           {countdown}
         </div>;
 
-    let modalFooter = this.props.userInfo.displayName === this.props.moderatorName && this.props.isUsernameModalOpen === false
+    let modalFooter = this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false
       ? (
         <div>
           <br/>
@@ -423,7 +424,9 @@ class DiscussionPage extends React.Component {
 
         <div class="session-grid-item usersSection column3">
           <div>All here:</div>
-          <div>{this.props.getAllHere()}</div>
+          <div>
+            <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
+          </div>
         </div>
         {sessionControlButtons}
       </div>
