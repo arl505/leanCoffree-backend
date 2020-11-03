@@ -7,7 +7,7 @@ import Axios from 'axios';
 import './session.css'
 
 let stompClient = null;
-class BaseSessionPage extends React.Component {
+class Session extends React.Component {
 
   constructor(props) {
     super(props);
@@ -141,4 +141,4 @@ class BaseSessionPage extends React.Component {
   }
 }
 
-export default BaseSessionPage;
+export default Session;
