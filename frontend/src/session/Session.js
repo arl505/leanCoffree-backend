@@ -80,6 +80,9 @@ class Session extends React.Component {
         stompClient.subscribe('/topic/discussion-topics/session/' + this.state.sessionId, 
           (payload) => {
             if(payload.body === "") {
+              if(!this.state.usersInAttendance.moderator.includes(this.state.userDisplayName)) {
+                alert('The moderator has ended the session. All session data has been deleted. Click OK to be redirected or close the window to exit');
+              }
               return window.location = process.env.REACT_APP_FRONTEND_BASEURL;
             }
             if(JSON.parse(payload.body).currentDiscussionItem.text === undefined) {
