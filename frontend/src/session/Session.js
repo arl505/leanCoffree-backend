@@ -1,9 +1,10 @@
 import React from 'react';
+import VotingPage from './VotingPage'
+import DiscussionPage from './DiscussionPage'
+import UsernamePromptModal from './UsernamePromptModal';
+import ShareableLinkModal from './ShareableLinkModal';
 import Axios from 'axios';
-import DiscussionPage from './DiscussionPage';
 import './session.css'
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 let stompClient = null;
 class Session extends React.Component {
@@ -11,26 +12,20 @@ class Session extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isSessionVerified: false,
-      sessionId: "",
-      sessionStatus: "",
-      userDisplayName: "",
-      websocketUserId: "",
-      usersInAttendance: [],
-      cardSubmissionText: "",
-      topics: {},
-      votesLeft: 3,
-      currentTopicEndTime: '',
+      sessionId: '',
+      sessionStatus: '',
+      userDisplayName: '',
+      topicSubmissionText: '',
+      websocketUserId: '',
       isNameModalOpen: true,
       showShareableLink: false,
+      topics: {},
       discussionVotes: {},
+      usersInAttendance: [],
     }
-    this.componentDidMount = this.componentDidMount.bind(this);
-    this.submitDisplayName = this.submitDisplayName.bind(this);
-    this.submitCard = this.submitCard.bind(this);
-    this.transitionToDiscussion = this.transitionToDiscussion.bind(this);
-    this.getAllHere = this.getAllHere.bind(this);
     this.toggleShareableLink = this.toggleShareableLink.bind(this);
+    this.setUserDisplayNameAndSessionStatusAndShareableLink = this.setUserDisplayNameAndSessionStatusAndShareableLink.bind(this);
+    this.setTopics = this.setTopics.bind(this);
   }
 
   componentDidMount() {
@@ -54,7 +49,6 @@ class Session extends React.Component {
             ? "ASK_FOR_USERNAME_STARTED"
             : "ASK_FOR_USERNAME_DISCUSSING";
           self.setState({
-            isSessionVerified: true,
             sessionId: response.data.sessionDetails.sessionId,
             sessionStatus: status,
           })
@@ -120,241 +114,35 @@ class Session extends React.Component {
     );
   }
 
-  submitDisplayName() {
-    let self = this;
-    if(this.state.userDisplayName !== "" && this.state.sessionId !== "") {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/refresh-users", {displayName: self.state.userDisplayName, sessionId: self.state.sessionId, command: "ADD", websocketUserId: self.state.websocketUserId})
-      .then((response) => {
-        if(response.data.status === "SUCCESS") {
-          self.setState({sessionStatus: response.data.sessionStatus, isNameModalOpen: false, showShareableLink: response.data.showShareableLink});
-        } else {
-          alert(response.data.error);
-        }
-      })
-      .catch((error) => {
-        alert("Error while adding displayname to backend\n" + error)
-      }); 
-    }
-  }
-
-  getAllHere() {
-    let allHereListItems = [];
-    if(this.state.usersInAttendance.displayNames !== undefined) {
-      for(let i = 0; i < this.state.usersInAttendance.displayNames.length; i++) {
-        let username = this.state.usersInAttendance.displayNames[i];
-        if(username === this.state.userDisplayName) {
-          if(username === this.state.usersInAttendance.moderator) {
-            allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList"><b>{username}</b></li>);
-          } else {
-            allHereListItems.push(<li key={i.toString()} class="usernameList"><b>{username}</b></li>);
-          }
-        } else {
-          if(username === this.state.usersInAttendance.moderator) {
-            allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList">{username}</li>);
-          } else {
-            allHereListItems.push(<li key={i.toString()} class="usernameList">{username}</li>);
-          }
-        }
-      }
-      allHereListItems.push(<button onClick={this.toggleShareableLink}>Invite more</button>);
-    }
-    return (
-      <ul class="usernameList">
-        {allHereListItems}
-      </ul>
-    )
-  }
-
-  submitCard() {
-    if(this.state.cardSubmissionText !== "") {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/submit-topic", {submissionText: this.state.cardSubmissionText, sessionId: this.state.sessionId, displayName: this.state.userDisplayName})
-        .then((response) => {
-          if(response.data.status === "SUCCESS") {
-            this.setState({cardSubmissionText: ""})
-          } else {
-            alert(response.data.error);
-          }
-        })
-        .catch((error) => 
-          alert("Unable to subit discussion topic\n" + error)
-        );
-    }
-  }
-
-  deleteTopic(topic) {
-    if(window.confirm("Confirm if you'd like to delete the following topic: " + topic.text)) {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/delete-topic', {sessionId: this.state.sessionId, topicText: topic.text, authorName: topic.authorDisplayName})
-        .then((response) => {
-          if(response.data.status !== "SUCCESS") {
-            alert(response.data.error);
-          }
-        })
-        .catch((error) => 
-          alert("Unable to delete topic\n" + error)
-        );
-    }
-  }
-
-  populateCards() {
-    let topicsElements = [];
-
-    let allTopics = this.state.topics.discussionBacklogTopics;
-    if(allTopics !== undefined) {
-      for(let i = 0; i < allTopics.length; i++) {
-        let text = allTopics[i].text;
-        let votes = allTopics[i].voters.length;
-        let votingButton;
-        if(allTopics[i].voters.includes(this.state.userDisplayName)) {
-          votingButton = <button onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
-        } else if(this.state.votesLeft !== 0) {
-          votingButton = <button style={{maxHeight: '100%'}} onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
-        }
-        let deleteButton = this.state.userDisplayName === this.state.usersInAttendance.moderator && !this.state.sessionStatus.includes("ASK_FOR_USERNAME")
-          ? <button onClick={() => this.deleteTopic(allTopics[i])} style={{maxHeight: '100%'}}>Delete</button>
-          : null;
-
-        // i + 1 because first square taken by compose card
-        // mod by 5 to get column number, count is 1 based so add 1 to result
-        let columnNum = ((i + 1) % 5) + 1;
-
-        // i + 1 because first square taken by compose card
-        // divide by 5 to get row number, count is 1 based so add 1 to result
-        let rowNum = Math.floor((i + 1) / 5) + 1;
-        topicsElements.push(
-          <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
-            <p id="topicText">{text}</p>
-            <p id="votesText">Votes: {votes}</p>
-            <div style={{fontSize: '50%', height: '10%', position: "absolute", bottom: '2.5%', right: '2.5%'}}>
-              {deleteButton}
-              <text> </text>
-              {votingButton}
-            </div>
-          </div>
-        );
-      }
-    }
-
-    return (
-      <div class="cards-grid-container">
-        <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
-          <textarea id="composeTextArea" value={this.state.cardSubmissionText} onChange={(event) => {this.setState({cardSubmissionText: event.target.value});}} placeholder="Submit a discussion topic!"/>
-          <button id="cardButton" onClick={this.submitCard}>Submit</button>
-        </div>
-
-        {topicsElements}
-      </div>
-    )    
-  }
-
-  postVoteForTopic(topicText, commandType, authorDisplayName) {
-    if(commandType === "CAST") {
-      let newVotesLeft = this.state.votesLeft - 1;
-      this.setState({votesLeft: newVotesLeft})
-    } else {
-      let newVotesLeft = this.state.votesLeft + 1;
-      this.setState({votesLeft: newVotesLeft})
-    }
-
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/post-vote", {command: commandType, sessionId: this.state.sessionId, text: topicText, voterDisplayName: this.state.userDisplayName, authorDisplayName: authorDisplayName})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(response.data.error);
-        }
-      })
-      .catch((error) => 
-        alert("Unable to submit vote\n" + error)
-      );
-  }
-
-  transitionToDiscussion() {
-    if(this.state.topics.discussionBacklogTopics.length >= 2) {
-      Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.state.sessionId, {})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(response.data.error);
-        }
-      })
-      .catch((error) => {
-        alert("Unable to transition to next section\n" + error)
-      })
-    }
+  setUserDisplayNameAndSessionStatusAndShareableLink(displayName, status, showShareableLink) {
+    this.setState({userDisplayName: displayName, sessionStatus: status, showShareableLink: showShareableLink, isNameModalOpen: false});
   }
 
   toggleShareableLink() {
     this.setState({showShareableLink: !this.state.showShareableLink});
   }
 
+  setTopics(topics) {
+    this.setState({topics: topics})
+  }
+
   render() {
-    let usernameModal = !this.state.sessionStatus.includes("ASK_FOR_USERNAME")
-      ? null
-      : <Modal isOpen={this.state.isNameModalOpen}>
-          <ModalHeader>Enter your name</ModalHeader>
-          <ModalBody>
-            <input name="displayName" placeholder="Johnny C." onChange={(event) => {this.setState({userDisplayName: event.target.value});}}></input>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onClick={this.submitDisplayName}>Submit</Button>
-          </ModalFooter>
-        </Modal>
+    let votingPage = this.state.sessionStatus.includes("STARTED")
+      ? <VotingPage userDisplayName={this.state.userDisplayName} sessionId={this.state.sessionId} topics={this.state.topics} usersInAttendance={this.state.usersInAttendance} isNameModalOpen={false} sessionStatus={this.state.sessionStatus} toggleShareableLink={this.toggleShareableLink}/>
+      : null;
 
-      let newSessionUrl = process.env.REACT_APP_FRONTEND_BASEURL + '/session/' + this.state.sessionId;
-      let shareableLinkModal = <div>
-        <Modal backdrop={true} isOpen={this.state.showShareableLink} toggle={this.toggleShareableLink}>
-          <ModalHeader toggle={this.toggleShareableLink}>Shareable Link</ModalHeader>
-          <ModalBody>
-            Your meeting link is: {newSessionUrl}
-            <br/>
-            <CopyToClipboard text={newSessionUrl} onCopy={() => this.setState({copied: true})}>
-              <button>Copy to clipboard</button>
-            </CopyToClipboard>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onClick={this.toggleShareableLink}>Close</Button>
-          </ModalFooter>
-        </Modal>
+    let discussionPage = this.state.sessionStatus.includes("DISCUSSING")
+    ? <DiscussionPage setTopics={this.setTopics} discussionVotes={this.state.discussionVotes} isUsernameModalOpen={this.state.isNameModalOpen} sessionId={this.state.sessionId} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userDisplayName={this.state.userDisplayName} usersInAttendance={this.state.usersInAttendance} />
+    : null;
+
+    return (
+      <div>
+        <UsernamePromptModal isNameModalOpen={this.state.isNameModalOpen} sessionId={this.state.sessionId} websocketUserId={this.state.websocketUserId} setUserDisplayNameAndSessionStatusAndShareableLink={this.setUserDisplayNameAndSessionStatusAndShareableLink}/>
+        <ShareableLinkModal sessionId={this.state.sessionId} showShareableLink={this.state.showShareableLink} toggleShareableLink={this.toggleShareableLink}/>
+        {votingPage}
+        {discussionPage}
       </div>
-
-    if((this.state.sessionStatus.includes("STARTED"))) {
-      let nextSectionButton = this.state.topics.discussionBacklogTopics !== undefined && this.state.topics.discussionBacklogTopics.length >= 2 && this.state.userDisplayName === this.state.usersInAttendance.moderator && this.state.isNameModalOpen === false
-        ? <div class="nextSectionButton">
-            <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
-          </div>
-        : null;
-      return (
-        <div>
-          {usernameModal}
-          {shareableLinkModal}
-          <div class="session-grid-container">
-            <div class="session-grid-item cardsSection">
-              {this.populateCards()}
-            </div>
-            <div class="session-grid-item usersSection">
-              <div>All here:</div>
-              <div>{this.getAllHere()}</div>
-              {nextSectionButton}
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    else if (this.state.sessionStatus.includes("DISCUSSING") && this.state.currentTopicEndTime !== null) {
-      return (
-        <div>
-          {usernameModal}
-          {shareableLinkModal}
-          <DiscussionPage discussionVotes={this.state.discussionVotes} isUsernameModalOpen={usernameModal !== null} sessionId={this.state.sessionId} getAllHere={this.getAllHere} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userInfo={{displayName: this.state.userDisplayName}} moderatorName={this.state.usersInAttendance.moderator} />
-        </div>
-      )
-    }
-
-    else {
-      return (
-        <div>
-          Session page
-        </div>
-      )
-    }
+    )
   }
 }
 
