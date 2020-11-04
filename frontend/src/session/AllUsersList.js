@@ -8,13 +8,13 @@ class AllUsersList extends React.Component {
       for(let i = 0; i < this.props.usersInAttendance.displayNames.length; i++) {
         let username = this.props.usersInAttendance.displayNames[i];
         if(this.props.userDisplayName === username) {
-          if(username === this.props.usersInAttendance.moderator) {
+          if(this.props.usersInAttendance.moderator.includes(username)) {
             allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList"><b>{username}</b></li>);
           } else {
             allHereListItems.push(<li key={i.toString()} class="usernameList"><b>{username}</b></li>);
           }
         } else {
-          if(username === this.props.usersInAttendance.moderator) {
+          if(this.props.usersInAttendance.moderator.includes(username)) {
             allHereListItems.push(<li key={i.toString()} style={{color:'#d4af37'}} class="usernameList">{username}</li>);
           } else {
             allHereListItems.push(<li key={i.toString()} class="usernameList">{username}</li>);

@@ -6,7 +6,7 @@ class DiscussedTopics extends React.Component {
     let topics = this.props.topics.discussedTopics;
     let allDiscussedTopicsElements = [];
     for(let i = 0; i <= topics.length; i++) {
-      let buttons = this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false
+      let buttons = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false
         ? <div>
             <button  onClick={() => this.props.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
             <button onClick={() => this.props.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>

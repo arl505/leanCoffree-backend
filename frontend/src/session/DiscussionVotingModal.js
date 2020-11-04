@@ -51,7 +51,7 @@ class DiscussionVotingModal extends React.Component {
       ? 0
       : this.props.discussionVotes.finishTopicVotesCount;
 
-      let modalFooter = this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false
+      let modalFooter = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false
         ? (
           <div>
             <br/>

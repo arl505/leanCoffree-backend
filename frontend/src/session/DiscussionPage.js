@@ -135,7 +135,7 @@ class DiscussionPage extends React.Component {
   }
 
   sessionControlButtons() {
-    if(this.props.userDisplayName !== this.props.usersInAttendance.moderator || this.props.isUsernameModalOpen !== false) {
+    if(!(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName)) || this.props.isUsernameModalOpen !== false) {
       return null;
     }
 

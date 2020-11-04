@@ -95,7 +95,7 @@ class VotingPage extends React.Component {
         } else if(this.state.votesLeft !== 0) {
           votingButton = <button style={{maxHeight: '100%'}} onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
         }
-        let deleteButton = this.props.userDisplayName === this.props.usersInAttendance.moderator && !this.props.sessionStatus.includes("ASK_FOR_USERNAME")
+        let deleteButton = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && !this.props.sessionStatus.includes("ASK_FOR_USERNAME")
           ? <button onClick={() => this.deleteTopic(allTopics[i])} style={{maxHeight: '100%'}}>Delete</button>
           : null;
 
@@ -128,7 +128,7 @@ class VotingPage extends React.Component {
   }
   
   render() {
-    let nextSectionButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 2 && this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isNameModalOpen === false
+    let nextSectionButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 2 && this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isNameModalOpen === false
       ? <div class="nextSectionButton">
           <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
         </div>

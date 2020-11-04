@@ -56,7 +56,8 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     if (usersEntityOptional.isEmpty() || !usersEntityOptional.get().getIsOnline()) {
       final boolean wasAlreadyModerator = wasAlreadyModerator(usersEntityOptional);
       final boolean isModerator =
-          usersRepository.countBySessionId(sessionId) == 0 || wasAlreadyModerator;
+          usersRepository.countBySessionIdAndIsOnlineTrueAndIsModeratorTrue(sessionId) == 0
+              || wasAlreadyModerator;
 
       usersRepository.save(UsersEntity.builder()
           .displayName(displayName)
@@ -70,15 +71,12 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
           .findBySessionIdAndIsOnlineTrue(sessionId);
 
       if (optionalUsersEntityList.isPresent() && sessionsEntityOptional.isPresent()) {
-        final Map.Entry<List<String>, String> displayNamesAndModeratorName = getDisplayNamesAndModeratorName(
-            isModerator
-                ? displayName
-                : null,
+        final Map.Entry<List<String>, List<String>> displayNamesAndModeratorName = getDisplayNamesAndModeratorName(
             optionalUsersEntityList.get());
 
         final String websocketMessageString = new JSONObject()
             .put("displayNames", new JSONArray(displayNamesAndModeratorName.getKey()))
-            .put("moderator", displayNamesAndModeratorName.getValue()).toString();
+            .put("moderator", new JSONArray(displayNamesAndModeratorName.getValue())).toString();
         final SortTopicsBy sortTopicsBy =
             sessionsEntityOptional.get().getSessionStatus().equals(DISCUSSING)
                 ? Y_INDEX
@@ -117,18 +115,16 @@ public class AddUserToSessionServiceImpl implements AddUserToSessionService {
     return wasAlreadyModerator;
   }
 
-  private Map.Entry<List<String>, String> getDisplayNamesAndModeratorName(String moderatorName,
+  private Map.Entry<List<String>, List<String>> getDisplayNamesAndModeratorName(
       final List<UsersEntity> optionalUsersEntityList) {
+    final List<String> moderators = new ArrayList<>();
     final List<String> displayNames = new ArrayList<>();
     for (final UsersEntity usersEntity : optionalUsersEntityList) {
       displayNames.add(usersEntity.getDisplayName());
       if (usersEntity.getIsModerator()) {
-        moderatorName = usersEntity.getDisplayName();
+        moderators.add(usersEntity.getDisplayName());
       }
     }
-    if(moderatorName == null) {
-      moderatorName = "";
-    }
-    return Map.entry(displayNames, moderatorName);
+    return Map.entry(displayNames, moderators);
   }
 }

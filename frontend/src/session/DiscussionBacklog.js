@@ -49,7 +49,7 @@ const Container = styled.div`
     }
 
   getTopicCardModeratorButtons(text, author) {
-    if(this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false) {
+    if(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false) {
       return (
         <div>
           <button  onClick={() => this.props.pullNewDiscussionTopic(text, author)}>Discuss</button>
@@ -71,7 +71,7 @@ const Container = styled.div`
         topics.push({votes: votes, text: text, author: author});
       }
 
-      if(this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false && this.props.topics.discussionBacklogTopics.length > 1) {
+      if(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false && this.props.topics.discussionBacklogTopics.length > 1) {
         return topics.length === 0
         ? null
         : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: '1',  minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden', borderRight: 'solid black 1px'}}>
