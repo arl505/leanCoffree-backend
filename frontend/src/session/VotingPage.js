@@ -140,10 +140,7 @@ class VotingPage extends React.Component {
             {this.populateCards()}
           </div>
           <div class="session-grid-item usersSection">
-            <div>All here:</div>
-            <div>
-              <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
-            </div>
+            <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
             {nextSectionButton}
           </div>
         </div>

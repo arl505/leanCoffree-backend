@@ -24,9 +24,12 @@ class AllUsersList extends React.Component {
       allHereListItems.push(<button onClick={this.props.toggleShareableLink}>Invite more</button>);
     }
     return (
-      <ul class="usernameList">
-        {allHereListItems}
-      </ul>
+      <div>
+        All here:
+        <ul class="usernameList">
+          {allHereListItems}
+        </ul>
+      </div>
     )
   }
 }

@@ -129,7 +129,12 @@ class DiscussionPage extends React.Component {
     }
   }
 
-  getButtons() {
+  toggleVotingModal() {
+    let isModalOpen = !this.state.isVotingModalOpen;
+    this.setState({isVotingModalOpen: isModalOpen});
+  }
+
+  sessionControlButtons() {
     if(this.props.userDisplayName !== this.props.usersInAttendance.moderator || this.props.isUsernameModalOpen !== false) {
       return null;
     }
@@ -139,23 +144,14 @@ class DiscussionPage extends React.Component {
       : null;
 
     return (
-      <div style={{gridColumn: 3, gridRow: 2, position: 'relative'}}>
-        <div style={{textAlign: 'center', position: 'absolute', bottom: 0, left: 0, right: 0}}>
-          {finishTopicButton}
-          <button style={{marginTop: '1vh', marginBottom: '1vh'}} onClick={this.endSession}>End Session</button>
-        </div>
+      <div style={{textAlign: 'center', position: 'absolute', bottom: '1vh'}}>
+        {finishTopicButton}
+        <button style={{marginTop: '1vh'}} onClick={this.endSession}>End Session</button>
       </div>
     );
   }
 
-  toggleVotingModal() {
-    let isModalOpen = !this.state.isVotingModalOpen;
-    this.setState({isVotingModalOpen: isModalOpen});
-  }
-
   render() {  
-    let sessionControlButtons = this.getButtons();
-      
     return (
       <div class="session-grid-container">
 
@@ -178,12 +174,10 @@ class DiscussionPage extends React.Component {
           usersInAttendance={this.props.usersInAttendance}/>
 
         <div class="session-grid-item usersSection column3">
-          <div>All here:</div>
-          <div>
-            <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
-          </div>
+          <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
+          {this.sessionControlButtons()}
         </div>
-        {sessionControlButtons}
+        
       </div>
     )
   }
