@@ -25,6 +25,7 @@ class Session extends React.Component {
     }
     this.toggleShareableLink = this.toggleShareableLink.bind(this);
     this.setUserDisplayNameAndSessionStatusAndShareableLink = this.setUserDisplayNameAndSessionStatusAndShareableLink.bind(this);
+    this.setTopics = this.setTopics.bind(this);
   }
 
   componentDidMount() {
@@ -121,13 +122,17 @@ class Session extends React.Component {
     this.setState({showShareableLink: !this.state.showShareableLink});
   }
 
+  setTopics(topics) {
+    this.setState({topics: topics})
+  }
+
   render() {
     let votingPage = this.state.sessionStatus.includes("STARTED")
       ? <VotingPage userDisplayName={this.state.userDisplayName} sessionId={this.state.sessionId} topics={this.state.topics} usersInAttendance={this.state.usersInAttendance} isNameModalOpen={false} sessionStatus={this.state.sessionStatus} toggleShareableLink={this.toggleShareableLink}/>
       : null;
 
     let discussionPage = this.state.sessionStatus.includes("DISCUSSING")
-    ? <DiscussionPage discussionVotes={this.state.discussionVotes} isUsernameModalOpen={this.state.isNameModalOpen} sessionId={this.state.sessionId} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userDisplayName={this.state.userDisplayName} usersInAttendance={this.state.usersInAttendance} />
+    ? <DiscussionPage setTopics={this.setTopics} discussionVotes={this.state.discussionVotes} isUsernameModalOpen={this.state.isNameModalOpen} sessionId={this.state.sessionId} topics={this.state.topics} currentEndTime={this.state.currentTopicEndTime} userDisplayName={this.state.userDisplayName} usersInAttendance={this.state.usersInAttendance} />
     : null;
 
     return (

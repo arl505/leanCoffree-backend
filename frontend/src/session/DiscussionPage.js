@@ -1,20 +1,9 @@
 import React from 'react';
 import Axios from 'axios';
-import styled from "styled-components";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import AllUsersList from './AllUsersList';
+import DiscussionBackog from './DiscussionBacklog'
 import DiscussionVotingModal from './DiscussionVotingModal'
 
-const Container = styled.div`
-grid-column: 1;
-margin: 1vw;
-margin-left: 2.5vw;
-margin-right: 2.5vw;
-overflow: scroll;
-border: solid black 1px;
-width: 15vw;
-height: 15vw;
-position: relative;`;
 
 class DiscussionPage extends React.Component {
 
@@ -28,10 +17,11 @@ class DiscussionPage extends React.Component {
       finished: false,
       isVotingModalOpen: false,
     }
-    this.onDragEnd = this.onDragEnd.bind(this);
     this.loadNextTopic = this.loadNextTopic.bind(this);
     this.toggleVotingModal = this.toggleVotingModal.bind(this);
     this.endSession = this.endSession.bind(this);
+    this.pullNewDiscussionTopic = this.pullNewDiscussionTopic.bind(this);
+    this.deleteTopic = this.deleteTopic.bind(this);
   }
 
   componentDidMount() {
@@ -60,33 +50,6 @@ class DiscussionPage extends React.Component {
     if(prevProps.topics !== this.props.topics) {
       this.setState({topics: this.props.topics});
     }
-  }
-
-  onDragEnd(result) {
-    // dropped outside the list
-    if (!result.destination) {
-      return;
-    }
-
-    let topics = this.state.topics.discussionBacklogTopics;
-
-    let topic = topics[result.source.index];
-    topics.splice(result.source.index, 1);
-    topics.splice(result.destination.index, 0, topic);
-
-    let allTopics = this.state.topics;
-    allTopics.discussionBacklogTopics = topics;
-    this.setState({topics: allTopics});
-    
-    Axios.post(process.env.REACT_APP_BACKEND_BASEURL + '/reorder', {sessionId: this.props.sessionId, text: topic.text, newIndex: result.destination.index})
-      .then((response) => {
-        if(response.data.status !== "SUCCESS") {
-          alert(response.data.error);
-        }
-      })
-      .catch((error) => 
-        alert("Unable to reorder topic\n" + error)
-      );
   }
 
   deleteTopic(topicText, author) {
@@ -124,77 +87,6 @@ class DiscussionPage extends React.Component {
           alert("Unable to pull topic for discussion\n" + error)
         );
     } 
-  }
-
-  getAllTopicCards() {
-    let allTopics = this.state.topics.discussionBacklogTopics;
-    if(allTopics !== undefined) {
-      let topics = [];
-      for(let i = 0; i < allTopics.length; i++) {
-        let text = allTopics[i].text;
-        let votes = allTopics[i].voters.length;
-        let author = allTopics[i].authorDisplayName
-        topics.push({votes: votes, text: text, author: author});
-      }
-
-      if(this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false && this.state.topics.discussionBacklogTopics.length > 1) {
-        return topics.length === 0
-        ? null
-        : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden'}}>
-            <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
-            <DragDropContext onDragEnd={this.onDragEnd}>
-              <Droppable droppableId="droppable">
-                {(provided, snapshot) => (
-                  <div {...provided.droppableProps} class="discussCards-container" style={{paddingBottom: '7.5vw'}} ref={provided.innerRef}>
-                    {topics.map((item, index) => (
-                      <Draggable key={index.toString()}  draggableId={'draggable' + index} index={index}>
-                        {(provided) => (
-                          <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                            <p class="topicText">{item.text}</p>
-                            <p class="votesText">Votes: {item.votes}</p>
-                            <button  onClick={() => this.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
-                            <button onClick={() => this.deleteTopic(item.text, item.author)}>Delete</button>
-                          </Container>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          </div>;
-      } else if(this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false) {
-        return topics.length === 0
-        ? null
-        : (
-          <div class="discussCards-container" style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'scroll'}}>
-            {topics.map((item, index) => (
-              <div key={index.toString()} class="cardItem discussionCardItem" style={{gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
-                <p class="topicText">{item.text}</p>
-                <p class="votesText">Votes: {item.votes}</p>
-                <button  onClick={() => this.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
-                <button onClick={() => this.deleteTopic(item.text, item.author)}>Delete</button>
-              </div>
-            ))}
-          </div>
-        );
-      } else {
-        return topics.length === 0
-        ? null
-        : (
-          <div class="discussCards-container" style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'scroll'}}>
-            {topics.map((item, index) => (
-              <div key={index.toString()} class="cardItem discussionCardItem" style={{gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
-                <p class="topicText">{item.text}</p>
-                <p class="votesText">Votes: {item.votes}</p>
-              </div>
-            ))}
-          </div>
-        );
-      }
-    }
-    return null;
   }
 
   getDiscussedCards(isFinished) {
@@ -322,9 +214,7 @@ class DiscussionPage extends React.Component {
       ? "Session completed!"
       : this.state.topics.currentDiscussionItem.text;
 
-    let allTopicCardsContainer = this.getAllTopicCards();
-
-    let currentDiscussionItemContainer = allTopicCardsContainer === null 
+    let currentDiscussionItemContainer = this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0
       ? <div class="currentDiscussionItem column1">
           <h5 class="currentTopicHeader">{currentDiscussionItemHeader}</h5>
           <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
@@ -340,10 +230,22 @@ class DiscussionPage extends React.Component {
       
     return (
       <div class="session-grid-container">
-        <DiscussionVotingModal loadNextTopic={this.loadNextTopic} toggleVotingModal={this.toggleVotingModal} sessionId={this.props.sessionId} userDisplayName={this.props.userDisplayName} discussionVotes={this.props.discussionVotes} currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} isUsernameModalOpen={this.props.isUsernameModalOpen} isVotingModalOpen={this.state.isVotingModalOpen} usersInAttendance={this.props.usersInAttendance}/>
-        {allTopicCardsContainer}
+
+        <DiscussionVotingModal loadNextTopic={this.loadNextTopic} toggleVotingModal={this.toggleVotingModal} 
+          sessionId={this.props.sessionId} userDisplayName={this.props.userDisplayName} 
+          discussionVotes={this.props.discussionVotes} currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} 
+          isUsernameModalOpen={this.props.isUsernameModalOpen} isVotingModalOpen={this.state.isVotingModalOpen} 
+          usersInAttendance={this.props.usersInAttendance}
+        />
+
+        <DiscussionBackog userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance} 
+          isUsernameModalOpen={this.props.isUsernameModalOpen} pullNewDiscussionTopic={this.pullNewDiscussionTopic}
+          deleteTopic={this.deleteTopic} topics={this.props.topics} 
+          setTopics={this.props.setTopics} sessionId={this.props.sessionId}
+        />
+        
         {currentDiscussionItemContainer}
-        {this.getDiscussedCards(allTopicCardsContainer === null)}
+        {this.getDiscussedCards(this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0)}
 
         <div class="session-grid-item usersSection column3">
           <div>All here:</div>
