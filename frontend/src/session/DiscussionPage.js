@@ -1,9 +1,9 @@
 import React from 'react';
 import Axios from 'axios';
 import AllUsersList from './AllUsersList';
-import DiscussionBackog from './DiscussionBacklog'
-import DiscussionVotingModal from './DiscussionVotingModal'
-
+import DiscussionBackog from './DiscussionBacklog';
+import DiscussionVotingModal from './DiscussionVotingModal';
+import DiscussedTopics from './DiscussedTopics';
 
 class DiscussionPage extends React.Component {
 
@@ -87,47 +87,6 @@ class DiscussionPage extends React.Component {
           alert("Unable to pull topic for discussion\n" + error)
         );
     } 
-  }
-
-  getDiscussedCards(isFinished) {
-    if(this.state.topics.discussedTopics !== undefined && this.state.topics.discussedTopics.length !== 0) {
-      let topics = this.state.topics.discussedTopics;
-      let allDiscussedTopicsElements = [];
-      for(let i = 0; i <= topics.length; i++) {
-        let buttons = this.props.userDisplayName === this.props.usersInAttendance.moderator && this.props.isUsernameModalOpen === false
-          ? <div>
-              <button  onClick={() => this.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
-              <button onClick={() => this.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
-            </div>
-          : null;
-        if(i === (topics.length)) {
-          allDiscussedTopicsElements.push(
-            <div key={i.toString()} class="finalSpacer row1" style={{gridColumn: i + 1}}/>
-          )
-        } else {
-          allDiscussedTopicsElements.push(
-            <div key={i.toString()} class="cardItem row1" style={{gridColumn: i + 1}}>
-              <p class="topicText">{topics[i].text}</p>
-              {buttons}
-            </div>
-          )
-        }
-      }
-
-      if(!isFinished) {
-        return (
-          <div class="discussedItemsSection">
-            {allDiscussedTopicsElements}
-          </div>
-        )
-      } else {
-        return (
-          <div class="discussedItemsSection column1">
-            {allDiscussedTopicsElements}
-          </div>
-        )
-      }
-    }
   }
 
   loadNextTopic() {
@@ -227,6 +186,14 @@ class DiscussionPage extends React.Component {
         </div>;
 
     let sessionControlButtons = this.getButtons();
+
+    let discussedTopics = this.props.topics.discussedTopics !== undefined && this.props.topics.discussedTopics.length !== 0
+      ? <DiscussedTopics isBacklogOpen={this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0}
+          topics={this.props.topics} isUsernameModalOpen={this.props.isUsernameModalOpen}
+          userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance}
+          pullNewDiscussionTopic={this.pullNewDiscussionTopic} deleteTopic={this.deleteTopic}
+        />
+      : null;
       
     return (
       <div class="session-grid-container">
@@ -245,7 +212,8 @@ class DiscussionPage extends React.Component {
         />
         
         {currentDiscussionItemContainer}
-        {this.getDiscussedCards(this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0)}
+
+        {discussedTopics}
 
         <div class="session-grid-item usersSection column3">
           <div>All here:</div>
