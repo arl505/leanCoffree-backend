@@ -1,8 +1,8 @@
 package com.leancoffree.backend.service;
 
+import static com.leancoffree.backend.enums.SessionStatus.DISCUSSING;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
-import static org.json.JSONObject.NULL;
 
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.entity.UsersEntity;
@@ -13,7 +13,6 @@ import com.leancoffree.backend.repository.UsersRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -34,7 +33,6 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
     this.sessionsRepository = sessionsRepository;
   }
 
-  @Transactional
   public SessionStatusResponse dropUserInSessionAndReturnAllUsers(
       final RefreshUsersRequest refreshUsersRequest) {
     final List<String> displayNames = new ArrayList<>();
@@ -50,16 +48,43 @@ public class DropUserInSessionServiceImpl implements DropUserInSessionService {
           .findBySessionIdAndIsOnlineTrue(usersEntity.getSessionId());
 
       if (optionalUsersEntityList.isPresent()) {
-        String moderatorName = null;
+        final List<String> moderatorNames = new ArrayList<>();
+
         for (final UsersEntity user : optionalUsersEntityList.get()) {
           displayNames.add(user.getDisplayName());
-          if(user.getIsModerator()) {
-            moderatorName = user.getDisplayName();
+          if (user.getIsModerator()) {
+            moderatorNames.add(user.getDisplayName());
           }
         }
+
+        if (moderatorNames.isEmpty()) {
+          final List<Object[]> alphabeticallyFirstOnlineUser = usersRepository
+              .getTopAlphabeticalOnlineUser(usersEntity.getSessionId());
+
+          if (alphabeticallyFirstOnlineUser != null && alphabeticallyFirstOnlineUser.size() == 1) {
+            moderatorNames.add((String) alphabeticallyFirstOnlineUser.get(0)[0]);
+            final UsersEntity newModeratorEntity = UsersEntity.builder()
+                .isOnline(true)
+                .displayName((String) alphabeticallyFirstOnlineUser.get(0)[0])
+                .isModerator(true)
+                .sessionId(usersEntity.getSessionId())
+                .websocketUserId((String) alphabeticallyFirstOnlineUser.get(0)[1])
+                .build();
+            usersRepository.save(newModeratorEntity);
+
+          } else {
+            // no one online, return dummy response
+            return SessionStatusResponse.builder()
+                .status(SUCCESS)
+                .error(null)
+                .sessionStatus(DISCUSSING)
+                .build();
+          }
+        }
+
         final String websocketMessageString = new JSONObject()
             .put("displayNames", new JSONArray(displayNames))
-            .put("moderator", moderatorName == null ? NULL : moderatorName).toString();
+            .put("moderator", new JSONArray(moderatorNames)).toString();
         webSocketMessagingTemplate
             .convertAndSend("/topic/users/session/" + usersEntity.getSessionId(),
                 websocketMessageString);

@@ -71,12 +71,17 @@ public class RefreshUsersServiceImpl implements RefreshUsersService {
         .findById(sessionId);
 
     if (sessionsEntityOptional.isPresent()) {
-      final String moderatorName;
-      final Optional<UsersEntity> moderatorUserEntityOptional = usersRepository
+
+      final List<String> moderatorNames = new ArrayList<>();
+      final Optional<List<UsersEntity>> moderatorUserEntityOptional = usersRepository
           .findBySessionIdAndIsModeratorTrue(sessionId);
       if(moderatorUserEntityOptional.isPresent()) {
-        moderatorName = moderatorUserEntityOptional.get().getDisplayName();
-      } else {
+        for(final UsersEntity usersEntity : moderatorUserEntityOptional.get()) {
+          moderatorNames.add(usersEntity.getDisplayName());
+        }
+      }
+
+      if(moderatorNames.isEmpty()){
         return SessionStatusResponse.builder()
             .status(FAILURE)
             .error("Couldn't find moderator")
@@ -92,7 +97,7 @@ public class RefreshUsersServiceImpl implements RefreshUsersService {
 
       final String websocketMessageString = new JSONObject()
           .put("displayNames", new JSONArray(displayNames))
-          .put("moderator", moderatorName).toString();
+          .put("moderator", new JSONArray(moderatorNames)).toString();
       final SortTopicsBy sortTopicsBy =
           sessionsEntityOptional.get().getSessionStatus().equals(DISCUSSING)
               ? Y_INDEX
