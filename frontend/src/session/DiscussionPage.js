@@ -1,6 +1,7 @@
 import React from 'react';
 import Axios from 'axios';
 import AllUsersList from './AllUsersList';
+import CurrentDiscussionItem from './CurrentDiscussionItem'
 import DiscussionBackog from './DiscussionBacklog';
 import DiscussionVotingModal from './DiscussionVotingModal';
 import DiscussedTopics from './DiscussedTopics';
@@ -153,67 +154,28 @@ class DiscussionPage extends React.Component {
   }
 
   render() {  
-    let countdown;
-    if(this.state.currentTopicSecondsRemaining !== -1) {
-      let minutesNum = Math.floor(this.state.currentTopicSecondsRemaining / 60);
-      let secondsNum = this.state.currentTopicSecondsRemaining % 60;
-      if(!isNaN(minutesNum) && !isNaN(secondsNum)) {
-        if(secondsNum < 10) {
-          secondsNum = ("0" + secondsNum).slice(-2);
-        }
-        countdown = <h5 class="countdown">{minutesNum} : {secondsNum}</h5>
-      }
-    }
-
-    let currentDiscussionItemHeader = this.state.topics.currentDiscussionItem === undefined || this.state.topics.currentDiscussionItem.text === undefined
-      ? null
-      : "Current discussion item";
-    
-    let currentDiscussionItem = this.state.topics.currentDiscussionItem === undefined || this.state.topics.currentDiscussionItem.text === undefined
-      ? "Session completed!"
-      : this.state.topics.currentDiscussionItem.text;
-
-    let currentDiscussionItemContainer = this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0
-      ? <div class="currentDiscussionItem column1">
-          <h5 class="currentTopicHeader">{currentDiscussionItemHeader}</h5>
-          <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
-          {countdown}
-        </div>
-      : <div class="currentDiscussionItem">
-          <h5 class="currentTopicHeader">{currentDiscussionItemHeader}</h5>
-          <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
-          {countdown}
-        </div>;
-
     let sessionControlButtons = this.getButtons();
-
-    let discussedTopics = this.props.topics.discussedTopics !== undefined && this.props.topics.discussedTopics.length !== 0
-      ? <DiscussedTopics isBacklogOpen={this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0}
-          topics={this.props.topics} isUsernameModalOpen={this.props.isUsernameModalOpen}
-          userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance}
-          pullNewDiscussionTopic={this.pullNewDiscussionTopic} deleteTopic={this.deleteTopic}
-        />
-      : null;
       
     return (
       <div class="session-grid-container">
+
+        <CurrentDiscussionItem currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} topics={this.props.topics}/>
+
+        <DiscussionBackog userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance} 
+          isUsernameModalOpen={this.props.isUsernameModalOpen} pullNewDiscussionTopic={this.pullNewDiscussionTopic}
+          deleteTopic={this.deleteTopic} topics={this.props.topics} 
+          setTopics={this.props.setTopics} sessionId={this.props.sessionId}/>
+
+        <DiscussedTopics isBacklogOpen={this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0}
+          topics={this.props.topics} isUsernameModalOpen={this.props.isUsernameModalOpen}
+          userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance}
+          pullNewDiscussionTopic={this.pullNewDiscussionTopic} deleteTopic={this.deleteTopic}/>
 
         <DiscussionVotingModal loadNextTopic={this.loadNextTopic} toggleVotingModal={this.toggleVotingModal} 
           sessionId={this.props.sessionId} userDisplayName={this.props.userDisplayName} 
           discussionVotes={this.props.discussionVotes} currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} 
           isUsernameModalOpen={this.props.isUsernameModalOpen} isVotingModalOpen={this.state.isVotingModalOpen} 
-          usersInAttendance={this.props.usersInAttendance}
-        />
-
-        <DiscussionBackog userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance} 
-          isUsernameModalOpen={this.props.isUsernameModalOpen} pullNewDiscussionTopic={this.pullNewDiscussionTopic}
-          deleteTopic={this.deleteTopic} topics={this.props.topics} 
-          setTopics={this.props.setTopics} sessionId={this.props.sessionId}
-        />
-        
-        {currentDiscussionItemContainer}
-
-        {discussedTopics}
+          usersInAttendance={this.props.usersInAttendance}/>
 
         <div class="session-grid-item usersSection column3">
           <div>All here:</div>

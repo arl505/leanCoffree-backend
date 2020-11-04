@@ -29,6 +29,10 @@ class DiscussedTopics extends React.Component {
   }
 
   render() {
+    if(this.props.topics.discussedTopics === undefined || this.props.topics.discussedTopics.length === 0) {
+      return null;
+    }
+
     let classNames = !this.props.isBacklogOpen
       ? "discussedItemsSection"
       : "discussedItemsSection column1"
