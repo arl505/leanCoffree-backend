@@ -167,16 +167,16 @@ class DiscussionPage extends React.Component {
           userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance}
           pullNewDiscussionTopic={this.pullNewDiscussionTopic} deleteTopic={this.deleteTopic}/>
 
+        <div class="session-grid-item usersSection column3">
+          <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
+          {this.sessionControlButtons()}
+        </div>
+
         <DiscussionVotingModal loadNextTopic={this.loadNextTopic} toggleVotingModal={this.toggleVotingModal} 
           sessionId={this.props.sessionId} userDisplayName={this.props.userDisplayName} 
           discussionVotes={this.props.discussionVotes} currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} 
           isUsernameModalOpen={this.props.isUsernameModalOpen} isVotingModalOpen={this.state.isVotingModalOpen} 
           usersInAttendance={this.props.usersInAttendance}/>
-
-        <div class="session-grid-item usersSection column3">
-          <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
-          {this.sessionControlButtons()}
-        </div>
         
       </div>
     )
