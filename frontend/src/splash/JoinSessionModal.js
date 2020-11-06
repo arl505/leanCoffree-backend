@@ -50,16 +50,17 @@ class JoinSessionModal extends React.Component {
     return (
       <div>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
-          <ModalHeader toggle={this.props.toggle}>Join a Lean Coffree session</ModalHeader>
-          <ModalBody>
+          <ModalHeader style={{backgroundColor: '#133b5c'}} toggle={this.props.toggle}>Join a Lean Coffree session</ModalHeader>
+          <ModalBody style={{backgroundColor: '#1d2d50'}}>
             Session link:
             <br/> 
-            <input type="text" onChange={this.captureChange} placeholder={placeholder}></input>
-          </ModalBody>
-          <ModalFooter>
+            <input style={{width: '95%'}} type="text" onChange={this.captureChange} placeholder={placeholder}></input>
+            <br/>
+            <br/>
             <Button color="primary" onClick={this.redirectToSession}>Join lean coffee session</Button>
+            <text> </text>
             <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
-          </ModalFooter>
+          </ModalBody>
         </Modal>
       </div>
     )

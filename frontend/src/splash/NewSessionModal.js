@@ -18,14 +18,15 @@ class NewSessionModal extends React.Component {
     return (
       <div>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
-          <ModalHeader toggle={this.props.toggle}>Create a new Lean Coffree session</ModalHeader>
-          <ModalBody>
+          <ModalHeader style={{backgroundColor: '#133b5c'}} toggle={this.props.toggle}>Create a new Lean Coffree session</ModalHeader>
+          <ModalBody style={{backgroundColor: '#1d2d50'}}>
             Click below to launch a new Lean Coffree session!
-          </ModalBody>
-          <ModalFooter>
+            <br/>
+            <br/>
             <Button color="primary" onClick={this.redirectToSession}>Create lean coffee session</Button>
+            <text> </text>
             <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
-          </ModalFooter>
+          </ModalBody>
         </Modal>
       </div>
     );
