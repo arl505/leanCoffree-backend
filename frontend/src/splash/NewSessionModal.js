@@ -1,6 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 class NewSessionModal extends React.Component {
 
