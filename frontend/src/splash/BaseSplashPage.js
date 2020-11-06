@@ -1,15 +1,41 @@
 import React from 'react';
+import {isMobile} from 'react-device-detect';
+import websitePicture from './website.png';
+import './BaseSplashPage.css';
 
 class BaseSplashPage extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: window.innerWidth
+    }
+  }
+
+  componentWillMount() {
+    window.addEventListener('resize', () => this.setState({width: window.innerWidth}));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleWindowSizeChange);
+  }
+
   render() {
+    let isMobileString = isMobile === true || this.state.width < 700
+      ? "_mobile"
+      : "";
     return (
       <div>
-        <h1>Welcome to Lean Coffree, a free lean coffee discussion tool</h1>
-        <button onClick={this.props.toggleCreateNewSessionModal}>Create a new Lean Coffree session!</button>
+        <p class={isMobile === true ? "baseHeader_mobile" : "baseHeader"}>Lean Coffree, a <b>free</b> lean coffee discussion tool</p>
         <br/>
-        <br/>
-        <button onClick={this.props.toggleJoinSessionModal}>Join a Lean Coffree session!</button>
+        <img class={"websitePicture" + isMobileString} src={websitePicture} alt="demo of lean coffree session"/>
+        <div class={"joinSessionDiv" + isMobileString}>
+          <p class={"subHeader" + isMobileString}>Join or create a lean coffree session, for free!</p>
+          <button class={"button"} onClick={this.props.toggleCreateNewSessionModal}><b>Create a new Lean Coffree session</b></button>
+          <br/>
+          <br/>
+          <button class={"button"} onClick={this.props.toggleJoinSessionModal}><b>Join a Lean Coffree session</b></button>
+        </div>
       </div>
     )
   }
