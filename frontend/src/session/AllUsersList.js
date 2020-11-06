@@ -11,7 +11,7 @@ class AllUsersList extends React.Component {
         if(this.props.userDisplayName === username) {
           if(this.props.usersInAttendance.moderator.includes(username)) {
             allHereListItems.push(<div style={{marginTop: '1vw'}}>
-              <img src={moderatorIcon} style={{height: "3vh", verticalAlign: 'top'}}></img>
+              <img alt="moderator crown icon" src={moderatorIcon} style={{height: "3vh", verticalAlign: 'top'}}></img>
               <text> </text>
               <li key={i.toString()} style={{display: 'inline-block'}} class="usernameList"><b>{username}</b></li>
             </div>);
@@ -21,7 +21,7 @@ class AllUsersList extends React.Component {
         } else {
           if(this.props.usersInAttendance.moderator.includes(username)) {
             allHereListItems.push(<div style={{marginTop: '1vw'}}>
-              <img src={moderatorIcon} style={{height: "3vh", verticalAlign: 'top'}}></img>
+              <img alt="moderator crown icon" src={moderatorIcon} style={{height: "3vh", verticalAlign: 'top'}}></img>
               <text> </text>
               <li key={i.toString()} style={{display: 'inline-block'}} class="usernameList">{username}</li>
             </div>);
