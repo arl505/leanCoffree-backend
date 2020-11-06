@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 import Axios from 'axios';
 
 class UsernamePromptModal extends React.Component {
@@ -32,13 +32,13 @@ class UsernamePromptModal extends React.Component {
   render() {
     return (
       <Modal isOpen={this.props.isNameModalOpen}>
-        <ModalHeader>Enter your name</ModalHeader>
-        <ModalBody>
+        <ModalHeader style={{backgroundColor: '#133b5c'}}>Enter your name</ModalHeader>
+        <ModalBody style={{backgroundColor: '#1d2d50'}}>
           <input name="displayName" placeholder="Johnny C." onChange={(event) => this.setState({localDisplayName: event.target.value})}></input>
-        </ModalBody>
-        <ModalFooter>
+          <br/>
+          <br/>
           <Button color="primary" onClick={this.submitUsername}>Submit</Button>
-        </ModalFooter>
+        </ModalBody>
       </Modal>
     )
   }
