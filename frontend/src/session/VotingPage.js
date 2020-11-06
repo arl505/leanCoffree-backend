@@ -1,5 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
+import isMobile from 'react-device-detect';
 import AllUsersList from './AllUsersList'
 
 class VotingPage extends React.Component {
@@ -91,12 +92,12 @@ class VotingPage extends React.Component {
         let votes = allTopics[i].voters.length;
         let votingButton;
         if(allTopics[i].voters.includes(this.props.userDisplayName)) {
-          votingButton = <button onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
+          votingButton = <button class="button" onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
         } else if(this.state.votesLeft !== 0) {
-          votingButton = <button style={{maxHeight: '100%'}} onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
+          votingButton = <button class="button" onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
         }
         let deleteButton = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && !this.props.sessionStatus.includes("ASK_FOR_USERNAME")
-          ? <button onClick={() => this.deleteTopic(allTopics[i])} style={{maxHeight: '100%'}}>Delete</button>
+          ? <button class="button" onClick={() => this.deleteTopic(allTopics[i])}>Delete</button>
           : null;
 
         let columnNum = ((i + 1) % 5) + 1;
@@ -104,11 +105,13 @@ class VotingPage extends React.Component {
         topicsElements.push(
           <div key={i.toString()} class="cardItem" style={{gridColumn: columnNum, gridRow: rowNum}}>
             <p id="topicText">{text}</p>
-            <p id="votesText">Votes: {votes}</p>
-            <div style={{fontSize: '50%', height: '10%', position: "absolute", bottom: '2.5%', right: '2.5%'}}>
-              {deleteButton}
-              <text> </text>
-              {votingButton}
+            <div style={{position: "relative"}}>
+            <p style={{display: 'inline', fontSize: '75%'}}>Votes: {votes}</p>
+              <div style={{display: 'inline', position: 'absolute', width: '65%', right: 0, textAlign: 'right', fontSize: '75%'}}>
+                {votingButton} 
+                <text> </text>
+                {deleteButton}
+              </div>
             </div>
           </div>
         );
@@ -118,8 +121,8 @@ class VotingPage extends React.Component {
     return (
       <div class="cards-grid-container">
         <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1}}>
-          <textarea id="composeTextArea" value={this.state.topicSubmissionText} onChange={(event) => this.setState({topicSubmissionText: event.target.value})} placeholder="Submit a discussion topic!"/>
-          <button id="cardButton" onClick={this.sumbitTopic}>Submit</button>
+          <textarea style={{padding: '5%', backgroundColor: '#29354f', color: '#fcdab7'}} id="composeTextArea" value={this.state.topicSubmissionText} onChange={(event) => this.setState({topicSubmissionText: event.target.value})} placeholder="Submit a discussion topic!"/>
+          <button style={{fontSize: '75%', marginRight: '.5vw'}} class="button" onClick={this.sumbitTopic}>Submit</button>
         </div>
 
         {topicsElements}
@@ -133,6 +136,10 @@ class VotingPage extends React.Component {
           <button class="button" onClick={this.transitionToDiscussion}>End voting and go to next section</button>
         </div>
       : null;
+    
+    if (isMobile === true || this.props.width < 652) {
+      return <div>ayo</div>
+    }
     return (
       <div>
         <div class="session-grid-container">

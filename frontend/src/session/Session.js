@@ -22,10 +22,15 @@ class Session extends React.Component {
       topics: {},
       discussionVotes: {},
       usersInAttendance: [],
+      width: window.innerWidth,
     }
     this.toggleShareableLink = this.toggleShareableLink.bind(this);
     this.setUserDisplayNameAndSessionStatusAndShareableLink = this.setUserDisplayNameAndSessionStatusAndShareableLink.bind(this);
     this.setTopics = this.setTopics.bind(this);
+  }
+
+  componentWillMount() {
+    window.addEventListener('resize', () => this.setState({width: window.innerWidth}));
   }
 
   componentDidMount() {
@@ -131,7 +136,7 @@ class Session extends React.Component {
 
   render() {
     let votingPage = this.state.sessionStatus.includes("STARTED")
-      ? <VotingPage userDisplayName={this.state.userDisplayName} sessionId={this.state.sessionId} topics={this.state.topics} usersInAttendance={this.state.usersInAttendance} isNameModalOpen={false} sessionStatus={this.state.sessionStatus} toggleShareableLink={this.toggleShareableLink}/>
+      ? <VotingPage width={this.state.width} userDisplayName={this.state.userDisplayName} sessionId={this.state.sessionId} topics={this.state.topics} usersInAttendance={this.state.usersInAttendance} isNameModalOpen={false} sessionStatus={this.state.sessionStatus} toggleShareableLink={this.toggleShareableLink}/>
       : null;
 
     let discussionPage = this.state.sessionStatus.includes("DISCUSSING")
