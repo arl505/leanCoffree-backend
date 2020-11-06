@@ -30,7 +30,7 @@ class AllUsersList extends React.Component {
           }
         }
       } 
-      allHereListItems.push(<div style={{textAlign: 'center', marginRight: '1.5em'}}><button class="button" style={{marginTop: "1em"}} onClick={this.props.toggleShareableLink}>Invite more</button></div>);
+      allHereListItems.push(<div  style={{width: '10vw', marginLeft: '.5vw', marginRight:'2.5vw', textAlign: "center"}}><button class="button" style={{marginTop: "1em"}} onClick={this.props.toggleShareableLink}>Invite more</button></div>);
     }
     return (
       <div>

@@ -130,7 +130,7 @@ class VotingPage extends React.Component {
   render() {
     let nextSectionButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 2 && this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isNameModalOpen === false
       ? <div class="nextSectionButton">
-          <button onClick={this.transitionToDiscussion}>End voting and go to next section</button>
+          <button class="button" onClick={this.transitionToDiscussion}>End voting and go to next section</button>
         </div>
       : null;
     return (

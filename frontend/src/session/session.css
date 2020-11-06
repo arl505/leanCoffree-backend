@@ -95,6 +95,7 @@
   position: absolute;
   width: 13vw;
   bottom: 1vw;
+  right: .75vw;
 }
 
 .currentDiscussionItem {
