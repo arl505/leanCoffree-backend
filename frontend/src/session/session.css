@@ -143,3 +143,15 @@
 .finalSpacer {
   width: .01vw;
 }
+
+.button {
+  background-color: transparent;
+  color: #fcdab7;
+  padding: 3%;
+  border: solid #800000 3px;
+  border-radius: 20px;
+}
+
+.button:hover{
+  background-color: #121c30;
+}

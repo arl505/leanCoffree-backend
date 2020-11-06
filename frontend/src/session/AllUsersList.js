@@ -11,7 +11,7 @@ class AllUsersList extends React.Component {
         if(this.props.userDisplayName === username) {
           if(this.props.usersInAttendance.moderator.includes(username)) {
             allHereListItems.push(<div style={{marginTop: '1vw'}}>
-              <img alt="moderator crown icon" src={moderatorIcon} style={{height: "3vh", verticalAlign: 'top'}}></img>
+              <img alt="moderator crown icon" src={moderatorIcon} style={{width: "1em", verticalAlign: 'top'}}></img>
               <text> </text>
               <li key={i.toString()} style={{display: 'inline-block'}} class="usernameList"><b>{username}</b></li>
             </div>);
@@ -21,7 +21,7 @@ class AllUsersList extends React.Component {
         } else {
           if(this.props.usersInAttendance.moderator.includes(username)) {
             allHereListItems.push(<div style={{marginTop: '1vw'}}>
-              <img alt="moderator crown icon" src={moderatorIcon} style={{height: "3vh", verticalAlign: 'top'}}></img>
+              <img alt="moderator crown icon" src={moderatorIcon} style={{width: "1em", verticalAlign: 'top'}}></img>
               <text> </text>
               <li key={i.toString()} style={{display: 'inline-block'}} class="usernameList">{username}</li>
             </div>);
@@ -29,8 +29,8 @@ class AllUsersList extends React.Component {
             allHereListItems.push(<li key={i.toString()} class="usernameList">{username}</li>);
           }
         }
-      }
-      allHereListItems.push(<button onClick={this.props.toggleShareableLink}>Invite more</button>);
+      } 
+      allHereListItems.push(<div style={{textAlign: 'center', marginRight: '1.5em'}}><button class="button" style={{marginTop: "1em"}} onClick={this.props.toggleShareableLink}>Invite more</button></div>);
     }
     return (
       <div>
