@@ -137,7 +137,7 @@ class VotingPage extends React.Component {
         </div>
       : null;
     
-    if (isMobile === true || this.props.width < 652) {
+    if (isMobile == true || this.props.width < 652) {
       return <div>ayo</div>
     }
     return (

@@ -16,10 +16,6 @@ class BaseSplashPage extends React.Component {
     window.addEventListener('resize', () => this.setState({width: window.innerWidth}));
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleWindowSizeChange);
-  }
-
   render() {
     let isMobileString = isMobile === true || this.state.width < 700
       ? "_mobile"
