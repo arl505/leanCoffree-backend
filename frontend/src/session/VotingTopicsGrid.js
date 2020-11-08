@@ -120,8 +120,11 @@ class VotingTopicsGrid extends React.Component {
       columnCount = 4;
       size = (this.props.containerSizeVw / columnCount) + 'vw';
     }
-    else {
+    else if(window.innerWidth > 652) {
       columnCount = 3;
+      size = (this.props.containerSizeVw / columnCount) + 'vw';
+    } else {
+      columnCount = 2;
       size = (this.props.containerSizeVw / columnCount) + 'vw';
     }
 
