@@ -8,6 +8,9 @@ class VotingPage extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      activeTab: 'TOPICS'
+    }
     this.transitionToDiscussion = this.transitionToDiscussion.bind(this);
   }
 
@@ -26,30 +29,57 @@ class VotingPage extends React.Component {
   }
 
   render() {
-    if (isMobile === true || this.props.width < 652) {
-      return <div>ayo</div>
-    }
+    if(isMobile !== true && this.props.width > 652) {
+      let nextSectionButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 2 && this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isNameModalOpen === false
+        ? <div class="nextSectionButton">
+            <button class="button" onClick={this.transitionToDiscussion}>End voting and go to next section</button>
+          </div>
+        : null;
 
-    let nextSectionButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 2 && this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isNameModalOpen === false
-      ? <div class="nextSectionButton">
-          <button class="button" onClick={this.transitionToDiscussion}>End voting and go to next section</button>
+      return (
+        <div class="session-grid-container">
+
+          <VotingTopicsGrid topics={this.props.topics} usersInAttendance={this.props.usersInAttendance}
+            userDisplayName={this.props.userDisplayName} sessionStatus={this.props.sessionStatus}
+            sessionId={this.props.sessionId} containerSizeVw={75}/>
+
+          <div class="users-container">
+            <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
+            {nextSectionButton}
+          </div>
+
         </div>
-      : null;
-    
-    return (
-      <div class="session-grid-container">
+      )
+    } else {
+      let nextSectionButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 2 && this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isNameModalOpen === false
+        ? <div style={{gridRow: 1, gridColumn: 3}}>
+            <button style={{width: '100%'}} onClick={this.transitionToDiscussion}>End voting and go to next section</button>
+          </div>
+        : null;
 
-        <VotingTopicsGrid topics={this.props.topics} usersInAttendance={this.props.usersInAttendance}
+      let activeTab = this.state.activeTab === 'USERS'
+        ? <div style={{minWidth: '100vw', minHeight: '100vh', maxWidth: '100vw', maxHeight: '100vh', backgroundColor: '#1e5f74', textAlign: 'center'}}>
+            <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
+          </div>
+      : <VotingTopicsGrid topics={this.props.topics} usersInAttendance={this.props.usersInAttendance}
           userDisplayName={this.props.userDisplayName} sessionStatus={this.props.sessionStatus}
-          sessionId={this.props.sessionId}/>
+          sessionId={this.props.sessionId} containerSizeVw={94}/>;
+      return (
+        <div>
+          {activeTab}
 
-        <div class="users-container">
-          <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
-          {nextSectionButton}
+          <div style={{position: 'fixed', bottom: 0, width: '100vw', display: 'grid'}}>
+            <div style={{gridRow: 1, gridColumn: 1}}>
+              <button style={{width: '100%'}} onClick={() => this.setState({activeTab: 'TOPICS'})}>Topics</button>
+            </div>
+            <div style={{gridRow: 1, gridColumn: 2}}>
+              <button style={{width: '100%'}} onClick={() => this.setState({activeTab: 'USERS'})}>Users</button>
+            </div>
+            {nextSectionButton}
+          </div>
         </div>
-
-      </div>
-    )
+      )
+    }
   }
 }
 

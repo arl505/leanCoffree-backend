@@ -20,7 +20,7 @@ class AllUsersList extends React.Component {
           <div>
             <img alt="moderator crown icon" class="moderatorCrownIcon" src={moderatorIcon} style={{visibility: crownVisibility}}/>
             <text> </text>
-            <li key={i.toString()} class="usernameList">{usernameElement}</li>
+            <li key={i.toString()} class="usernameListItem">{usernameElement}</li>
           </div>);
       } 
       allHereListItems.push(

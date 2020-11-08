@@ -66,7 +66,7 @@ class VotingTopicsGrid extends React.Component {
   }
 
   populateCards(columnCount) {
-    let size = 75 / columnCount + 'vw';
+    let size = this.props.containerSizeVw / columnCount + 'vw';
 
     let topicsElements = [];
     let allTopics = this.props.topics.discussionBacklogTopics;
@@ -114,15 +114,15 @@ class VotingTopicsGrid extends React.Component {
     let size;
     if(window.innerWidth > 1100) {
       columnCount = 5;
-      size = "15vw"
+      size = (this.props.containerSizeVw / columnCount) + 'vw';
     }
     else if(window.innerWidth > 900) {
       columnCount = 4;
-      size = "18.75vw"
+      size = (this.props.containerSizeVw / columnCount) + 'vw';
     }
-    else if (window.innerWidth >= 652) {
+    else {
       columnCount = 3;
-      size = "25vw"
+      size = (this.props.containerSizeVw / columnCount) + 'vw';
     }
 
     return (

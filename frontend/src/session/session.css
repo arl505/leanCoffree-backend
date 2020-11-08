@@ -36,11 +36,13 @@
 }
 
 .usernameList {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   padding: 0;
   margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.usernameListItem {
   display: inline-block;
 }
 
@@ -54,12 +56,12 @@
   vertical-align: top;
 }
 
-.shareableLinkDiv {
+/* .shareableLinkDiv {
   width: 10vw;
   margin-left: .5vw;
   margin-right: 2.5vw;
   text-align: center;
-}
+} */
 
 .cardItem {
   overflow: scroll;
