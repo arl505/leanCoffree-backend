@@ -112,7 +112,7 @@ class VotingPage extends React.Component {
           columnCount = 4;
           size = "18.75vw"
         }
-        else if (window.innerWidth > 652) {
+        else if (window.innerWidth >= 652) {
           columnCount = 3;
           size = "25vw"
         }
@@ -143,7 +143,11 @@ class VotingPage extends React.Component {
       <div class="cards-grid-container">
         <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1, width: size, height: size}}>
           <textarea style={{padding: '5%', backgroundColor: '#29354f', color: '#fcdab7'}} id="composeTextArea" value={this.state.topicSubmissionText} onChange={(event) => this.setState({topicSubmissionText: event.target.value})} placeholder="Submit a discussion topic!"/>
-          <button class="button" style={{fontSize: '1.25vw', marginRight: '.5vw', padding: '.25vw'}} onClick={this.sumbitTopic}>Submit</button>
+          <div style={{height: '25%', width: '100%', position: 'absolute', bottom: 0}}>
+            <div style={{display: 'flex', height: '100%', justifyContent: 'flex-end', alignItems: 'center'}}>
+              <button class="button" style={{marginRight: '1%', padding: '.25vw'}} onClick={this.sumbitTopic}>Submit</button>
+            </div>
+          </div>
         </div>
           {topicsElements}
       </div>
