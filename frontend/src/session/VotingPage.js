@@ -58,7 +58,7 @@ class VotingPage extends React.Component {
         : null;
 
       let activeTab = this.state.activeTab === 'USERS'
-        ? <div style={{minWidth: '100vw', minHeight: '100vh', maxWidth: '100vw', maxHeight: '100vh', backgroundColor: '#1e5f74', textAlign: 'center'}}>
+        ? <div style={{minWidth: '100vw', minHeight: '90vh', maxWidth: '100vw', maxHeight: '90vh', backgroundColor: '#1e5f74', textAlign: 'center'}}>
             <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
           </div>
          : <VotingTopicsGrid topics={this.props.topics} usersInAttendance={this.props.usersInAttendance}
@@ -72,13 +72,17 @@ class VotingPage extends React.Component {
         ? '#fcdab7'
         : '#bfa488';
 
+      let tabsDivBackgroundColor = this.state.activeTab === 'USERS' 
+        ? '#1e5f74'
+        : '#1d2d50';
+
       return (
         <div>
           {activeTab}
 
-          <div style={{width: '100vw', height: '10vh'}}/>
+          <div style={{width: '100vw', height: '10vh', backgroundColor: tabsDivBackgroundColor}}/>
 
-          <div style={{position: 'fixed', bottom: 0, width: '100vw', display: 'grid', height: '10vh', backgroundColor: '#1d2d50', borderRadius: '20px 20px 0 0'}}>
+          <div style={{position: 'fixed', bottom: 0, width: '100vw', display: 'grid', height: '10vh', backgroundColor: tabsDivBackgroundColor, borderRadius: '20px 20px 0 0'}}>
             <div style={{gridRow: 1, gridColumn: 1}}>
               <button class="button" style={{width: '100%', height: '100%', color: topicsColor}} onClick={() => this.setState({activeTab: 'TOPICS'})}>Topics</button>
             </div>
