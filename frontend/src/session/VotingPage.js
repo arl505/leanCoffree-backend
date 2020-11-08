@@ -63,7 +63,7 @@ class VotingPage extends React.Component {
           </div>
       : <VotingTopicsGrid topics={this.props.topics} usersInAttendance={this.props.usersInAttendance}
           userDisplayName={this.props.userDisplayName} sessionStatus={this.props.sessionStatus}
-          sessionId={this.props.sessionId} containerSizeVw={94}/>;
+          sessionId={this.props.sessionId} containerSizeVw={96}/>;
       return (
         <div>
           {activeTab}
