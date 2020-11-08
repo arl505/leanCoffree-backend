@@ -53,7 +53,7 @@ class VotingPage extends React.Component {
     } else {
       let nextSectionButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 2 && this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isNameModalOpen === false
         ? <div style={{gridRow: 1, gridColumn: 3}}>
-            <button style={{width: '100%'}} onClick={this.transitionToDiscussion}>End voting and go to next section</button>
+            <button class="button" style={{width: '100%', height: '100%', color: '#bfa488'}} onClick={this.transitionToDiscussion}>End voting and go to next section</button>
           </div>
         : null;
 
@@ -61,19 +61,29 @@ class VotingPage extends React.Component {
         ? <div style={{minWidth: '100vw', minHeight: '100vh', maxWidth: '100vw', maxHeight: '100vh', backgroundColor: '#1e5f74', textAlign: 'center'}}>
             <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
           </div>
-      : <VotingTopicsGrid topics={this.props.topics} usersInAttendance={this.props.usersInAttendance}
-          userDisplayName={this.props.userDisplayName} sessionStatus={this.props.sessionStatus}
-          sessionId={this.props.sessionId} containerSizeVw={96}/>;
+         : <VotingTopicsGrid topics={this.props.topics} usersInAttendance={this.props.usersInAttendance}
+            userDisplayName={this.props.userDisplayName} sessionStatus={this.props.sessionStatus}
+            sessionId={this.props.sessionId} containerSizeVw={96}/>;
+    
+      let usersColor = this.state.activeTab === 'USERS'
+        ? '#fcdab7'
+        : '#bfa488';
+      let topicsColor = this.state.activeTab === 'TOPICS'
+        ? '#fcdab7'
+        : '#bfa488';
+        
       return (
         <div>
           {activeTab}
 
-          <div style={{position: 'fixed', bottom: 0, width: '100vw', display: 'grid'}}>
+          <div style={{width: '100vw', height: '8vh'}}/>
+
+          <div style={{position: 'fixed', bottom: 0, width: '100vw', display: 'grid', height: '8vh', backgroundColor: '#1d2d50', borderRadius: '20px 20px 0 0'}}>
             <div style={{gridRow: 1, gridColumn: 1}}>
-              <button style={{width: '100%'}} onClick={() => this.setState({activeTab: 'TOPICS'})}>Topics</button>
+              <button class="button" style={{width: '100%', height: '100%', color: topicsColor}} onClick={() => this.setState({activeTab: 'TOPICS'})}>Topics</button>
             </div>
             <div style={{gridRow: 1, gridColumn: 2}}>
-              <button style={{width: '100%'}} onClick={() => this.setState({activeTab: 'USERS'})}>Users</button>
+              <button class="button" style={{width: '100%', height: '100%', color: usersColor}} onClick={() => this.setState({activeTab: 'USERS'})}>Users</button>
             </div>
             {nextSectionButton}
           </div>
