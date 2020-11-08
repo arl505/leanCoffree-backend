@@ -23,10 +23,7 @@ class AllUsersList extends React.Component {
             <li key={i.toString()} class="usernameListItem">{usernameElement}</li>
           </div>);
       } 
-      allHereListItems.push(
-        <div class="shareableLinkDiv">
-          <button class="button" onClick={this.props.toggleShareableLink}>Invite more</button>
-        </div>);
+      allHereListItems.push(<button class="button" onClick={this.props.toggleShareableLink}>Invite more</button>);
     }
     return (
       <div>

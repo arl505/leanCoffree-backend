@@ -71,7 +71,6 @@ class VotingPage extends React.Component {
       let topicsColor = this.state.activeTab === 'TOPICS'
         ? '#fcdab7'
         : '#bfa488';
-
       let tabsDivBackgroundColor = this.state.activeTab === 'USERS' 
         ? '#1e5f74'
         : '#1d2d50';
