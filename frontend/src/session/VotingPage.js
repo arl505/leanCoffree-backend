@@ -71,14 +71,14 @@ class VotingPage extends React.Component {
       let topicsColor = this.state.activeTab === 'TOPICS'
         ? '#fcdab7'
         : '#bfa488';
-        
+
       return (
         <div>
           {activeTab}
 
-          <div style={{width: '100vw', height: '8vh'}}/>
+          <div style={{width: '100vw', height: '10vh'}}/>
 
-          <div style={{position: 'fixed', bottom: 0, width: '100vw', display: 'grid', height: '8vh', backgroundColor: '#1d2d50', borderRadius: '20px 20px 0 0'}}>
+          <div style={{position: 'fixed', bottom: 0, width: '100vw', display: 'grid', height: '10vh', backgroundColor: '#1d2d50', borderRadius: '20px 20px 0 0'}}>
             <div style={{gridRow: 1, gridColumn: 1}}>
               <button class="button" style={{width: '100%', height: '100%', color: topicsColor}} onClick={() => this.setState({activeTab: 'TOPICS'})}>Topics</button>
             </div>
