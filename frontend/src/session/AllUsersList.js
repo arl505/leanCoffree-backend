@@ -17,17 +17,20 @@ class AllUsersList extends React.Component {
           : 'hidden'
 
         allHereListItems.push(
-          <div style={this.props.usersInAttendance.moderator.includes(username)  ? {marginTop: '1vw'} : {}}>
-            <img alt="moderator crown icon" src={moderatorIcon} style={{width: "1em", verticalAlign: 'top', visibility: crownVisibility}}></img>
+          <div>
+            <img alt="moderator crown icon" class="moderatorCrownIcon" src={moderatorIcon} style={{visibility: crownVisibility}}/>
             <text> </text>
-            <li key={i.toString()} style={{display: 'inline-block'}} class="usernameList">{usernameElement}</li>
+            <li key={i.toString()} class="usernameList">{usernameElement}</li>
           </div>);
       } 
-      allHereListItems.push(<div style={{width: '10vw', marginLeft: '.5vw', marginRight:'2.5vw', textAlign: "center"}}><button class="button" style={{marginTop: "1em"}} onClick={this.props.toggleShareableLink}>Invite more</button></div>);
+      allHereListItems.push(
+        <div class="shareableLinkDiv">
+          <button class="button" onClick={this.props.toggleShareableLink}>Invite more</button>
+        </div>);
     }
     return (
       <div>
-        <p style={{fontWeight: 100, margin: 0}}>All here:</p>
+        <p class="allHereHeading">All here:</p>
         <ul class="usernameList">
           {allHereListItems}
         </ul>

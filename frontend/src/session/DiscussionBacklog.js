@@ -102,7 +102,7 @@ const Container = styled.div`
         return topics.length === 0
         ? null
         : (
-          <div class="discussCards-container" style={{gridRow: '1 / span 2', gridColumn: 1, borderRight: 'solid black 1px', minHeight: '100vh', maxHeight: '100vh', overflow: 'scroll'}}>
+          <div class="discussCards-container">
             {topics.map((item, index) => (
               <div key={index.toString()} class="cardItem discussionCardItem" style={{gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
                 <p class="topicText">{item.text}</p>

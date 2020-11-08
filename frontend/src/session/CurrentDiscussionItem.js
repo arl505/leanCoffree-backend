@@ -26,7 +26,7 @@ class CurrentDiscussionItem extends React.Component {
     }
 
     let classNames = this.props.topics.discussionBacklogTopics === undefined || this.props.topics.discussionBacklogTopics.length <= 0
-      ? "currentDiscussionItem column1"
+      ? "currentDiscussionItem fullSizeSection"
       : "currentDiscussionItem";
 
     return (

@@ -13,12 +13,10 @@ class DiscussedTopics extends React.Component {
           </div>
         : null;
       if(i === (topics.length)) {
-        allDiscussedTopicsElements.push(
-          <div key={i.toString()} class="finalSpacer row1" style={{gridColumn: i + 1}}/>
-        )
+        allDiscussedTopicsElements.push(<div key={i.toString()} style={{gridRow: 1, gridColumn: i + 1, width: '.01vw'}}/>)
       } else {
         allDiscussedTopicsElements.push(
-          <div key={i.toString()} class="cardItem row1" style={{gridColumn: i + 1}}>
+          <div key={i.toString()} class="cardItem" style={{gridRow: 1, gridColumn: i + 1}}>
             <p class="topicText">{topics[i].text}</p>
             {buttons}
           </div>
@@ -35,7 +33,7 @@ class DiscussedTopics extends React.Component {
 
     let classNames = !this.props.isBacklogOpen
       ? "discussedItemsSection"
-      : "discussedItemsSection column1"
+      : "discussedItemsSection fullSizeSection"
     return (
       <div class={classNames}>
         {this.getDiscussedCards()}

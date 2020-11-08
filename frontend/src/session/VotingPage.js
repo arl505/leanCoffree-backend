@@ -6,6 +6,11 @@ import VotingTopicsGrid from './VotingTopicsGrid';
 
 class VotingPage extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.transitionToDiscussion = this.transitionToDiscussion.bind(this);
+  }
+
   transitionToDiscussion() {
     if(this.props.topics.discussionBacklogTopics.length >= 2) {
       Axios.post(process.env.REACT_APP_BACKEND_BASEURL + "/transition-to-discussion/" + this.props.sessionId, {})
@@ -38,7 +43,7 @@ class VotingPage extends React.Component {
           userDisplayName={this.props.userDisplayName} sessionStatus={this.props.sessionStatus}
           sessionId={this.props.sessionId}/>
 
-        <div class="session-grid-item usersSection">
+        <div class="users-container">
           <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
           {nextSectionButton}
         </div>

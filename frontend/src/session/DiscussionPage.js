@@ -151,7 +151,11 @@ class DiscussionPage extends React.Component {
     );
   }
 
-  render() {  
+  render() {
+    let column = this.props.topics.discussionBacklogTopics !== undefined &&  this.props.topics.discussionBacklogTopics.length >= 1
+      ? " column3"
+      : "";
+      
     return (
       <div class="session-grid-container">
 
@@ -167,7 +171,7 @@ class DiscussionPage extends React.Component {
           userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance}
           pullNewDiscussionTopic={this.pullNewDiscussionTopic} deleteTopic={this.deleteTopic}/>
 
-        <div class="session-grid-item usersSection column3">
+        <div class={"users-container" + column}>
           <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
           {this.sessionControlButtons()}
         </div>
