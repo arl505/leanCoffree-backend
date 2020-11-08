@@ -10,8 +10,8 @@ class ShareableLinkModal extends React.Component {
     return (
       <div>
         <Modal backdrop={true} isOpen={this.props.showShareableLink} toggle={this.props.toggleShareableLink}>
-          <ModalHeader style={{backgroundColor: '#133b5c'}} toggle={this.props.toggleShareableLink}>Shareable Link</ModalHeader>
-          <ModalBody style={{backgroundColor: '#1d2d50'}}>
+          <ModalHeader style={{backgroundColor: '#30475e'}} toggle={this.props.toggleShareableLink}>Shareable Link</ModalHeader>
+          <ModalBody style={{backgroundColor: '#222831'}}>
             Your meeting link is: {newSessionUrl}
             <br/>
             <CopyToClipboard text={newSessionUrl}>

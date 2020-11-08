@@ -32,8 +32,8 @@ class UsernamePromptModal extends React.Component {
   render() {
     return (
       <Modal isOpen={this.props.isNameModalOpen}>
-        <ModalHeader style={{backgroundColor: '#133b5c'}}>Enter your name</ModalHeader>
-        <ModalBody style={{backgroundColor: '#1d2d50'}}>
+        <ModalHeader style={{backgroundColor: '#30475e'}}>Enter your name</ModalHeader>
+        <ModalBody style={{backgroundColor: '#222831'}}>
           <input name="displayName" placeholder="Johnny C." onChange={(event) => this.setState({localDisplayName: event.target.value})}></input>
           <br/>
           <br/>

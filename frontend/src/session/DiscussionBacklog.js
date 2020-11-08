@@ -9,7 +9,7 @@ const Container = styled.div`
   margin-left: 2.5vw;
   margin-right: 2.5vw;
   overflow: scroll;
-  border: solid black 1px;
+  border: solid #ececec 1px;
   width: 15vw;
   height: 15vw;
   position: relative;`;
@@ -74,8 +74,8 @@ const Container = styled.div`
       if(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false && this.props.topics.discussionBacklogTopics.length > 1) {
         return topics.length === 0
         ? null
-        : <div style={{gridRow: '1 / span 2', width: '20vw', gridColumn: '1',  minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden', borderRight: 'solid black 1px'}}>
-            <p style={{marginLeft: '2.5vw', marginRight: '2.5vw'}}>Drag and drop topic cards to reorder the discussion queue</p>
+        : <div style={{borderRadius: '0 30px 30px 0', backgroundColor: '#233145', gridRow: '1 / span 2', width: '20vw', gridColumn: '1',  minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden', borderRight: 'solid #ececec 1px'}}>
+            <p style={{marginLeft: '2.5vw', marginRight: '2.5vw', textAlign: 'center'}}>Drag and drop topic cards to reorder the discussion queue</p>
             <DragDropContext onDragEnd={this.onDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided, snapshot) => (
@@ -86,8 +86,8 @@ const Container = styled.div`
                           <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                             <p class="topicText">{item.text}</p>
                             <p class="votesText">Votes: {item.votes}</p>
-                            <button  onClick={() => this.props.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
-                            <button onClick={() => this.props.deleteTopic(item.text, item.author)}>Delete</button>
+                            <button class="button" onClick={() => this.props.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
+                            <button class="button" onClick={() => this.props.deleteTopic(item.text, item.author)}>Delete</button>
                           </Container>
                         )}
                       </Draggable>
@@ -102,9 +102,9 @@ const Container = styled.div`
         return topics.length === 0
         ? null
         : (
-          <div class="discussCards-container">
+          <div class="discussCards-container" style={{backgroundColor: '#233145', borderRadius: '0 30px 30px 0', borderRight: 'solid #ececec 1px'}}>
             {topics.map((item, index) => (
-              <div key={index.toString()} class="cardItem discussionCardItem" style={{gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
+              <div key={index.toString()} class="cardItem" style={{backgroundColor: 'transparent', width: '15vw', height: '15vw', gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
                 <p class="topicText">{item.text}</p>
                 <p class="votesText">Votes: {item.votes}</p>
                 {this.getTopicCardModeratorButtons(item.text, item.author)}

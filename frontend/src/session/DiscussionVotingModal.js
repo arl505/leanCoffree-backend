@@ -51,36 +51,36 @@ class DiscussionVotingModal extends React.Component {
       ? 0
       : this.props.discussionVotes.finishTopicVotesCount;
 
-      let modalFooter = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false
-        ? (
-          <div>
-            <br/>
-            <hr/>
-            <p style={{textAlign: 'center'}}><b>Moderator final say</b></p>
-            <div style={{textAlign: 'center'}}>
-              <select value={this.state.moreTimeValue} onChange={(event) => this.setState({moreTimeValue: event.target.value})}>
-                <option value="30s">30s</option>
-                <option selected="selected" value="1m">1m</option>
-                <option value="3m">3m</option>
-                <option value="5m">5m</option>
-                <option value="10m">10m</option>
-                <option value="15m">15m</option>
-                <option value="30m">30m</option>
-                <option value="1h">1h</option>
-              </select>
-              <text> </text>
-              <Button color="success" onClick={this.addTime}>Add {this.state.moreTimeValue} More time</Button>
-              <text> </text>
-              <Button color="primary" onClick={this.props.loadNextTopic}>Finish Topic</Button>
-            </div>
+    let modalFooter = this.props.usersInAttendance.moderator === undefined || (this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false)
+      ? (
+        <div>
+          <br/>
+          <hr/>
+          <p style={{textAlign: 'center'}}>Moderator final say</p>
+          <div style={{textAlign: 'center'}}>
+            <select value={this.state.moreTimeValue} onChange={(event) => this.setState({moreTimeValue: event.target.value})}>
+              <option value="30s">30s</option>
+              <option selected="selected" value="1m">1m</option>
+              <option value="3m">3m</option>
+              <option value="5m">5m</option>
+              <option value="10m">10m</option>
+              <option value="15m">15m</option>
+              <option value="30m">30m</option>
+              <option value="1h">1h</option>
+            </select>
+            <text> </text>
+            <Button color="success" onClick={this.addTime}>Add {this.state.moreTimeValue} More time</Button>
+            <text> </text>
+            <Button color="primary" onClick={this.props.loadNextTopic}>Finish Topic</Button>
           </div>
-        )
-        : null;
+        </div>
+      )
+      : null;
 
     return (
-      <Modal isOpen={this.props.currentTopicSecondsRemaining < 2 && this.props.isUsernameModalOpen === false && this.props.isVotingModalOpen} toggle={this.props.toggleDiscussionVotingModal}>
-        <ModalHeader>Vote: More Time or Finish Topic</ModalHeader>
-        <ModalBody>
+      <Modal style={{fontWeight: 100}} isOpen={this.props.currentTopicSecondsRemaining < 2 && this.props.isUsernameModalOpen === false && this.props.isVotingModalOpen} toggle={this.props.toggleDiscussionVotingModal}>
+        <ModalHeader style={{backgroundColor: '#30475e'}}>Vote: More Time or Finish Topic</ModalHeader>
+        <ModalBody style={{backgroundColor: '#222831'}}>
           <div style={{marginBottom: '5vh'}}>
             More Time Votes: {moreTimeVoteCount}
             <Button style={{display: 'inline-block', float: 'right'}} color="success" onClick={() => this.castVote('MORE_TIME')}>More time</Button>

@@ -135,18 +135,22 @@ class DiscussionPage extends React.Component {
   }
 
   sessionControlButtons() {
+    if(this.props.usersInAttendance.moderator === undefined) {
+      return null;
+    }
+
     if(!(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName)) || this.props.isUsernameModalOpen !== false) {
       return null;
     }
 
     let finishTopicButton = this.state.topics.currentDiscussionItem !== undefined && this.state.topics.currentDiscussionItem.text !== undefined
-      ? <button onClick={() => {if(window.confirm("Confirm you'd like to finish the current topic below\n" + this.state.topics.currentDiscussionItem.text)) this.loadNextTopic()}}>Finish Topic</button>
+      ? <button class="button" onClick={() => {if(window.confirm("Confirm you'd like to finish the current topic below\n" + this.state.topics.currentDiscussionItem.text)) this.loadNextTopic()}}>Finish Topic</button>
       : null;
 
     return (
       <div style={{textAlign: 'center', position: 'absolute', bottom: '1vh'}}>
         {finishTopicButton}
-        <button style={{marginTop: '1vh'}} onClick={this.endSession}>End Session</button>
+        <button class="button" style={{marginTop: '1vh'}} onClick={this.endSession}>End Session</button>
       </div>
     );
   }
@@ -155,6 +159,18 @@ class DiscussionPage extends React.Component {
     let column = this.props.topics.discussionBacklogTopics !== undefined &&  this.props.topics.discussionBacklogTopics.length >= 1
       ? " column3"
       : "";
+    
+    let discussedTopicsLeftFiller = this.props.topics.discussedTopics !== undefined && this.props.topics.discussedTopics.length >= 1 &&  this.props.topics.discussionBacklogTopics.length >= 1
+      ? <div class="newColor" style={{backgroundColor: '#2b2f36', gridRow: 2, gridColumn: 1, zIndex: -1}}/>
+      : null;
+
+    let rightFillerColumn = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 1
+      ? 3
+      : 2;
+    
+    let discussedTopicsRightFiller = this.props.topics.discussedTopics !== undefined && this.props.topics.discussedTopics.length >= 1
+      ? <div class="newColor" style={{backgroundColor: '#2b2f36', gridRow: 2, gridColumn: rightFillerColumn, zIndex: -1}}/>
+      : null;
       
     return (
       <div class="session-grid-container">
@@ -170,6 +186,9 @@ class DiscussionPage extends React.Component {
           topics={this.props.topics} isUsernameModalOpen={this.props.isUsernameModalOpen}
           userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance}
           pullNewDiscussionTopic={this.pullNewDiscussionTopic} deleteTopic={this.deleteTopic}/>
+
+        {discussedTopicsLeftFiller}
+        {discussedTopicsRightFiller}
 
         <div class={"users-container" + column}>
           <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>

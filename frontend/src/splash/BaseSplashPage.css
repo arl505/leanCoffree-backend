@@ -3,7 +3,7 @@
   margin-left: 1vw;
   padding-left: 1.5vw;
   font-size: 250%;
-  background-color: #133b5c;
+  background-color: #30475e;
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
 }
@@ -13,7 +13,7 @@
   margin-left: 5vw;
   padding-left: 5vw;
   font-size: 175%;
-  background-color: #133b5c;
+  background-color: #30475e;
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
 }
@@ -33,7 +33,7 @@
   width: 55vw;
   margin-left: 5vw;
   border-radius: 20px;
-  border: solid #fcdab7 2px;
+  border: solid #ececec 2px;
 }
 
 .websitePicture_mobile {
@@ -41,7 +41,7 @@
   margin-left: 3vw;
   margin-right: 3vw;
   border-radius: 20px;
-  border: solid #fcdab7 2px;
+  border: solid #ececec 2px;
 }
 
 .joinSessionDiv {
@@ -55,16 +55,4 @@
 .joinSessionDiv_mobile {
   text-align: center;
   margin-top: 5vw;
-}
-
-.button {
-  background-color: transparent;
-  color: #fcdab7;
-  padding: 3%;
-  border: solid #800000 3px;
-  border-radius: 20px;
-}
-
-.button:hover{
-  background-color: #121c30;
 }

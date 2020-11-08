@@ -18,8 +18,8 @@ class NewSessionModal extends React.Component {
     return (
       <div>
         <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
-          <ModalHeader style={{backgroundColor: '#133b5c'}} toggle={this.props.toggle}>Create a new Lean Coffree session</ModalHeader>
-          <ModalBody style={{backgroundColor: '#1d2d50'}}>
+          <ModalHeader style={{backgroundColor: '#30475e'}} toggle={this.props.toggle}>Create a new Lean Coffree session</ModalHeader>
+          <ModalBody style={{backgroundColor: '#222831'}}>
             Click below to launch a new Lean Coffree session!
             <br/>
             <br/>

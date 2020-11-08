@@ -8,15 +8,15 @@ class DiscussedTopics extends React.Component {
     for(let i = 0; i <= topics.length; i++) {
       let buttons = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false
         ? <div>
-            <button  onClick={() => this.props.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
-            <button onClick={() => this.props.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
+            <button class="button" onClick={() => this.props.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
+            <button class="button" onClick={() => this.props.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
           </div>
         : null;
       if(i === (topics.length)) {
         allDiscussedTopicsElements.push(<div key={i.toString()} style={{gridRow: 1, gridColumn: i + 1, width: '.01vw'}}/>)
       } else {
         allDiscussedTopicsElements.push(
-          <div key={i.toString()} class="cardItem" style={{gridRow: 1, gridColumn: i + 1}}>
+          <div key={i.toString()} class="cardItem" style={{backgroundColor: 'transparent', width: '15vw', height: '15vw', gridRow: 1, gridColumn: i + 1}}>
             <p class="topicText">{topics[i].text}</p>
             {buttons}
           </div>

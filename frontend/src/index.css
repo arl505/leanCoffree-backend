@@ -1,5 +1,17 @@
 body {
-  background-color: #1d2d50;
-  color: #fcdab7;
+  background-color: #222831;
+  color: #ececec;
   font-family: sans-serif;
+}
+
+.button {
+  background-color: transparent;
+  color: #ececec;
+  padding: 3%;
+  border: solid #ececec 3px;
+  border-radius: 20px;
+}
+
+.button:hover{
+  background-color: #121c30;
 }
