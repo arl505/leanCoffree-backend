@@ -60,7 +60,6 @@
   position: relative;
   background-color: #133b5c;
   border-radius: 10px;
-  padding: 5px;
 }
 
 .composeCard {
@@ -73,14 +72,6 @@
   border: none;
   width: 100%;
   height: 75%;
-  font-weight: 100;
-}
-
-#topicText {
-  overflow: scroll;
-  width: 100%;
-  height: 75%;
-  margin-bottom: 0;
   font-weight: 100;
 }
 

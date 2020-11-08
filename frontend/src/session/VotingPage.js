@@ -83,57 +83,58 @@ class VotingPage extends React.Component {
   }
 
   populateCards() {
-    let topicsElements = [];
-
-    let allTopics = this.props.topics.discussionBacklogTopics;
     let size;
+    let columnCount;
+    if(window.innerWidth > 1100) {
+      columnCount = 5;
+      size = "15vw"
+    }
+    else if(window.innerWidth > 900) {
+      columnCount = 4;
+      size = "18.75vw"
+    }
+    else if (window.innerWidth >= 652) {
+      columnCount = 3;
+      size = "25vw"
+    }
+
+    let topicsElements = [];
+    let allTopics = this.props.topics.discussionBacklogTopics;
     if(allTopics !== undefined) {
+
       for(let i = 0; i < allTopics.length; i++) {
         let text = allTopics[i].text;
         let votes = allTopics[i].voters.length;
+
+        let deleteButton = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && !this.props.sessionStatus.includes("ASK_FOR_USERNAME")
+        ? <div style={{gridRow: '1', gridColumn: '2', display: 'flex', alignItems: 'center'}}>
+            <button class="button" onClick={() => this.deleteTopic(allTopics[i])}>Delete</button>
+          </div>
+        : null;
+        
+        let votingButtonColumnNum = deleteButton === null ? '2' : '3';
+
         let votingButton;
         if(allTopics[i].voters.includes(this.props.userDisplayName)) {
           votingButton = <button class="button" style={{marginRight: '5%'}} onClick={() => this.postVoteForTopic(text, 'UNCAST', allTopics[i].authorDisplayName)}>UnVote</button>;
         } else if(this.state.votesLeft !== 0) {
           votingButton = <button class="button" style={{marginRight: '5%'}} onClick={() => this.postVoteForTopic(text, 'CAST', allTopics[i].authorDisplayName)}>Vote</button>;
         }
-        let deleteButton = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && !this.props.sessionStatus.includes("ASK_FOR_USERNAME")
-          ? <div style={{gridRow: '1', gridColumn: '2', display: 'flex', alignItems: 'center'}}>
-              <button class="button" onClick={() => this.deleteTopic(allTopics[i])}>Delete</button>
-            </div>
-          : null;
-
-        let columnCount;
-        if(window.innerWidth > 1100) {
-          columnCount = 5;
-          size = "15vw"
-        }
-        else if(window.innerWidth > 900) {
-          columnCount = 4;
-          size = "18.75vw"
-        }
-        else if (window.innerWidth >= 652) {
-          columnCount = 3;
-          size = "25vw"
-        }
-
+        votingButton = <div style={{gridRow: '1', gridColumn: {votingButtonColumnNum}, display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>{votingButton}</div>
 
         let columnNum = ((i + 1) % columnCount) + 1;
         let rowNum = Math.floor((i + 1) / columnCount) + 1;
-        let votingButtonColumnNum = deleteButton === null ? '2' : '3';
+        
         topicsElements.push(
           <div key={i.toString()} style={{gridRow: rowNum, gridColumn: columnNum, width: size, height: size, border: 'solid #fcdab7 1px', borderRadius: '10px', margin: '1vw', position: 'relative', overflow: 'scroll'}}>
-            <p style={{height: '75%', overflow: 'scroll'}}>{text}</p>
+            <p style={{padding: '5px', height: '75%', overflow: 'scroll', fontWeight: 100}}>{text}</p>
             <div style={{position:'absolute', bottom: 0, backgroundColor: '#133b5c', minWidth: '100%', minHeight: '25%', borderRadius: '0 0 10px 10px', display: 'grid'}}>
               <div style={{gridRow: '1', gridColumn: '1', display: 'flex', alignItems: 'center', marginLeft: '5%'}}>
                 Votes: {votes}
               </div>
-
+              
               {deleteButton}
-
-              <div style={{gridRow: '1', gridColumn: {votingButtonColumnNum}, display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
-                {votingButton}
-              </div>
+              {votingButton}
             </div>
           </div>);
       }
@@ -142,14 +143,14 @@ class VotingPage extends React.Component {
     return (
       <div class="cards-grid-container">
         <div class="cardItem composeCard" style={{gridRow: 1, gridColumn: 1, width: size, height: size}}>
-          <textarea style={{padding: '5%', backgroundColor: '#29354f', color: '#fcdab7'}} id="composeTextArea" value={this.state.topicSubmissionText} onChange={(event) => this.setState({topicSubmissionText: event.target.value})} placeholder="Submit a discussion topic!"/>
+          <textarea style={{padding: '5px', backgroundColor: '#29354f', color: '#fcdab7'}} id="composeTextArea" value={this.state.topicSubmissionText} onChange={(event) => this.setState({topicSubmissionText: event.target.value})} placeholder="Submit a discussion topic!"/>
           <div style={{height: '25%', width: '100%', position: 'absolute', bottom: 0}}>
             <div style={{display: 'flex', height: '100%', justifyContent: 'flex-end', alignItems: 'center'}}>
               <button class="button" style={{marginRight: '1%', padding: '.25vw'}} onClick={this.sumbitTopic}>Submit</button>
             </div>
           </div>
         </div>
-          {topicsElements}
+        {topicsElements}
       </div>
     )    
   }
