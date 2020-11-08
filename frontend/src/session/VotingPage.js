@@ -53,12 +53,12 @@ class VotingPage extends React.Component {
     } else {
       let nextSectionButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length >= 2 && this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isNameModalOpen === false
         ? <div style={{gridRow: 1, gridColumn: 3}}>
-            <button class="button" style={{width: '100%', height: '100%', color: '#bfa488'}} onClick={this.transitionToDiscussion}>End voting and go to next section</button>
+            <button class="button" style={{width: '100%', height: '100%', color: '#bfbfbf'}} onClick={this.transitionToDiscussion}>End voting and go to next section</button>
           </div>
         : null;
 
       let activeTab = this.state.activeTab === 'USERS'
-        ? <div style={{minWidth: '100vw', minHeight: '90vh', maxWidth: '100vw', maxHeight: '90vh', backgroundColor: '#1e5f74', textAlign: 'center'}}>
+        ? <div style={{minWidth: '100vw', minHeight: '90vh', maxWidth: '100vw', maxHeight: '90vh', backgroundColor: '#30475e', textAlign: 'center'}}>
             <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
           </div>
          : <VotingTopicsGrid topics={this.props.topics} usersInAttendance={this.props.usersInAttendance}
@@ -66,14 +66,14 @@ class VotingPage extends React.Component {
             sessionId={this.props.sessionId} containerSizeVw={96}/>;
     
       let usersColor = this.state.activeTab === 'USERS'
-        ? '#fcdab7'
-        : '#bfa488';
+        ? '#ececec'
+        : '#bfbfbf';
       let topicsColor = this.state.activeTab === 'TOPICS'
-        ? '#fcdab7'
-        : '#bfa488';
+        ? '#ececec'
+        : '#bfbfbf';
       let tabsDivBackgroundColor = this.state.activeTab === 'USERS' 
-        ? '#1e5f74'
-        : '#1d2d50';
+        ? '#30475e'
+        : '#222831';
 
       return (
         <div>
