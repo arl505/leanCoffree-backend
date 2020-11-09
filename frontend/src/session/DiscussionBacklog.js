@@ -12,7 +12,9 @@ const Container = styled.div`
   border: solid #ececec 1px;
   width: 15vw;
   height: 15vw;
-  position: relative;`;
+  position: relative;
+  border-radius: 10px;
+  background-color: #30475e;`;
 
   class DiscussionBacklog extends React.Component {
 
@@ -48,16 +50,20 @@ const Container = styled.div`
         );
     }
 
-  getTopicCardModeratorButtons(text, author) {
+  getBottomDiv(votes, text, author) {
     if(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false) {
       return (
-        <div>
-          <button  onClick={() => this.props.pullNewDiscussionTopic(text, author)}>Discuss</button>
-          <button onClick={() => this.props.deleteTopic(text, author)}>Delete</button>
+        <div class="backlogBottomDiv">
+          <p class="votesText" style={{margin: 0, gridRow: 1, gridColumn: 1}}>Votes: {votes}</p>
+          <button class="button" style={{gridRow: 1, gridColumn: 2}} onClick={() => this.props.pullNewDiscussionTopic(text, author)}>Discuss</button>
+          <button class="button" style={{gridRow: 1, gridColumn: 3}} onClick={() => this.props.deleteTopic(text, author)}>Delete</button>
         </div>
       )
     }
-    return null;
+    return (
+    <div class="backlogBottomDiv">
+      <p class="votesText" style={{margin: 0}}>Votes: {votes}</p>
+    </div>);
   }
 
   render() {
@@ -74,20 +80,18 @@ const Container = styled.div`
       if(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false && this.props.topics.discussionBacklogTopics.length > 1) {
         return topics.length === 0
         ? null
-        : <div style={{borderRadius: '0 30px 30px 0', backgroundColor: '#233145', gridRow: '1 / span 2', width: '20vw', gridColumn: '1',  minHeight: '100vh', maxHeight: '100vh', overflow: 'hidden', borderRight: 'solid #ececec 1px'}}>
-            <p style={{marginLeft: '2.5vw', marginRight: '2.5vw', textAlign: 'center'}}>Drag and drop topic cards to reorder the discussion queue</p>
+        : <div class="dragAndDropWrapper">
+            <p class="dragAndDropHeader">Drag and drop topic cards to reorder the discussion queue</p>
             <DragDropContext onDragEnd={this.onDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided, snapshot) => (
                   <div {...provided.droppableProps} class="discussCards-container" style={{paddingBottom: '7.5vw'}} ref={provided.innerRef}>
                     {topics.map((item, index) => (
-                      <Draggable key={index.toString()}  draggableId={'draggable' + index.toString()} index={index}>
+                      <Draggable key={index.toString()} draggableId={'draggable' + index.toString()} index={index}>
                         {(provided) => (
                           <Container ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                            <p class="topicText">{item.text}</p>
-                            <p class="votesText">Votes: {item.votes}</p>
-                            <button class="button" onClick={() => this.props.pullNewDiscussionTopic(item.text, item.author)}>Discuss</button>
-                            <button class="button" onClick={() => this.props.deleteTopic(item.text, item.author)}>Delete</button>
+                            <p class="cardItemTopicText" style={{height: '75%', backgroundColor: '#233145'}}>{item.text}</p>
+                            {this.getBottomDiv(item.votes, item.text, item.author)}
                           </Container>
                         )}
                       </Draggable>
@@ -102,12 +106,11 @@ const Container = styled.div`
         return topics.length === 0
         ? null
         : (
-          <div class="discussCards-container" style={{backgroundColor: '#233145', borderRadius: '0 30px 30px 0', borderRight: 'solid #ececec 1px'}}>
+          <div class="discussCards-container" style={{borderRadius: '0 30px 30px 0', borderRight: 'solid #ececec 1px'}}>
             {topics.map((item, index) => (
-              <div key={index.toString()} class="cardItem" style={{backgroundColor: 'transparent', width: '15vw', height: '15vw', gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
-                <p class="topicText">{item.text}</p>
-                <p class="votesText">Votes: {item.votes}</p>
-                {this.getTopicCardModeratorButtons(item.text, item.author)}
+              <div key={index.toString()} class="cardItem" style={{backgroundColor: '#233145', width: '15vw', height: '15vw', gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
+                <p class="cardItemTopicText" style={{height: "75%", backgroundColor: '#233145'}}>{item.text}</p>
+                {this.getBottomDiv(item.votes, item.text, item.author)}
               </div>
             ))}
           </div>

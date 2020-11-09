@@ -7,17 +7,20 @@ class DiscussedTopics extends React.Component {
     let allDiscussedTopicsElements = [];
     for(let i = 0; i <= topics.length; i++) {
       let buttons = this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false
-        ? <div>
-            <button class="button" onClick={() => this.props.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
-            <button class="button" onClick={() => this.props.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
+        ? <div style={{backgroundColor: '#30475e', height: '25%', display: 'grid', alignItems: 'center'}}>
+            <button class="button" style={{gridRow: 1, gridColumn: 2}} onClick={() => this.props.pullNewDiscussionTopic(topics[i].text, topics[i].authorDisplayName)}>Discuss</button>
+            <button class="button" style={{gridRow: 1, gridColumn: 3}} onClick={() => this.props.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
           </div>
         : null;
       if(i === (topics.length)) {
         allDiscussedTopicsElements.push(<div key={i.toString()} style={{gridRow: 1, gridColumn: i + 1, width: '.01vw'}}/>)
       } else {
+        let topicTextHeight = buttons === null 
+          ? '100%'
+          : '75%';
         allDiscussedTopicsElements.push(
-          <div key={i.toString()} class="cardItem" style={{backgroundColor: 'transparent', width: '15vw', height: '15vw', gridRow: 1, gridColumn: i + 1}}>
-            <p class="topicText">{topics[i].text}</p>
+          <div key={i.toString()} class="cardItem" style={{backgroundColor: '#2b2f36', width: '15vw', height: '15vw', gridRow: 1, gridColumn: i + 1}}>
+            <p class="cardItemTopicText" style={{height: topicTextHeight, marginBottom: 0, backgroundColor: '#2b2f36'}}>{topics[i].text}</p>
             {buttons}
           </div>
         )
