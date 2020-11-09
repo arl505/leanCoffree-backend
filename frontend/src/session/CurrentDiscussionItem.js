@@ -29,8 +29,21 @@ class CurrentDiscussionItem extends React.Component {
       ? "currentDiscussionItem fullSizeSection"
       : "currentDiscussionItem";
 
+      let width;
+      if(window.innerWidth > 1100) {
+        width = '65vw';
+      }
+      else if(window.innerWidth > 900) {
+        width = '61.25vw';
+      }
+      else if(window.innerWidth > 652) {
+        width = '55vw';
+      } else {
+        return <div>ayo</div>
+      }
+
     return (
-      <div class={classNames}>
+      <div class={classNames} style={{width: width}}>
         <h5 class="currentTopicHeader">{currentDiscussionItemHeader}</h5>
         <h2 class="currentTopicHeader">{currentDiscussionItem}</h2>
         {countdown}
