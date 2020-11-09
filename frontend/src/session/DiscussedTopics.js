@@ -3,6 +3,19 @@ import React from 'react';
 class DiscussedTopics extends React.Component {
 
   getDiscussedCards() {
+    let cardSize;
+    if(window.innerWidth > 1100) {
+      cardSize = '15vw';
+    }
+    else if(window.innerWidth > 900) {
+      cardSize = '18.75vw';
+    }
+    else if(window.innerWidth > 652) {
+      cardSize = '25vw';
+    } else {
+      return <div>ayo</div>
+    }
+
     let topics = this.props.topics.discussedTopics;
     let allDiscussedTopicsElements = [];
     for(let i = 0; i <= topics.length; i++) {
@@ -19,7 +32,7 @@ class DiscussedTopics extends React.Component {
           ? '100%'
           : '75%';
         allDiscussedTopicsElements.push(
-          <div key={i.toString()} class="cardItem" style={{backgroundColor: '#2b2f36', width: '15vw', height: '15vw', gridRow: 1, gridColumn: i + 1}}>
+          <div key={i.toString()} class="cardItem" style={{backgroundColor: '#2b2f36', width: cardSize, height: cardSize, gridRow: 1, gridColumn: i + 1}}>
             <p class="cardItemTopicText" style={{height: topicTextHeight, marginBottom: 0, backgroundColor: '#2b2f36'}}>{topics[i].text}</p>
             {buttons}
           </div>
