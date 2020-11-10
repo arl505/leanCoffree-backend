@@ -96,11 +96,9 @@ const Container = styled.div`
         cardSize = '18.75vw';
         columnSize = '23.75vw'
       }
-      else if(window.innerWidth > 652) {
+      else {
         cardSize = '25vw';
         columnSize = '30vw'
-      } else {
-        return <div>ayo</div>
       }
 
       if(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false && this.props.topics.discussionBacklogTopics.length > 1) {

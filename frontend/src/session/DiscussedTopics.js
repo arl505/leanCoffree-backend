@@ -10,10 +10,8 @@ class DiscussedTopics extends React.Component {
     else if(window.innerWidth > 900) {
       cardSize = '18.75vw';
     }
-    else if(window.innerWidth > 652) {
+    else {
       cardSize = '25vw';
-    } else {
-      return <div>ayo</div>
     }
 
     let topics = this.props.topics.discussedTopics;

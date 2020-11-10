@@ -17,6 +17,7 @@ class DiscussionPage extends React.Component {
       currentTopicSecondsRemaining: -1,
       finished: false,
       isVotingModalOpen: false,
+      activeTab: 'CURRENT',
     }
     this.loadNextTopic = this.loadNextTopic.bind(this);
     this.toggleVotingModal = this.toggleVotingModal.bind(this);
@@ -171,38 +172,128 @@ class DiscussionPage extends React.Component {
     let discussedTopicsRightFiller = this.props.topics.discussedTopics !== undefined && this.props.topics.discussedTopics.length >= 1
       ? <div class="newColor" style={{backgroundColor: '#2b2f36', gridRow: 2, gridColumn: rightFillerColumn, zIndex: -1}}/>
       : null;
+
+    if(window.innerWidth > 652) {
+      return (
+        <div class="session-grid-container">
+  
+          <CurrentDiscussionItem currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} topics={this.props.topics}/>
+  
+          <DiscussionBackog userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance} 
+            isUsernameModalOpen={this.props.isUsernameModalOpen} pullNewDiscussionTopic={this.pullNewDiscussionTopic}
+            deleteTopic={this.deleteTopic} topics={this.props.topics} 
+            setTopics={this.props.setTopics} sessionId={this.props.sessionId}/>
+  
+          <DiscussedTopics isBacklogOpen={this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0}
+            topics={this.props.topics} isUsernameModalOpen={this.props.isUsernameModalOpen}
+            userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance}
+            pullNewDiscussionTopic={this.pullNewDiscussionTopic} deleteTopic={this.deleteTopic}/>
+  
+          {discussedTopicsLeftFiller}
+          {discussedTopicsRightFiller}
+  
+          <div class={"users-container" + column}>
+            <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
+            {this.sessionControlButtons()}
+          </div>
+  
+          <DiscussionVotingModal loadNextTopic={this.loadNextTopic} toggleVotingModal={this.toggleVotingModal} 
+            sessionId={this.props.sessionId} userDisplayName={this.props.userDisplayName} 
+            discussionVotes={this.props.discussionVotes} currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} 
+            isUsernameModalOpen={this.props.isUsernameModalOpen} isVotingModalOpen={this.state.isVotingModalOpen} 
+            usersInAttendance={this.props.usersInAttendance}/>
+          
+        </div>
+      )
+    } else {
+      let queueColor = this.state.activeTab === 'QUEUE'
+        ? '#ececec'
+        : '#bfbfbf';
+      let currentColor = this.state.activeTab === 'CURRENT'
+        ? '#ececec'
+        : '#bfbfbf';
+      let pastColor = this.state.activeTab === 'PAST'
+        ? '#ececec'
+        : '#bfbfbf';
+      let usersColor = this.state.activeTab === 'USERS'
+        ? '#ececec'
+        : '#bfbfbf';
+      let tabsDivBackgroundColor = this.state.activeTab === 'USERS' 
+        ? '#30475e'
+        : '#222831';
+
+      let queueButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length > 0
+        ? <div style={{gridRow: 1, gridColumn: 1}}>
+            <button class="button" style={{width: '100%', height: '100%', color: queueColor}} onClick={() => this.setState({activeTab: 'QUEUE'})}>Queue</button>
+          </div>
+        : null;
+
+      let currentColumnCount = queueButton === null
+        ? 1
+        : 2;
+      let pastColumnCount = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length > 0 && this.props.topics.discussedTopics !== undefined && this.props.topics.discussedTopics.length > 0
+        ? 3
+        : 2;
+
+      let pastButton = this.props.topics.discussedTopics !== undefined && this.props.topics.discussedTopics.length > 0
+        ? <div style={{gridRow: 1, gridColumn: pastColumnCount}}>
+            <button class="button" style={{width: '100%', height: '100%', color: pastColor}} onClick={() => this.setState({activeTab: 'PAST'})}>Past</button>
+          </div>
+        : null;
       
-    return (
-      <div class="session-grid-container">
+      let usersColumnCount = pastButton === null || pastColumnCount === 2
+        ? 3
+        : 4;
 
-        <CurrentDiscussionItem currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} topics={this.props.topics}/>
-
-        <DiscussionBackog userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance} 
+      let activeTab = <div></div>;
+      if (this.state.activeTab === 'QUEUE') {
+        activeTab = <DiscussionBackog userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance} 
           isUsernameModalOpen={this.props.isUsernameModalOpen} pullNewDiscussionTopic={this.pullNewDiscussionTopic}
           deleteTopic={this.deleteTopic} topics={this.props.topics} 
           setTopics={this.props.setTopics} sessionId={this.props.sessionId}/>
-
-        <DiscussedTopics isBacklogOpen={this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0}
+      } else if (this.state.activeTab === 'CURRENT') {
+        activeTab = <CurrentDiscussionItem currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} topics={this.props.topics}/>;
+      } else if (this.state.activeTab === 'PAST') {
+        activeTab = <DiscussedTopics isBacklogOpen={this.state.topics.discussionBacklogTopics === undefined || this.state.topics.discussionBacklogTopics.length <= 0}
           topics={this.props.topics} isUsernameModalOpen={this.props.isUsernameModalOpen}
           userDisplayName={this.props.userDisplayName} usersInAttendance={this.props.usersInAttendance}
           pullNewDiscussionTopic={this.pullNewDiscussionTopic} deleteTopic={this.deleteTopic}/>
+      } else if (this.state.activeTab === 'USERS') {
+        activeTab = (
+          <div style={{minWidth: '100vw', minHeight: '90vh', maxWidth: '100vw', maxHeight: '90vh', backgroundColor: '#30475e', textAlign: 'center'}}>
+            <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
+          </div>);
+      }
 
-        {discussedTopicsLeftFiller}
-        {discussedTopicsRightFiller}
+      return (
 
-        <div class={"users-container" + column}>
-          <AllUsersList usersInAttendance={this.props.usersInAttendance} userDisplayName={this.props.userDisplayName} toggleShareableLink={this.props.toggleShareableLink}/>
-          {this.sessionControlButtons()}
+        <div>
+          {activeTab}
+
+          <div style={{width: '100vw', height: '10vh', backgroundColor: tabsDivBackgroundColor}}/>
+
+          <div style={{position: 'fixed', bottom: 0, width: '100vw', display: 'grid', height: '10vh', backgroundColor: tabsDivBackgroundColor, borderRadius: '20px 20px 0 0'}}>
+            {queueButton}
+            
+            <div style={{gridRow: 1, gridColumn: currentColumnCount}}>
+              <button class="button" style={{width: '100%', height: '100%', color: currentColor}} onClick={() => this.setState({activeTab: 'CURRENT'})}>Current</button>
+            </div>
+
+            {pastButton}
+
+            <div style={{gridRow: 1, gridColumn: usersColumnCount}}>
+              <button class="button" style={{width: '100%', height: '100%', color: usersColor}} onClick={() => this.setState({activeTab: 'USERS'})}>Users</button>
+            </div>
+          </div>
+
+          <DiscussionVotingModal loadNextTopic={this.loadNextTopic} toggleVotingModal={this.toggleVotingModal} 
+            sessionId={this.props.sessionId} userDisplayName={this.props.userDisplayName} 
+            discussionVotes={this.props.discussionVotes} currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} 
+            isUsernameModalOpen={this.props.isUsernameModalOpen} isVotingModalOpen={this.state.isVotingModalOpen} 
+            usersInAttendance={this.props.usersInAttendance}/>
         </div>
-
-        <DiscussionVotingModal loadNextTopic={this.loadNextTopic} toggleVotingModal={this.toggleVotingModal} 
-          sessionId={this.props.sessionId} userDisplayName={this.props.userDisplayName} 
-          discussionVotes={this.props.discussionVotes} currentTopicSecondsRemaining={this.state.currentTopicSecondsRemaining} 
-          isUsernameModalOpen={this.props.isUsernameModalOpen} isVotingModalOpen={this.state.isVotingModalOpen} 
-          usersInAttendance={this.props.usersInAttendance}/>
-        
-      </div>
-    )
+      )
+    }
   }
 }
 

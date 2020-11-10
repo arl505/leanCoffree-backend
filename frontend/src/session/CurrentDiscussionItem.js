@@ -36,10 +36,8 @@ class CurrentDiscussionItem extends React.Component {
       else if(window.innerWidth > 900) {
         width = '61.25vw';
       }
-      else if(window.innerWidth > 652) {
+      else {
         width = '55vw';
-      } else {
-        return <div>ayo</div>
       }
 
     return (
