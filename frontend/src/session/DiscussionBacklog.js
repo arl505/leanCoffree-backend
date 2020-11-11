@@ -21,9 +21,13 @@ const Container = styled.div`
     width: 18.75vw;
     height: 18.75vw;
   }
-  @media (max-width: 899px) {
+  @media (max-width: 899px) and (min-width: 653) {
     width: 25vw;
     height: 25vw;
+  }
+  @media (max-width: 652px) {
+    width: 95vw;
+    height: 47.5vw;
   }`;
 
   class DiscussionBacklog extends React.Component {
@@ -87,18 +91,25 @@ const Container = styled.div`
         topics.push({votes: votes, text: text, author: author});
       }
 
-      let columnSize, cardSize;
+      let columnSize, cardWidth, cardHeight;
       if(window.innerWidth > 1100) {
-        cardSize = '15vw';
+        cardWidth = '15vw';
+        cardHeight = '15vw';
         columnSize = '20vw'
       }
       else if(window.innerWidth > 900) {
-        cardSize = '18.75vw';
+        cardWidth = '18.75vw';
+        cardHeight = '18.75vw';
         columnSize = '23.75vw'
       }
-      else {
-        cardSize = '25vw';
+      else if(window.innerWidth > 652) {
+        cardWidth = '25vw';
+        cardHeight = '25vw';
         columnSize = '30vw'
+      } else {
+        cardWidth = '95vw';
+        cardHeight = '47.5vw';
+        columnSize = '100vw'
       }
 
       if(this.props.usersInAttendance.moderator.includes(this.props.userDisplayName) && this.props.isUsernameModalOpen === false && this.props.topics.discussionBacklogTopics.length > 1) {
@@ -109,7 +120,7 @@ const Container = styled.div`
             <DragDropContext onDragEnd={this.onDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided, snapshot) => (
-                  <div {...provided.droppableProps} class="discussCards-container" style={{width: columnSize, paddingBottom: '7.5vw'}} ref={provided.innerRef}>
+                  <div {...provided.droppableProps} class="discussCards-container" style={{width: columnSize, paddingBottom: '9vw'}} ref={provided.innerRef}>
                     {topics.map((item, index) => (
                       <Draggable key={index.toString()} draggableId={'draggable' + index.toString()} index={index}>
                         {(provided) => (
@@ -127,12 +138,18 @@ const Container = styled.div`
             </DragDropContext>
           </div>;
       } else {
+        let borderRadius = window.innerWidth <= 652
+          ? ''
+          : '0 30px 30px 0';
+        let border = window.innerWidth <= 652
+          ? ''
+          : 'solic #ececec 1px';
         return topics.length === 0
         ? null
         : (
-          <div class="discussCards-container" style={{borderRadius: '0 30px 30px 0', borderRight: 'solid #ececec 1px', width: columnSize}}>
+          <div class="discussCards-container" style={{borderRadius: borderRadius, borderRight: border, width: columnSize}}>
             {topics.map((item, index) => (
-              <div key={index.toString()} class="cardItem" style={{backgroundColor: '#233145', width: cardSize, height: cardSize, gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
+              <div key={index.toString()} class="cardItem" style={{backgroundColor: '#233145', width: cardWidth, height: cardHeight, gridRow: index + 1, marginLeft: '2.5vw', marginRight: '2.5vw'}}>
                 <p class="cardItemTopicText" style={{height: "75%", backgroundColor: '#233145'}}>{item.text}</p>
                 {this.getBottomDiv(item.votes, item.text, item.author)}
               </div>

@@ -206,21 +206,41 @@ class DiscussionPage extends React.Component {
         </div>
       )
     } else {
-      let queueColor = this.state.activeTab === 'QUEUE'
-        ? '#ececec'
-        : '#bfbfbf';
-      let currentColor = this.state.activeTab === 'CURRENT'
-        ? '#ececec'
-        : '#bfbfbf';
-      let pastColor = this.state.activeTab === 'PAST'
-        ? '#ececec'
-        : '#bfbfbf';
-      let usersColor = this.state.activeTab === 'USERS'
-        ? '#ececec'
-        : '#bfbfbf';
-      let tabsDivBackgroundColor = this.state.activeTab === 'USERS' 
-        ? '#30475e'
-        : '#222831';
+      if(this.state.activeTab === 'QUEUE' && (this.props.topics.discussionBacklogTopics === undefined || this.props.topics.discussionBacklogTopics.length <= 0)) {
+        this.setState({activeTab: 'CURRENT'});
+      }
+
+      let queueColor, usersColor, pastColor, currentColor, tabsDivBackgroundColor;
+
+      if(this.state.activeTab === 'QUEUE') {
+        queueColor = '#ececec';
+        tabsDivBackgroundColor = '#233145'
+
+        usersColor = '#bfbfbf';
+        pastColor = '#bfbfbf';
+        currentColor = '#bfbfbf';
+      } else if (this.state.activeTab === 'CURRENT') {
+        currentColor = '#ececec';
+        tabsDivBackgroundColor = '#222831'
+
+        usersColor = '#bfbfbf';
+        pastColor = '#bfbfbf';
+        queueColor = '#bfbfbf';
+      } else if (this.state.activeTab === 'PAST') {
+        pastColor = '#ececec';
+        tabsDivBackgroundColor = '#2b2f36'
+
+        usersColor = '#bfbfbf';
+        currentColor = '#bfbfbf';
+        queueColor = '#bfbfbf';
+      } else if (this.state.activeTab === 'USERS') {
+        usersColor = '#ececec';
+        tabsDivBackgroundColor = '#30475e'
+
+        pastColor = '#bfbfbf';
+        currentColor = '#bfbfbf';
+        queueColor = '#bfbfbf';
+      }
 
       let queueButton = this.props.topics.discussionBacklogTopics !== undefined && this.props.topics.discussionBacklogTopics.length > 0
         ? <div style={{gridRow: 1, gridColumn: 1}}>

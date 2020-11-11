@@ -172,6 +172,16 @@
   background-color: #2b2f36;
 }
 
+.discussedItemsSection_mobile {
+  min-height: 90vh;
+  max-height: 90vh;
+  min-width: 100vw;
+  max-width: 100vw;
+  overflow: scroll;
+  display: grid;
+  background-color: #2b2f36;  
+}
+
 .fullSizeSection {
   grid-column: 1;
   width: 85vw;
@@ -186,6 +196,13 @@
   max-height: 100vh;
   overflow: hidden;
   border-right: solid #ececec 1px;
+}
+
+@media (max-width: 652px) {
+  .dragAndDropWrapper {
+    border: none;
+    border-radius: 0;
+  }
 }
 
 .dragAndDropHeader {

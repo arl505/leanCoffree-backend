@@ -10,8 +10,10 @@ class DiscussedTopics extends React.Component {
     else if(window.innerWidth > 900) {
       cardSize = '18.75vw';
     }
-    else {
+    else if( window.innerWidth > 652) {
       cardSize = '25vw';
+    } else {
+      cardSize = '48vw';
     }
 
     let topics = this.props.topics.discussedTopics;
@@ -23,14 +25,22 @@ class DiscussedTopics extends React.Component {
             <button class="button" style={{gridRow: 1, gridColumn: 3}} onClick={() => this.props.deleteTopic(topics[i].text, topics[i].authorDisplayName)}>Delete</button>
           </div>
         : null;
+      let column, row;
+      if(window.innerWidth <= 652) {
+        column = (i % 2) + 1;
+        row = Math.floor(i / 2) + 1;
+      } else {
+        row = 1;
+        column = i + 1;
+      }
       if(i === (topics.length)) {
-        allDiscussedTopicsElements.push(<div key={i.toString()} style={{gridRow: 1, gridColumn: i + 1, width: '.01vw'}}/>)
+        allDiscussedTopicsElements.push(<div key={i.toString()} style={{gridRow: row, gridColumn: column, width: '.01vw'}}/>)
       } else {
         let topicTextHeight = buttons === null 
           ? '100%'
           : '75%';
         allDiscussedTopicsElements.push(
-          <div key={i.toString()} class="cardItem" style={{backgroundColor: '#2b2f36', width: cardSize, height: cardSize, gridRow: 1, gridColumn: i + 1}}>
+          <div key={i.toString()} class="cardItem" style={{backgroundColor: '#2b2f36', width: cardSize, height: cardSize, gridRow: row, gridColumn: column}}>
             <p class="cardItemTopicText" style={{height: topicTextHeight, marginBottom: 0, backgroundColor: '#2b2f36'}}>{topics[i].text}</p>
             {buttons}
           </div>
@@ -48,6 +58,10 @@ class DiscussedTopics extends React.Component {
     let classNames = !this.props.isBacklogOpen
       ? "discussedItemsSection"
       : "discussedItemsSection fullSizeSection"
+    classNames = window.innerWidth <= 652 
+      ? "discussedItemsSection_mobile"
+      : classNames;
+
     return (
       <div class={classNames}>
         {this.getDiscussedCards()}
