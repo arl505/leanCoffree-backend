@@ -41,7 +41,7 @@ pipeline {
       }
       steps {
         dir("./backend/build/libs") {
-          sh "cp backend.jar /writeToFolder/"
+          sh "cp backend.jar /home/sftp-able/backends/leanCoffree/"
           sh "systemctl restart lean_coffree"
         }
       }
