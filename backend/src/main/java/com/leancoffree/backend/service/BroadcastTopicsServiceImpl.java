@@ -5,6 +5,7 @@ import static com.leancoffree.backend.enums.SortTopicsBy.Y_INDEX;
 import static com.leancoffree.backend.enums.SuccessOrFailure.FAILURE;
 import static com.leancoffree.backend.enums.SuccessOrFailure.SUCCESS;
 import static com.leancoffree.backend.enums.TopicStatus.DISCUSSING;
+import static java.time.temporal.ChronoField.*;
 
 import com.leancoffree.backend.domain.entity.SessionsEntity;
 import com.leancoffree.backend.domain.entity.TopicsEntity;
@@ -118,7 +119,7 @@ public class BroadcastTopicsServiceImpl implements BroadcastTopicsService {
               .put("authorDisplayName", topicDetails.getAuthorDisplayName())
               .put("endTime", sessionsEntityOptional.get().getCurrentTopicEndTime() == null
                   ? JSONObject.NULL
-                  : sessionsEntityOptional.get().getCurrentTopicEndTime());
+                  : sessionsEntityOptional.get().getCurrentTopicEndTime().with(NANO_OF_SECOND, 0));
         }
       }
 
