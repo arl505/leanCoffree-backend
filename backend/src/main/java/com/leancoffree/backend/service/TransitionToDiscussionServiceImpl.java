@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TransitionToDiscussionServiceImpl implements TransitionToDiscussionService {
 
-  @Value("${defaultTopicTime:10}")
+  @Value("${defaultTopicTime:180}")
   private Integer defaultTopicTime;
 
   private final SessionsRepository sessionsRepository;
