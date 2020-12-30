@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RefreshTopicsServiceImpl implements RefreshTopicsService {
 
-  @Value("${defaultTopicTime:180}")
+  @Value("${defaultTopicTime:10}")
   private Integer defaultTopicTime;
 
   private final TopicsRepository topicsRepository;
