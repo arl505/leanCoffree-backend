@@ -17,7 +17,7 @@ pipeline {
       }
       steps {
         dir("./build/libs") {
-          sh "cp backend.jar /writeToFolder/"
+          sh "cp leanCoffree_main.jar /writeToFolder/backend.jar"
           sh "systemctl restart lean_coffree"
         }
       }
